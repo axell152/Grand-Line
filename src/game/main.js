@@ -6,8 +6,8 @@ export function createGameConfig(Phaser, parentId) {
   return {
     type: Phaser.AUTO,
     parent: parentId,
-    width: 512,
-    height: 384,
+    width: 1024,
+    height: 768,
     pixelArt: true,
     backgroundColor: "#0b2545",
     physics: {
