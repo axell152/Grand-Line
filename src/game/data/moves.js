@@ -10,4 +10,7 @@ export const MOVES = {
   vagueDeChoc: { name: "Vague de Choc", power: 65, type: "choc", accuracy: 0.7 },
   griffureSauvage: { name: "Griffure Sauvage", power: 38, type: "tranchant", accuracy: 0.9 },
   soinDeFortune: { name: "Soin de Fortune", power: 0, heal: 30, type: "soin", accuracy: 1 },
+  coupDeMarteau: { name: "Coup de Marteau", power: 58, type: "choc", accuracy: 0.82 },
+  chantEnivrant: { name: "Chant Enivrant", power: 42, type: "mental", accuracy: 0.88 },
+  fouilleEclair: { name: "Fouille Éclair", power: 33, type: "distance", accuracy: 0.95 },
 };
