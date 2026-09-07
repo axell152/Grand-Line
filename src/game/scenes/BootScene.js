@@ -6,25 +6,17 @@ export default class BootScene extends Phaser.Scene {
     super("Boot");
   }
 
-  create() {
-    this.makeTileTexture("tile-floor", 0x2f6b3a, 0x255530);
-    this.makeTileTexture("tile-wall", 0x1d3b22, 0x14290f);
-    this.makeTileTexture("tile-path", 0xcbb073, 0xb59a5c);
+  preload() {
+    this.load.image("tile-floor", "/tiles/floor.png");
+    this.load.image("tile-wall", "/tiles/wall.png");
+    this.load.image("tile-path", "/tiles/path.png");
+  }
 
+  create() {
     this.makeWarpMarker();
     this.makeTokenTexture();
 
     this.scene.start("World");
-  }
-
-  makeTileTexture(key, base, edge) {
-    const g = this.add.graphics();
-    g.fillStyle(base, 1);
-    g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    g.lineStyle(2, edge, 1);
-    g.strokeRect(1, 1, TILE_SIZE - 2, TILE_SIZE - 2);
-    g.generateTexture(key, TILE_SIZE, TILE_SIZE);
-    g.destroy();
   }
 
   makeWarpMarker() {
