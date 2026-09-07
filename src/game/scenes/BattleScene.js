@@ -18,11 +18,12 @@ export default class BattleScene extends Phaser.Scene {
     const enemySource =
       mode === "recruit" ? CHARACTERS[characterId] : ENEMY_CHARACTERS[characterId];
 
-    // L'équipage recruté renforce légèrement le capitaine (bonus d'attaque cumulatif)
+    // L'équipage recruté renforce le capitaine (bonus cumulatif) — nécessaire
+    // vu la difficulté des recrues et ennemis désormais bien plus costauds.
     const heroData = {
       ...PLAYER_CHARACTER,
-      atk: PLAYER_CHARACTER.atk + crewSize * 2,
-      maxHp: PLAYER_CHARACTER.maxHp + crewSize * 4,
+      atk: PLAYER_CHARACTER.atk + crewSize * 3,
+      maxHp: PLAYER_CHARACTER.maxHp + crewSize * 6,
     };
 
     this.player = createBattler(heroData);
@@ -45,27 +46,27 @@ export default class BattleScene extends Phaser.Scene {
   drawBackground() {
     const g = this.add.graphics();
     g.fillGradientStyle(0x13315c, 0x13315c, 0x0b2545, 0x0b2545, 1);
-    g.fillRect(0, 0, 512, 384);
+    g.fillRect(0, 0, 1024, 768);
   }
 
   drawCombatants() {
-    this.enemyToken = this.add.circle(380, 110, 26, this.enemy.color).setStrokeStyle(2, 0x1c1c1c);
-    this.enemyNameText = this.add.text(240, 40, "", {
+    this.enemyToken = this.add.circle(760, 220, 52, this.enemy.color).setStrokeStyle(4, 0x1c1c1c);
+    this.enemyNameText = this.add.text(480, 80, "", {
       fontFamily: "monospace",
-      fontSize: "13px",
+      fontSize: "26px",
       color: "#ead9b8",
     });
-    this.enemyHpBarBg = this.add.rectangle(240, 62, 140, 10, 0x1c1c1c).setOrigin(0, 0.5);
-    this.enemyHpBar = this.add.rectangle(241, 62, 138, 8, 0xc0392b).setOrigin(0, 0.5);
+    this.enemyHpBarBg = this.add.rectangle(480, 124, 280, 20, 0x1c1c1c).setOrigin(0, 0.5);
+    this.enemyHpBar = this.add.rectangle(482, 124, 276, 16, 0xc0392b).setOrigin(0, 0.5);
 
-    this.playerToken = this.add.circle(120, 280, 26, this.player.color).setStrokeStyle(2, 0x1c1c1c);
-    this.playerNameText = this.add.text(150, 300, "", {
+    this.playerToken = this.add.circle(240, 560, 52, this.player.color).setStrokeStyle(4, 0x1c1c1c);
+    this.playerNameText = this.add.text(300, 600, "", {
       fontFamily: "monospace",
-      fontSize: "13px",
+      fontSize: "26px",
       color: "#ead9b8",
     });
-    this.playerHpBarBg = this.add.rectangle(150, 322, 140, 10, 0x1c1c1c).setOrigin(0, 0.5);
-    this.playerHpBar = this.add.rectangle(151, 322, 138, 8, 0x27ae60).setOrigin(0, 0.5);
+    this.playerHpBarBg = this.add.rectangle(300, 644, 280, 20, 0x1c1c1c).setOrigin(0, 0.5);
+    this.playerHpBar = this.add.rectangle(302, 644, 276, 16, 0x27ae60).setOrigin(0, 0.5);
 
     this.refreshBars();
   }
@@ -76,16 +77,16 @@ export default class BattleScene extends Phaser.Scene {
 
     const enemyRatio = Math.max(0, this.enemy.hp / this.enemy.maxHp);
     const playerRatio = Math.max(0, this.player.hp / this.player.maxHp);
-    this.enemyHpBar.width = 138 * enemyRatio;
-    this.playerHpBar.width = 138 * playerRatio;
+    this.enemyHpBar.width = 276 * enemyRatio;
+    this.playerHpBar.width = 276 * playerRatio;
   }
 
   drawLog() {
-    this.logText = this.add.text(20, 150, "", {
+    this.logText = this.add.text(40, 300, "", {
       fontFamily: "monospace",
-      fontSize: "12px",
+      fontSize: "24px",
       color: "#ffffff",
-      wordWrap: { width: 470 },
+      wordWrap: { width: 940 },
     });
   }
 
@@ -96,21 +97,21 @@ export default class BattleScene extends Phaser.Scene {
   drawMoveButtons() {
     this.buttonObjects = [];
     const moves = this.player.moves;
-    const startY = 210;
+    const startY = 420;
 
     moves.forEach((moveKey, i) => {
       const move = MOVES[moveKey];
-      const y = startY + i * 34;
+      const y = startY + i * 68;
 
       const bg = this.add
-        .rectangle(20, y, 300, 28, 0x1c1c1c, 0.6)
+        .rectangle(40, y, 600, 56, 0x1c1c1c, 0.6)
         .setOrigin(0, 0.5)
-        .setStrokeStyle(1, 0xd4a24c)
+        .setStrokeStyle(2, 0xd4a24c)
         .setInteractive({ useHandCursor: true });
 
-      const label = this.add.text(30, y, move.name, {
+      const label = this.add.text(60, y, move.name, {
         fontFamily: "monospace",
-        fontSize: "13px",
+        fontSize: "26px",
         color: "#ead9b8",
       }).setOrigin(0, 0.5);
 
