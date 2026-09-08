@@ -255,13 +255,15 @@ else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
   }
 
   startBattle({ mode, characterId }) {
-    this.scene.start("Battle", {
-      mode,
-      characterId,
-      crewSize: this.state.crew.length,
-      returnIsland: this.state.islandId,
-      returnX: this.state.x,
-      returnY: this.state.y,
-    });
-  }
+  this.scene.start("Battle", {
+    mode,
+    characterId,
+    crew: this.state.crew, // On passe l'équipage complet
+    playerLevel: this.state.level,
+    playerExp: this.state.exp,
+    returnIsland: this.state.islandId,
+    returnX: this.state.x,
+    returnY: this.state.y,
+  });
+}
 }
