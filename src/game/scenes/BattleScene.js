@@ -327,6 +327,19 @@ this.teamList.forEach(member => {
     if (playerWon) {
       const expGained = mode === "recruit" ? 40 : 20;
 
+    } else {
+    this.setLog("Équipe K.O... Réveil d'urgence à la taverne !");
+    this.time.delayedCall(2000, () => {
+      // Utilise le point de respawn de la taverne s'il existe
+      const respawnData = this.game.registry.get("gameState");
+      this.scene.start("World", {
+        islandId: respawnData.respawnIsland || returnIsland,
+        x: respawnData.respawnX || returnX,
+        y: respawnData.respawnY || returnY,
+      });
+    });
+  }
+
       if (mode === "recruit") {
         const recruit = CHARACTERS[characterId];
         this.setLog(`${recruit.name} est vaincu(e) !\n+${expGained} XP. "${recruit.recruitLine}"`);
