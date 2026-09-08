@@ -142,17 +142,21 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
-    // --- AJOUTE CE BLOC ICI POUR DESSINER LES BÂTIMENTS (DONT LA TAVERNE) ---
+    // Affichage des bâtiments (dont la taverne) avec échelle et profondeur ajustées
     if (island.buildings) {
       island.buildings.forEach((b) => {
-        this.add.image(
+        const buildingSprite = this.add.image(
           b.x * TILE_SIZE + TILE_SIZE / 2,
           (b.y + 1) * TILE_SIZE,
           b.key
-        ).setOrigin(0.5, 1).setDepth(b.y);
+        )
+        .setOrigin(0.5, 1)
+        .setDepth(b.y);
+
+        // Ajuste cette valeur si la taverne est trop grande ou trop petite (ex: 0.4, 0.6...)
+        buildingSprite.setScale(0.5); 
       });
     }
-    // ------------------------------------------------------------------------
 
     island.warps.forEach((warp) => {
       this.add.image(
@@ -172,6 +176,7 @@ export default class WorldScene extends Phaser.Scene {
           "token"
         );
         sprite.setTint(charData.color);
+        sprite.setDepth(npc.y); // Profondeur pour les PNJ aussi
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
       });
 
@@ -181,6 +186,7 @@ export default class WorldScene extends Phaser.Scene {
       "token"
     );
     this.player.setTint(0xd4a24c);
+    this.player.setDepth(this.state.y); // Profondeur initiale du joueur
 
     this.cameras.main.setBounds(0, 0, island.grid[0].length * TILE_SIZE, island.grid.length * TILE_SIZE);
     this.cameras.main.startFollow(this.player, true);
@@ -241,6 +247,9 @@ export default class WorldScene extends Phaser.Scene {
     this.isMoving = true;
     this.state.x = targetX;
     this.state.y = targetY;
+
+    // Met à jour la profondeur du joueur en temps réel pendant qu'il se déplace sur l'axe Y
+    this.player.setDepth(targetY);
 
     this.tweens.add({
       targets: this.player,
