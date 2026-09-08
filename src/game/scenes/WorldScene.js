@@ -76,6 +76,9 @@ this.input.keyboard.on('keydown-T', () => {
   respawnY: ISLANDS[STARTING_ISLAND].playerStart.y,
   crew: [],
   berrys: 0,
+  level: 1,       
+  exp: 0,        
+  maxExp: 100,
 });
 
       // Tentative de restauration d'une sauvegarde existante (best effort, async)
