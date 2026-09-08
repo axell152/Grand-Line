@@ -26,6 +26,16 @@ export default class BattleScene extends Phaser.Scene {
 
     this.player = createBattler(heroData);
     this.enemy = createBattler(enemySource);
+
+    // Pour chaque membre, on s'assure qu'ils ont des PT par attaque
+this.teamList.forEach(member => {
+  if (!member.ppData) {
+    member.ppData = {};
+    member.moves.forEach(mKey => {
+      member.ppData[mKey] = MOVES[mKey].maxPp || 10; // Valeur par défaut si non défini
+    });
+  }
+});
     
     // On stocke l'équipe disponible pour le changement en combat
     // (Le héros principal + les membres recrutés)
@@ -159,24 +169,27 @@ export default class BattleScene extends Phaser.Scene {
     this.menuGroup.add(backTxt);
 
     this.player.moves.forEach((moveKey, index) => {
-      const move = MOVES[moveKey];
-      const y = 620 + index * 32;
+  const move = MOVES[moveKey];
+  const currentPp = this.player.ppData[moveKey];
+  const maxPp = MOVES[moveKey].maxPp || 10;
+  const y = 620 + index * 32;
 
-      const txt = this.add.text(670, y, `• ${move.name}`, {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#ead9b8",
-      })
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => {
-        this.clearInterfaceElements();
-        this.playerTurnAction(moveKey);
-      })
-      .on("pointerover", () => txt.setColor("#ffffff"))
-      .on("pointerout", () => txt.setColor("#ead9b8"));
+  const txt = this.add.text(670, y, `• ${move.name} (${currentPp}/${maxPp})`, {
+    fontFamily: "monospace",
+    fontSize: "16px",
+    color: currentPp > 0 ? "#ead9b8" : "#7f8c8d", // Grisé si plus de PT
+  });
 
-      this.menuGroup.add(txt);
-    });
+  if (currentPp > 0) {
+    txt.setInteractive({ useHandCursor: true })
+       .on("pointerdown", () => {
+         this.player.ppData[moveKey]--; // Consomme un PT
+         this.clearInterfaceElements();
+         this.playerTurnAction(moveKey);
+       });
+  }
+  this.menuGroup.add(txt);
+});
   }
 
   // --- SOUS-MENU : CHANGEMENT D'ÉQUIPE ---
