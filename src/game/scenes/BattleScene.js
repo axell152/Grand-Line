@@ -18,7 +18,6 @@ export default class BattleScene extends Phaser.Scene {
     const enemySource =
       mode === "recruit" ? CHARACTERS[characterId] : ENEMY_CHARACTERS[characterId];
 
-    // Initialisation du combattant actif (le joueur ou un membre de l'équipe)
     const heroData = {
       ...PLAYER_CHARACTER,
       level: playerLevel || 1,
@@ -26,23 +25,21 @@ export default class BattleScene extends Phaser.Scene {
 
     this.player = createBattler(heroData);
     this.enemy = createBattler(enemySource);
-
-    // Pour chaque membre, on s'assure qu'ils ont des PT par attaque
-this.teamList.forEach(member => {
-  if (!member.ppData) {
-    member.ppData = {};
-    member.moves.forEach(mKey => {
-      member.ppData[mKey] = MOVES[mKey].maxPp || 10; // Valeur par défaut si non défini
-    });
-  }
-});
     
-    // On stocke l'équipe disponible pour le changement en combat
-    // (Le héros principal + les membres recrutés)
+    // Initialisation des combattants et de leurs points de techniques (PP)
     this.teamList = [
       { ...this.player, isMain: true },
       ...(crew || []).map(charId => createBattler(CHARACTERS[charId]))
     ];
+
+    this.teamList.forEach(member => {
+      if (!member.ppData) {
+        member.ppData = {};
+        member.moves.forEach(mKey => {
+          member.ppData[mKey] = MOVES[mKey].maxPp || 10;
+        });
+      }
+    });
 
     this.locked = false;
     this.battleOver = false;
@@ -50,8 +47,6 @@ this.teamList.forEach(member => {
     this.drawBackground();
     this.drawCombatants();
     this.drawLog();
-    
-    // Affichage du menu principal de style rétro
     this.showMainMenu();
 
     this.setLog(
@@ -100,7 +95,6 @@ this.teamList.forEach(member => {
   }
 
   drawLog() {
-    // Cadre de texte en bas à gauche
     this.add.rectangle(340, 660, 640, 160, 0x0b2545, 0.9).setStrokeStyle(4, 0xead9b8);
     this.logText = this.add.text(60, 600, "", {
       fontFamily: "monospace",
@@ -121,11 +115,9 @@ this.teamList.forEach(member => {
     this.menuGroup = this.add.group();
   }
 
-  // --- MENU PRINCIPAL (ATTAQUE, TEAM, OBJET, FUITE) ---
   showMainMenu() {
     this.clearInterfaceElements();
 
-    // Cadre de menu à droite (style rétro)
     const boxBg = this.add.rectangle(800, 660, 320, 160, 0x0b2545, 0.95).setStrokeStyle(4, 0xead9b8);
     this.menuGroup.add(boxBg);
 
@@ -151,14 +143,12 @@ this.teamList.forEach(member => {
     });
   }
 
-  // --- SOUS-MENU : LES ATTAQUES ---
   showMovesMenu() {
     this.clearInterfaceElements();
 
     const boxBg = this.add.rectangle(800, 660, 320, 160, 0x0b2545, 0.95).setStrokeStyle(4, 0xead9b8);
     this.menuGroup.add(boxBg);
 
-    // Bouton Retour
     const backTxt = this.add.text(880, 590, "[RETOUR]", {
       fontFamily: "monospace",
       fontSize: "14px",
@@ -169,30 +159,32 @@ this.teamList.forEach(member => {
     this.menuGroup.add(backTxt);
 
     this.player.moves.forEach((moveKey, index) => {
-  const move = MOVES[moveKey];
-  const currentPp = this.player.ppData[moveKey];
-  const maxPp = MOVES[moveKey].maxPp || 10;
-  const y = 620 + index * 32;
+      const move = MOVES[moveKey];
+      const currentPp = this.player.ppData[moveKey];
+      const maxPp = move.maxPp || 10;
+      const y = 620 + index * 32;
 
-  const txt = this.add.text(670, y, `• ${move.name} (${currentPp}/${maxPp})`, {
-    fontFamily: "monospace",
-    fontSize: "16px",
-    color: currentPp > 0 ? "#ead9b8" : "#7f8c8d", // Grisé si plus de PT
-  });
+      const txt = this.add.text(670, y, `• ${move.name} (${currentPp}/${maxPp})`, {
+        fontFamily: "monospace",
+        fontSize: "16px",
+        color: currentPp > 0 ? "#ead9b8" : "#7f8c8d",
+      });
 
-  if (currentPp > 0) {
-    txt.setInteractive({ useHandCursor: true })
-       .on("pointerdown", () => {
-         this.player.ppData[moveKey]--; // Consomme un PT
-         this.clearInterfaceElements();
-         this.playerTurnAction(moveKey);
-       });
+      if (currentPp > 0) {
+        txt.setInteractive({ useHandCursor: true })
+           .on("pointerdown", () => {
+             this.player.ppData[moveKey]--;
+             this.clearInterfaceElements();
+             this.playerTurnAction(moveKey);
+           })
+           .on("pointerover", () => txt.setColor("#ffffff"))
+           .on("pointerout", () => txt.setColor("#ead9b8"));
+      }
+
+      this.menuGroup.add(txt);
+    });
   }
-  this.menuGroup.add(txt);
-});
-  }
 
-  // --- SOUS-MENU : CHANGEMENT D'ÉQUIPE ---
   showTeamMenu() {
     this.clearInterfaceElements();
 
@@ -239,16 +231,14 @@ this.teamList.forEach(member => {
     this.playerToken.setFillStyle(this.player.color);
     this.refreshBars();
 
-    // Le changement de personnage prend le tour, l'ennemi réplique
     this.time.delayedCall(1200, () => {
       this.enemyReply();
     });
   }
 
-  // --- LOGIQUE DE FUITE (30% d'échec) ---
   attemptEscape() {
     this.clearInterfaceElements();
-    const failed = Math.random() < 0.30; // 30% de chance d'échouer
+    const failed = Math.random() < 0.30;
 
     if (failed) {
       this.setLog("Impossible de fuir ! L'ennemi bloque le passage...");
@@ -268,7 +258,6 @@ this.teamList.forEach(member => {
     }
   }
 
-  // --- DÉROULEMENT DU TOUR D'ATTAQUE ---
   playerTurnAction(moveKey) {
     if (this.locked || this.battleOver) return;
     this.locked = true;
@@ -322,23 +311,10 @@ this.teamList.forEach(member => {
   endBattle(playerWon) {
     this.battleOver = true;
     this.clearInterfaceElements();
-    const { mode, characterId, returnIsland, returnX, returnY } = this.battleData;
+    const { returnIsland, returnX, returnY } = this.battleData;
 
     if (playerWon) {
       const expGained = mode === "recruit" ? 40 : 20;
-
-    } else {
-    this.setLog("Équipe K.O... Réveil d'urgence à la taverne !");
-    this.time.delayedCall(2000, () => {
-      // Utilise le point de respawn de la taverne s'il existe
-      const respawnData = this.game.registry.get("gameState");
-      this.scene.start("World", {
-        islandId: respawnData.respawnIsland || returnIsland,
-        x: respawnData.respawnX || returnX,
-        y: respawnData.respawnY || returnY,
-      });
-    });
-  }
 
       if (mode === "recruit") {
         const recruit = CHARACTERS[characterId];
@@ -366,12 +342,13 @@ this.teamList.forEach(member => {
         });
       }
     } else {
-      this.setLog("Votre combattant s'effondre... Fin du combat.");
-      this.time.delayedCall(1800, () => {
+      this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
+      this.time.delayedCall(2000, () => {
+        const respawnData = this.game.registry.get("gameState") || {};
         this.scene.start("World", {
-          islandId: returnIsland,
-          x: returnX,
-          y: returnY,
+          islandId: respawnData.respawnIsland || returnIsland,
+          x: respawnData.respawnX || returnX,
+          y: respawnData.respawnY || returnY,
         });
       });
     }
