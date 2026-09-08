@@ -17,7 +17,7 @@ export default class WorldScene extends Phaser.Scene {
 
   preload() {
     // Chargement direct de l'image de la taverne
-    this.load.image("tavern", "assets/tavern.png");
+    this.load.image("tavern", "assets/tavern.jpg");
   }
   
   init(data) {
