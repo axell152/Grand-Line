@@ -24,7 +24,13 @@ export default class WorldScene extends Phaser.Scene {
 
     this.isMoving = false;
     this.cursors = this.input.keyboard.createCursorKeys();
-    this.wasd = this.input.keyboard.addKeys("W,A,S,D");
+// Modification pour supporter proprement le ZQSD / AZERTY
+this.wasd = this.input.keyboard.addKeys({
+  up: Phaser.Input.Keyboard.KeyCodes.Z,
+  left: Phaser.Input.Keyboard.KeyCodes.Q,
+  down: Phaser.Input.Keyboard.KeyCodes.S,
+  right: Phaser.Input.Keyboard.KeyCodes.D
+});
 
     this.drawIsland();
     this.drawHud();
@@ -168,10 +174,10 @@ export default class WorldScene extends Phaser.Scene {
     if (this.isMoving) return;
 
     let dir = null;
-    if (this.cursors.left.isDown || this.wasd.A.isDown) dir = "left";
-    else if (this.cursors.right.isDown || this.wasd.D.isDown) dir = "right";
-    else if (this.cursors.up.isDown || this.wasd.W.isDown) dir = "up";
-    else if (this.cursors.down.isDown || this.wasd.S.isDown) dir = "down";
+if (this.cursors.left.isDown || this.wasd.left.isDown) dir = "left";
+else if (this.cursors.right.isDown || this.wasd.right.isDown) dir = "right";
+else if (this.cursors.up.isDown || this.wasd.up.isDown) dir = "up";
+else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
 
     if (!dir) return;
 
