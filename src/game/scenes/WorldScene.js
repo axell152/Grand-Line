@@ -71,11 +71,14 @@ this.input.keyboard.on('keydown-T', () => {
   islandId: STARTING_ISLAND,
   x: ISLANDS[STARTING_ISLAND].playerStart.x,
   y: ISLANDS[STARTING_ISLAND].playerStart.y,
-  level: 1,
-  exp: 0,
-  maxExp: 50,
+  respawnIsland: STARTING_ISLAND,
+  respawnX: ISLANDS[STARTING_ISLAND].playerStart.x,
+  respawnY: ISLANDS[STARTING_ISLAND].playerStart.y,
   crew: [],
   berrys: 0,
+  level: 1,       
+  exp: 0,        
+  maxExp: 100,
 });
 
       // Tentative de restauration d'une sauvegarde existante (best effort, async)
@@ -235,6 +238,23 @@ else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
   checkTileEvents(x, y) {
     const island = this.island;
 
+    if (island.tavern && island.tavern.x === x && island.tavern.y === y) {
+  // Soin complet de l'équipe, rechargement des PT et mise à jour du respawn
+  this.state.respawnIsland = this.state.islandId;
+  this.state.respawnX = x;
+  this.state.respawnY = y;
+  
+  // Soin du joueur et de l'équipage
+  this.state.hp = this.state.maxHp;
+  if (this.state.crewDetails) {
+    this.state.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; /* Recharge les PT */ });
+  }
+  
+  this.persist();
+  // Afficher un message de succès (via le HUD ou un message temporaire)
+  return;
+}
+    
     const warp = island.warps.find((w) => w.x === x && w.y === y);
     if (warp) {
       this.scene.restart({ islandId: warp.toIsland, x: warp.toX, y: warp.toY });
