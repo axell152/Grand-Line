@@ -24,36 +24,37 @@ export default class WorldScene extends Phaser.Scene {
 
     this.isMoving = false;
     this.cursors = this.input.keyboard.createCursorKeys();
-// Modification pour supporter proprement le ZQSD / AZERTY
-this.wasd = this.input.keyboard.addKeys({
-  up: Phaser.Input.Keyboard.KeyCodes.Z,
-  left: Phaser.Input.Keyboard.KeyCodes.Q,
-  down: Phaser.Input.Keyboard.KeyCodes.S,
-  right: Phaser.Input.Keyboard.KeyCodes.D
-});
+    
+    // Support ZQSD / AZERTY
+    this.wasd = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.Z,
+      left: Phaser.Input.Keyboard.KeyCodes.Q,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      right: Phaser.Input.Keyboard.KeyCodes.D
+    });
 
     // Écoute de la touche T pour ouvrir la gestion d'équipage
-this.input.keyboard.on('keydown-T', () => {
-  this.scene.launch("CrewScene", { state: this.state });
-  this.scene.pause();
-});
+    this.input.keyboard.on('keydown-T', () => {
+      this.scene.launch("CrewScene", { state: this.state });
+      this.scene.pause();
+    });
 
+    // Gestion de l'XP et des montées de niveau cumulatives
     if (typeof this.incoming.expGained === "number") {
-  this.state.exp += this.incoming.expGained;
-  // Gestion de la montée de niveau (style Pokémon)
-  while (this.state.exp >= this.state.maxExp) {
-    this.state.exp -= this.state.maxExp;
-    this.state.level += 1;
-    this.state.maxExp = Math.round(this.state.maxExp * 1.5);
-    // Bonus de stats au passage de niveau
-  }
-  this.persist();
-}
+      this.state.exp += this.incoming.expGained;
+      
+      while (this.state.exp >= this.state.maxExp) {
+        this.state.exp -= this.state.maxExp;
+        this.state.level += 1;
+        // Le prochain niveau demande 40% d'XP en plus
+        this.state.maxExp = Math.round(this.state.maxExp * 1.4);
+      }
+      this.persist();
+    }
     
     this.drawIsland();
     this.drawHud();
 
-    // Si on revient d'un combat gagné contre un PNJ, on le retire de la carte
     if (this.incoming.recruitedId) {
       this.state.crew.push(this.incoming.recruitedId);
       this.persist();
@@ -68,20 +69,19 @@ this.input.keyboard.on('keydown-T', () => {
     const registry = this.game.registry;
     if (!registry.get("gameState")) {
       registry.set("gameState", {
-  islandId: STARTING_ISLAND,
-  x: ISLANDS[STARTING_ISLAND].playerStart.x,
-  y: ISLANDS[STARTING_ISLAND].playerStart.y,
-  respawnIsland: STARTING_ISLAND,
-  respawnX: ISLANDS[STARTING_ISLAND].playerStart.x,
-  respawnY: ISLANDS[STARTING_ISLAND].playerStart.y,
-  crew: [],
-  berrys: 0,
-  level: 1,       
-  exp: 0,        
-  maxExp: 100,
-});
+        islandId: STARTING_ISLAND,
+        x: ISLANDS[STARTING_ISLAND].playerStart.x,
+        y: ISLANDS[STARTING_ISLAND].playerStart.y,
+        respawnIsland: STARTING_ISLAND,
+        respawnX: ISLANDS[STARTING_ISLAND].playerStart.x,
+        respawnY: ISLANDS[STARTING_ISLAND].playerStart.y,
+        crew: [],
+        berrys: 0,
+        level: 1,
+        exp: 0,
+        maxExp: 100,
+      });
 
-      // Tentative de restauration d'une sauvegarde existante (best effort, async)
       loadGame().then((save) => {
         if (save) {
           this.game.registry.set("gameState", {
@@ -90,6 +90,9 @@ this.input.keyboard.on('keydown-T', () => {
             y: save.y,
             crew: save.crew || [],
             berrys: save.berrys || 0,
+            level: save.level || 1,
+            exp: save.exp || 0,
+            maxExp: save.maxExp || 100,
           });
           if (this.scene.isActive("World")) {
             this.scene.restart();
@@ -99,6 +102,11 @@ this.input.keyboard.on('keydown-T', () => {
     }
 
     this.state = registry.get("gameState");
+
+    // Sécurités pour éviter les undefined sur les sauvegardes existantes
+    if (this.state.level === undefined) this.state.level = 1;
+    if (this.state.exp === undefined) this.state.exp = 0;
+    if (this.state.maxExp === undefined) this.state.maxExp = 100;
 
     if (this.incoming.islandId) {
       this.state.islandId = this.incoming.islandId;
@@ -130,7 +138,6 @@ this.input.keyboard.on('keydown-T', () => {
       }
     }
 
-    // Marqueurs de passage vers une autre île
     island.warps.forEach((warp) => {
       this.add.image(
         warp.x * TILE_SIZE + TILE_SIZE / 2,
@@ -139,7 +146,6 @@ this.input.keyboard.on('keydown-T', () => {
       );
     });
 
-    // PNJ à recruter (uniquement ceux pas encore recrutés)
     island.recruitNpcs
       .filter((npc) => !this.state.crew.includes(npc.characterId))
       .forEach((npc) => {
@@ -153,7 +159,6 @@ this.input.keyboard.on('keydown-T', () => {
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
       });
 
-    // Joueur
     this.player = this.add.image(
       this.state.x * TILE_SIZE + TILE_SIZE / 2,
       this.state.y * TILE_SIZE + TILE_SIZE / 2,
@@ -182,7 +187,7 @@ this.input.keyboard.on('keydown-T', () => {
   updateHud() {
     const island = this.island;
     this.hudText.setText(
-      `${island.name}\nÉquipage: ${this.state.crew.length}  Berrys: ${this.state.berrys}`
+      `${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level}`
     );
   }
 
@@ -198,10 +203,10 @@ this.input.keyboard.on('keydown-T', () => {
     if (this.isMoving) return;
 
     let dir = null;
-if (this.cursors.left.isDown || this.wasd.left.isDown) dir = "left";
-else if (this.cursors.right.isDown || this.wasd.right.isDown) dir = "right";
-else if (this.cursors.up.isDown || this.wasd.up.isDown) dir = "up";
-else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
+    if (this.cursors.left.isDown || this.wasd.left.isDown) dir = "left";
+    else if (this.cursors.right.isDown || this.wasd.right.isDown) dir = "right";
+    else if (this.cursors.up.isDown || this.wasd.up.isDown) dir = "up";
+    else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
 
     if (!dir) return;
 
@@ -210,7 +215,6 @@ else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
     const targetY = this.state.y + dy;
     const key = `${targetX},${targetY}`;
 
-    // Un PNJ bloque la case : on déclenche le combat de recrutement
     if (this.npcSprites[key]) {
       this.startBattle({ mode: "recruit", characterId: this.npcSprites[key] });
       return;
@@ -239,21 +243,17 @@ else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
     const island = this.island;
 
     if (island.tavern && island.tavern.x === x && island.tavern.y === y) {
-  // Soin complet de l'équipe, rechargement des PT et mise à jour du respawn
-  this.state.respawnIsland = this.state.islandId;
-  this.state.respawnX = x;
-  this.state.respawnY = y;
-  
-  // Soin du joueur et de l'équipage
-  this.state.hp = this.state.maxHp;
-  if (this.state.crewDetails) {
-    this.state.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; /* Recharge les PT */ });
-  }
-  
-  this.persist();
-  // Afficher un message de succès (via le HUD ou un message temporaire)
-  return;
-}
+      this.state.respawnIsland = this.state.islandId;
+      this.state.respawnX = x;
+      this.state.respawnY = y;
+      
+      this.state.hp = this.state.maxHp;
+      if (this.state.crewDetails) {
+        this.state.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
+      }
+      this.persist();
+      return;
+    }
     
     const warp = island.warps.find((w) => w.x === x && w.y === y);
     if (warp) {
@@ -275,15 +275,15 @@ else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
   }
 
   startBattle({ mode, characterId }) {
-  this.scene.start("Battle", {
-    mode,
-    characterId,
-    crew: this.state.crew, // On passe l'équipage complet
-    playerLevel: this.state.level,
-    playerExp: this.state.exp,
-    returnIsland: this.state.islandId,
-    returnX: this.state.x,
-    returnY: this.state.y,
-  });
-}
+    this.scene.start("Battle", {
+      mode,
+      characterId,
+      crew: this.state.crew,
+      playerLevel: this.state.level,
+      playerExp: this.state.exp,
+      returnIsland: this.state.islandId,
+      returnX: this.state.x,
+      returnY: this.state.y,
+    });
+  }
 }
