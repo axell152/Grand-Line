@@ -15,6 +15,11 @@ export default class WorldScene extends Phaser.Scene {
     super("World");
   }
 
+  preload() {
+    // Chargement direct de l'image de la taverne
+    this.load.image("tavern", "assets/tavern.png");
+  }
+  
   init(data) {
     this.incoming = data || {};
   }
