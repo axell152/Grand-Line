@@ -182,43 +182,47 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   endBattle(playerWon) {
-    this.battleOver = true;
-    this.setButtonsEnabled(false);
-    const { mode, characterId, returnIsland, returnX, returnY } = this.battleData;
+  this.battleOver = true;
+  this.setButtonsEnabled(false);
+  const { mode, characterId, returnIsland, returnX, returnY } = this.battleData;
 
-    if (playerWon) {
-      if (mode === "recruit") {
-        const recruit = CHARACTERS[characterId];
-        this.setLog(`${recruit.name} est vaincu(e) !\n"${recruit.recruitLine}"`);
-        this.time.delayedCall(2400, () => {
-          this.scene.start("World", {
-            islandId: returnIsland,
-            x: returnX,
-            y: returnY,
-            recruitedId: characterId,
-          });
-        });
-      } else {
-        const loot = 20 + Math.floor(Math.random() * 30);
-        this.setLog(`Victoire ! Vous récupérez ${loot} berrys.`);
-        this.time.delayedCall(1800, () => {
-          this.scene.start("World", {
-            islandId: returnIsland,
-            x: returnX,
-            y: returnY,
-            berrysGained: loot,
-          });
-        });
-      }
-    } else {
-      this.setLog("Vous êtes à court de forces... Retour au dernier point sûr.");
-      this.time.delayedCall(1800, () => {
+  if (playerWon) {
+    // Calcul de l'XP gagnée (basée sur l'ennemi)
+    const expGained = mode === "recruit" ? 40 : 20; 
+
+    if (mode === "recruit") {
+      const recruit = CHARACTERS[characterId];
+      this.setLog(`${recruit.name} est vaincu(e) !\n+${expGained} XP. "${recruit.recruitLine}"`);
+      this.time.delayedCall(2800, () => {
         this.scene.start("World", {
           islandId: returnIsland,
           x: returnX,
           y: returnY,
+          recruitedId: characterId,
+          expGained: expGained,
+        });
+      });
+    } else {
+      const loot = 20 + Math.floor(Math.random() * 30);
+      this.setLog(`Victoire ! +${expGained} XP et ${loot} berrys.`);
+      this.time.delayedCall(2200, () => {
+        this.scene.start("World", {
+          islandId: returnIsland,
+          x: returnX,
+          y: returnY,
+          berrysGained: loot,
+          expGained: expGained,
         });
       });
     }
+  } else {
+    this.setLog("Vous êtes à court de forces... Retour au dernier point sûr.");
+    this.time.delayedCall(1800, () => {
+      this.scene.start("World", {
+        islandId: returnIsland,
+        x: returnX,
+        y: returnY,
+      });
+    });
   }
 }
