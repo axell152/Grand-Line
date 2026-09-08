@@ -142,6 +142,18 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
+    // --- AJOUTE CE BLOC ICI POUR DESSINER LES BÂTIMENTS (DONT LA TAVERNE) ---
+    if (island.buildings) {
+      island.buildings.forEach((b) => {
+        this.add.image(
+          b.x * TILE_SIZE + TILE_SIZE / 2,
+          (b.y + 1) * TILE_SIZE,
+          b.key
+        ).setOrigin(0.5, 1).setDepth(b.y);
+      });
+    }
+    // ------------------------------------------------------------------------
+
     island.warps.forEach((warp) => {
       this.add.image(
         warp.x * TILE_SIZE + TILE_SIZE / 2,
