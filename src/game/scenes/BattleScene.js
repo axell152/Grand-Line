@@ -326,7 +326,10 @@ export default class BattleScene extends Phaser.Scene {
     const { returnIsland, returnX, returnY } = this.battleData;
 
     if (playerWon) {
-      const expGained = this.battleMode === "recruit" ? 40 : 20;
+      // Calcul de l'XP dynamique basé sur le niveau de l'ennemi
+      const enemyLevel = this.enemy.level || 1;
+      const baseExp = this.battleMode === "recruit" ? 40 : 20;
+      const expGained = baseExp * enemyLevel;
 
       if (this.battleMode === "recruit") {
         const recruit = CHARACTERS[this.targetCharacterId] || { name: "Inconnu", recruitLine: "Bien joué !" };
