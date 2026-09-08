@@ -9,14 +9,16 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.battleData = data;
+    this.battleData = data || {};
   }
 
   create() {
     const { mode, characterId, crew, playerLevel } = this.battleData;
+    this.battleMode = mode || "wild";
+    this.targetCharacterId = characterId;
 
     const enemySource =
-      mode === "recruit" ? CHARACTERS[characterId] : ENEMY_CHARACTERS[characterId];
+      this.battleMode === "recruit" ? CHARACTERS[characterId] : ENEMY_CHARACTERS[characterId || "bandit"];
 
     const heroData = {
       ...PLAYER_CHARACTER,
@@ -26,7 +28,6 @@ export default class BattleScene extends Phaser.Scene {
     this.player = createBattler(heroData);
     this.enemy = createBattler(enemySource);
     
-    // Initialisation des combattants et de leurs points de techniques (PP)
     this.teamList = [
       { ...this.player, isMain: true },
       ...(crew || []).map(charId => createBattler(CHARACTERS[charId]))
@@ -35,8 +36,10 @@ export default class BattleScene extends Phaser.Scene {
     this.teamList.forEach(member => {
       if (!member.ppData) {
         member.ppData = {};
-        member.moves.forEach(mKey => {
-          member.ppData[mKey] = MOVES[mKey].maxPp || 10;
+        const moves = member.moves || ["taillade"];
+        moves.forEach(mKey => {
+          const moveInfo = MOVES[mKey] || { maxPp: 10 };
+          member.ppData[mKey] = moveInfo.maxPp || 10;
         });
       }
     });
@@ -50,7 +53,7 @@ export default class BattleScene extends Phaser.Scene {
     this.showMainMenu();
 
     this.setLog(
-      mode === "recruit"
+      this.battleMode === "recruit"
         ? `${this.enemy.name} vous barre la route. Que faites-vous ?`
         : `Un ${this.enemy.name} sauvage apparaît ! Que faites-vous ?`
     );
@@ -63,7 +66,7 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   drawCombatants() {
-    this.enemyToken = this.add.circle(760, 220, 52, this.enemy.color).setStrokeStyle(4, 0x1c1c1c);
+    this.enemyToken = this.add.circle(760, 220, 52, this.enemy.color || 0x555555).setStrokeStyle(4, 0x1c1c1c);
     this.enemyNameText = this.add.text(480, 80, "", {
       fontFamily: "monospace",
       fontSize: "24px",
@@ -72,7 +75,7 @@ export default class BattleScene extends Phaser.Scene {
     this.enemyHpBarBg = this.add.rectangle(480, 120, 280, 18, 0x1c1c1c).setOrigin(0, 0.5);
     this.enemyHpBar = this.add.rectangle(482, 120, 276, 14, 0xc0392b).setOrigin(0, 0.5);
 
-    this.playerToken = this.add.circle(240, 460, 52, this.player.color).setStrokeStyle(4, 0x1c1c1c);
+    this.playerToken = this.add.circle(240, 460, 52, this.player.color || 0xd4a24c).setStrokeStyle(4, 0x1c1c1c);
     this.playerNameText = this.add.text(300, 500, "", {
       fontFamily: "monospace",
       fontSize: "24px",
@@ -85,6 +88,7 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   refreshBars() {
+    if (!this.enemy || !this.player) return;
     this.enemyNameText.setText(`${this.enemy.name} (N.${this.enemy.level || 1})  ${this.enemy.hp}/${this.enemy.maxHp}`);
     this.playerNameText.setText(`${this.player.name} (N.${this.player.level || 1})  ${this.player.hp}/${this.player.maxHp}`);
 
@@ -105,7 +109,7 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   setLog(text) {
-    this.logText.setText(text);
+    if (this.logText) this.logText.setText(text);
   }
 
   clearInterfaceElements() {
@@ -158,15 +162,17 @@ export default class BattleScene extends Phaser.Scene {
     .on("pointerdown", () => this.showMainMenu());
     this.menuGroup.add(backTxt);
 
-    // Sécurité au cas où player.moves serait vide ou undefined
     const movesList = this.player.moves || ["taillade"];
 
     movesList.forEach((moveKey, index) => {
       const move = MOVES[moveKey] || { name: moveKey, maxPp: 10 };
-      const currentPp = this.player.ppData && this.player.ppData[moveKey] !== undefined ? this.player.ppData[moveKey] : (move.maxPp || 10);
-      const maxPp = move.maxPp || 10;
+      if (!this.player.ppData) this.player.ppData = {};
+      if (this.player.ppData[moveKey] === undefined) {
+        this.player.ppData[moveKey] = move.maxPp || 10;
+      }
       
-      // On décale proprement les lignes vers le bas à l'intérieur du rectangle
+      const currentPp = this.player.ppData[moveKey];
+      const maxPp = move.maxPp || 10;
       const y = 615 + (index * 26);
 
       const txt = this.add.text(650, y, `• ${move.name} (${currentPp}/${maxPp})`, {
@@ -178,7 +184,6 @@ export default class BattleScene extends Phaser.Scene {
       if (currentPp > 0) {
         txt.setInteractive({ useHandCursor: true })
            .on("pointerdown", () => {
-             if (!this.player.ppData) this.player.ppData = {};
              this.player.ppData[moveKey] = currentPp - 1;
              this.clearInterfaceElements();
              this.playerTurnAction(moveKey);
@@ -207,13 +212,13 @@ export default class BattleScene extends Phaser.Scene {
     this.menuGroup.add(backTxt);
 
     this.teamList.forEach((member, index) => {
-      const y = 620 + index * 30;
+      const y = 615 + (index * 26);
       const isCurrent = member.id === this.player.id;
       const color = isCurrent ? "#7f8c8d" : "#ead9b8";
 
-      const txt = this.add.text(670, y, `• ${member.name} (${member.hp}/${member.maxHp}PV)`, {
+      const txt = this.add.text(650, y, `• ${member.name} (${member.hp}/${member.maxHp}PV)`, {
         fontFamily: "monospace",
-        fontSize: "16px",
+        fontSize: "15px",
         color: color,
       });
 
@@ -234,7 +239,7 @@ export default class BattleScene extends Phaser.Scene {
     this.clearInterfaceElements();
     this.setLog(`Vous rappelez ${this.player.name} et envoyez ${newMember.name} au combat !`);
     this.player = newMember;
-    this.playerToken.setFillStyle(this.player.color);
+    this.playerToken.setFillStyle(this.player.color || 0xd4a24c);
     this.refreshBars();
 
     this.time.delayedCall(1200, () => {
@@ -256,9 +261,9 @@ export default class BattleScene extends Phaser.Scene {
       const { returnIsland, returnX, returnY } = this.battleData;
       this.time.delayedCall(1500, () => {
         this.scene.start("World", {
-          islandId: returnIsland,
-          x: returnX,
-          y: returnY,
+          islandId: returnIsland || "start",
+          x: returnX || 5,
+          y: returnY || 5,
         });
       });
     }
@@ -310,7 +315,8 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   enemyReply() {
-    const moveKey = this.enemy.moves[Math.floor(Math.random() * this.enemy.moves.length)];
+    const enemyMoves = this.enemy.moves || ["taillade"];
+    const moveKey = enemyMoves[Math.floor(Math.random() * enemyMoves.length)];
     return this.executeMove(this.enemy, this.player, moveKey);
   }
 
@@ -320,17 +326,17 @@ export default class BattleScene extends Phaser.Scene {
     const { returnIsland, returnX, returnY } = this.battleData;
 
     if (playerWon) {
-      const expGained = mode === "recruit" ? 40 : 20;
+      const expGained = this.battleMode === "recruit" ? 40 : 20;
 
-      if (mode === "recruit") {
-        const recruit = CHARACTERS[characterId];
+      if (this.battleMode === "recruit") {
+        const recruit = CHARACTERS[this.targetCharacterId] || { name: "Inconnu", recruitLine: "Bien joué !" };
         this.setLog(`${recruit.name} est vaincu(e) !\n+${expGained} XP. "${recruit.recruitLine}"`);
         this.time.delayedCall(2800, () => {
           this.scene.start("World", {
-            islandId: returnIsland,
-            x: returnX,
-            y: returnY,
-            recruitedId: characterId,
+            islandId: returnIsland || "start",
+            x: returnX || 5,
+            y: returnY || 5,
+            recruitedId: this.targetCharacterId,
             expGained: expGained,
           });
         });
@@ -339,9 +345,9 @@ export default class BattleScene extends Phaser.Scene {
         this.setLog(`Victoire ! +${expGained} XP et ${loot} berrys récupérés.`);
         this.time.delayedCall(2200, () => {
           this.scene.start("World", {
-            islandId: returnIsland,
-            x: returnX,
-            y: returnY,
+            islandId: returnIsland || "start",
+            x: returnX || 5,
+            y: returnY || 5,
             berrysGained: loot,
             expGained: expGained,
           });
@@ -352,9 +358,9 @@ export default class BattleScene extends Phaser.Scene {
       this.time.delayedCall(2000, () => {
         const respawnData = this.game.registry.get("gameState") || {};
         this.scene.start("World", {
-          islandId: respawnData.respawnIsland || returnIsland,
-          x: respawnData.respawnX || returnX,
-          y: respawnData.respawnY || returnY,
+          islandId: respawnData.respawnIsland || returnIsland || "start",
+          x: respawnData.respawnX || returnX || 5,
+          y: respawnData.respawnY || returnY || 5,
         });
       });
     }
