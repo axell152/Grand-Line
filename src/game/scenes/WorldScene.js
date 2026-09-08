@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import { ISLANDS, STARTING_ISLAND, TILE_SIZE } from "@/game/data/islands";
 import { CHARACTERS, ENEMY_CHARACTERS } from "@/game/data/characters";
 import { saveGame, loadGame } from "@/game/systems/SaveManager";
-import tavernImg from "@/assets/taverne.jpg";
 
 const DIRECTIONS = {
   up: { dx: 0, dy: -1 },
@@ -17,7 +16,7 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("taverne", tavernImg);
+    this.load.image("taverne", "tiles/taverne.jpg");
   }
   
   init(data) {
