@@ -149,7 +149,7 @@ export default class BattleScene extends Phaser.Scene {
     const boxBg = this.add.rectangle(800, 660, 320, 160, 0x0b2545, 0.95).setStrokeStyle(4, 0xead9b8);
     this.menuGroup.add(boxBg);
 
-    const backTxt = this.add.text(880, 590, "[RETOUR]", {
+    const backTxt = this.add.text(880, 595, "[RETOUR]", {
       fontFamily: "monospace",
       fontSize: "14px",
       color: "#d4a24c",
@@ -162,9 +162,11 @@ export default class BattleScene extends Phaser.Scene {
       const move = MOVES[moveKey];
       const currentPp = this.player.ppData[moveKey];
       const maxPp = move.maxPp || 10;
-      const y = 620 + index * 32;
+      
+      // Position Y corrigée pour s'aligner bien à l'intérieur du rectangle de droite
+      const y = 620 + index * 35;
 
-      const txt = this.add.text(670, y, `• ${move.name} (${currentPp}/${maxPp})`, {
+      const txt = this.add.text(660, y, `• ${move.name} (${currentPp}/${maxPp})`, {
         fontFamily: "monospace",
         fontSize: "16px",
         color: currentPp > 0 ? "#ead9b8" : "#7f8c8d",
