@@ -149,7 +149,7 @@ export default class BattleScene extends Phaser.Scene {
     const boxBg = this.add.rectangle(800, 660, 320, 160, 0x0b2545, 0.95).setStrokeStyle(4, 0xead9b8);
     this.menuGroup.add(boxBg);
 
-    const backTxt = this.add.text(880, 595, "[RETOUR]", {
+    const backTxt = this.add.text(880, 590, "[RETOUR]", {
       fontFamily: "monospace",
       fontSize: "14px",
       color: "#d4a24c",
@@ -158,24 +158,28 @@ export default class BattleScene extends Phaser.Scene {
     .on("pointerdown", () => this.showMainMenu());
     this.menuGroup.add(backTxt);
 
-    this.player.moves.forEach((moveKey, index) => {
-      const move = MOVES[moveKey];
-      const currentPp = this.player.ppData[moveKey];
+    // Sécurité au cas où player.moves serait vide ou undefined
+    const movesList = this.player.moves || ["taillade"];
+
+    movesList.forEach((moveKey, index) => {
+      const move = MOVES[moveKey] || { name: moveKey, maxPp: 10 };
+      const currentPp = this.player.ppData && this.player.ppData[moveKey] !== undefined ? this.player.ppData[moveKey] : (move.maxPp || 10);
       const maxPp = move.maxPp || 10;
       
-      // Position Y corrigée pour s'aligner bien à l'intérieur du rectangle de droite
-      const y = 620 + index * 35;
+      // On décale proprement les lignes vers le bas à l'intérieur du rectangle
+      const y = 615 + (index * 26);
 
-      const txt = this.add.text(660, y, `• ${move.name} (${currentPp}/${maxPp})`, {
+      const txt = this.add.text(650, y, `• ${move.name} (${currentPp}/${maxPp})`, {
         fontFamily: "monospace",
-        fontSize: "16px",
+        fontSize: "15px",
         color: currentPp > 0 ? "#ead9b8" : "#7f8c8d",
       });
 
       if (currentPp > 0) {
         txt.setInteractive({ useHandCursor: true })
            .on("pointerdown", () => {
-             this.player.ppData[moveKey]--;
+             if (!this.player.ppData) this.player.ppData = {};
+             this.player.ppData[moveKey] = currentPp - 1;
              this.clearInterfaceElements();
              this.playerTurnAction(moveKey);
            })
