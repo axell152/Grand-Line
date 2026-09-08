@@ -32,6 +32,24 @@ this.wasd = this.input.keyboard.addKeys({
   right: Phaser.Input.Keyboard.KeyCodes.D
 });
 
+    // Écoute de la touche T pour ouvrir la gestion d'équipage
+this.input.keyboard.on('keydown-T', () => {
+  this.scene.launch("CrewScene", { state: this.state });
+  this.scene.pause();
+});
+
+    if (typeof this.incoming.expGained === "number") {
+  this.state.exp += this.incoming.expGained;
+  // Gestion de la montée de niveau (style Pokémon)
+  while (this.state.exp >= this.state.maxExp) {
+    this.state.exp -= this.state.maxExp;
+    this.state.level += 1;
+    this.state.maxExp = Math.round(this.state.maxExp * 1.5);
+    // Bonus de stats au passage de niveau
+  }
+  this.persist();
+}
+    
     this.drawIsland();
     this.drawHud();
 
@@ -50,12 +68,15 @@ this.wasd = this.input.keyboard.addKeys({
     const registry = this.game.registry;
     if (!registry.get("gameState")) {
       registry.set("gameState", {
-        islandId: STARTING_ISLAND,
-        x: ISLANDS[STARTING_ISLAND].playerStart.x,
-        y: ISLANDS[STARTING_ISLAND].playerStart.y,
-        crew: [],
-        berrys: 0,
-      });
+  islandId: STARTING_ISLAND,
+  x: ISLANDS[STARTING_ISLAND].playerStart.x,
+  y: ISLANDS[STARTING_ISLAND].playerStart.y,
+  level: 1,
+  exp: 0,
+  maxExp: 50,
+  crew: [],
+  berrys: 0,
+});
 
       // Tentative de restauration d'une sauvegarde existante (best effort, async)
       loadGame().then((save) => {
