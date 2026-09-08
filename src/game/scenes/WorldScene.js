@@ -142,7 +142,7 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
-    // Affichage des bâtiments (dont la taverne) avec échelle et profondeur ajustées
+    // Affichage des bâtiments (dont la taverne) avec échelle réduite et profondeur de base
     if (island.buildings) {
       island.buildings.forEach((b) => {
         const buildingSprite = this.add.image(
@@ -151,10 +151,10 @@ export default class WorldScene extends Phaser.Scene {
           b.key
         )
         .setOrigin(0.5, 1)
-        .setDepth(b.y);
+        .setDepth(b.y); // Profondeur basée sur sa ligne de base
 
-        // Ajuste cette valeur si la taverne est trop grande ou trop petite (ex: 0.4, 0.6...)
-        buildingSprite.setScale(0.5); 
+        // Taille réduite drastiquement (divisée par ~3.3 par rapport à 0.5)
+        buildingSprite.setScale(0.15); 
       });
     }
 
@@ -176,7 +176,7 @@ export default class WorldScene extends Phaser.Scene {
           "token"
         );
         sprite.setTint(charData.color);
-        sprite.setDepth(npc.y); // Profondeur pour les PNJ aussi
+        sprite.setDepth(npc.y);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
       });
 
@@ -186,7 +186,8 @@ export default class WorldScene extends Phaser.Scene {
       "token"
     );
     this.player.setTint(0xd4a24c);
-    this.player.setDepth(this.state.y); // Profondeur initiale du joueur
+    // On met un léger offset (+0.5) pour que le joueur passe devant si son Y est égal ou supérieur à la base du bâtiment
+    this.player.setDepth(this.state.y + 0.1);
 
     this.cameras.main.setBounds(0, 0, island.grid[0].length * TILE_SIZE, island.grid.length * TILE_SIZE);
     this.cameras.main.startFollow(this.player, true);
@@ -248,8 +249,8 @@ export default class WorldScene extends Phaser.Scene {
     this.state.x = targetX;
     this.state.y = targetY;
 
-    // Met à jour la profondeur du joueur en temps réel pendant qu'il se déplace sur l'axe Y
-    this.player.setDepth(targetY);
+    // Met à jour la profondeur du joueur dynamiquement
+    this.player.setDepth(targetY + 0.1);
 
     this.tweens.add({
       targets: this.player,
