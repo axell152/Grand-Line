@@ -24,8 +24,32 @@ export default class WorldScene extends Phaser.Scene {
 
     this.isMoving = false;
     this.cursors = this.input.keyboard.createCursorKeys();
-    this.wasd = this.input.keyboard.addKeys("W,A,S,D");
+// Modification pour supporter proprement le ZQSD / AZERTY
+this.wasd = this.input.keyboard.addKeys({
+  up: Phaser.Input.Keyboard.KeyCodes.Z,
+  left: Phaser.Input.Keyboard.KeyCodes.Q,
+  down: Phaser.Input.Keyboard.KeyCodes.S,
+  right: Phaser.Input.Keyboard.KeyCodes.D
+});
 
+    // Écoute de la touche T pour ouvrir la gestion d'équipage
+this.input.keyboard.on('keydown-T', () => {
+  this.scene.launch("CrewScene", { state: this.state });
+  this.scene.pause();
+});
+
+    if (typeof this.incoming.expGained === "number") {
+  this.state.exp += this.incoming.expGained;
+  // Gestion de la montée de niveau (style Pokémon)
+  while (this.state.exp >= this.state.maxExp) {
+    this.state.exp -= this.state.maxExp;
+    this.state.level += 1;
+    this.state.maxExp = Math.round(this.state.maxExp * 1.5);
+    // Bonus de stats au passage de niveau
+  }
+  this.persist();
+}
+    
     this.drawIsland();
     this.drawHud();
 
@@ -44,12 +68,15 @@ export default class WorldScene extends Phaser.Scene {
     const registry = this.game.registry;
     if (!registry.get("gameState")) {
       registry.set("gameState", {
-        islandId: STARTING_ISLAND,
-        x: ISLANDS[STARTING_ISLAND].playerStart.x,
-        y: ISLANDS[STARTING_ISLAND].playerStart.y,
-        crew: [],
-        berrys: 0,
-      });
+  islandId: STARTING_ISLAND,
+  x: ISLANDS[STARTING_ISLAND].playerStart.x,
+  y: ISLANDS[STARTING_ISLAND].playerStart.y,
+  level: 1,
+  exp: 0,
+  maxExp: 50,
+  crew: [],
+  berrys: 0,
+});
 
       // Tentative de restauration d'une sauvegarde existante (best effort, async)
       loadGame().then((save) => {
@@ -168,10 +195,10 @@ export default class WorldScene extends Phaser.Scene {
     if (this.isMoving) return;
 
     let dir = null;
-    if (this.cursors.left.isDown || this.wasd.A.isDown) dir = "left";
-    else if (this.cursors.right.isDown || this.wasd.D.isDown) dir = "right";
-    else if (this.cursors.up.isDown || this.wasd.W.isDown) dir = "up";
-    else if (this.cursors.down.isDown || this.wasd.S.isDown) dir = "down";
+if (this.cursors.left.isDown || this.wasd.left.isDown) dir = "left";
+else if (this.cursors.right.isDown || this.wasd.right.isDown) dir = "right";
+else if (this.cursors.up.isDown || this.wasd.up.isDown) dir = "up";
+else if (this.cursors.down.isDown || this.wasd.down.isDown) dir = "down";
 
     if (!dir) return;
 
@@ -228,13 +255,15 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   startBattle({ mode, characterId }) {
-    this.scene.start("Battle", {
-      mode,
-      characterId,
-      crewSize: this.state.crew.length,
-      returnIsland: this.state.islandId,
-      returnX: this.state.x,
-      returnY: this.state.y,
-    });
-  }
+  this.scene.start("Battle", {
+    mode,
+    characterId,
+    crew: this.state.crew, // On passe l'équipage complet
+    playerLevel: this.state.level,
+    playerExp: this.state.exp,
+    returnIsland: this.state.islandId,
+    returnX: this.state.x,
+    returnY: this.state.y,
+  });
+}
 }
