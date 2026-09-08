@@ -1,10 +1,3 @@
-// Légende de tuiles : '.' = sol (marchable), '#' = obstacle (arbre/rocher/eau)
-// Chaque ligne de `grid` doit faire la même longueur.
-//
-// Îles beaucoup plus grandes et labyrinthiques que les versions précédentes :
-// générées avec une bonne densité d'obstacles tout en garantissant un chemin
-// vers chaque PNJ et chaque passage. Zones de rencontre sauvage étendues à
-// quasi toute la surface explorable, taux de rencontre en hausse.
 
 export const TILE_SIZE = 32;
 
@@ -46,6 +39,10 @@ export const ISLANDS = {
       "################################################",
     ],
     playerStart: { x: 24, y: 16 },
+    tavern: { x: 10, y: 10 }, 
+    buildings: [
+      { x: 10, y: 10, key: "tavern" }
+    ],
     recruitNpcs: [
       { x: 8, y: 6, characterId: "bretteur" },
       { x: 39, y: 25, characterId: "charpentier" },
