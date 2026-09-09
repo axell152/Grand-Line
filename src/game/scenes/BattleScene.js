@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { PLAYER_CHARACTER, CHARACTERS, ENEMY_CHARACTERS } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
 import { createBattler, getTurnOrder, applyMove, isDefeated } from "@/game/systems/BattleSystem";
+import { ISLANDS } from "@/game/data/islands"; // Import nécessaire pour récupérer les infos de secours de l'île
 
 export default class BattleScene extends Phaser.Scene {
   constructor() {
@@ -13,19 +14,26 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   create() {
-    const { mode, characterId, crew, playerLevel } = this.battleData;
+    const { mode, characterId, crew, playerLevel, playerCurrentHp, playerMaxHp } = this.battleData;
     this.battleMode = mode || "wild";
     this.targetCharacterId = characterId;
 
     const enemySource =
       this.battleMode === "recruit" ? CHARACTERS[characterId] : ENEMY_CHARACTERS[characterId || "bandit"];
 
+    const level = playerLevel || 1;
     const heroData = {
       ...PLAYER_CHARACTER,
-      level: playerLevel || 1,
+      level,
+      atk: PLAYER_CHARACTER.atk + (level - 1) * 2,
+      def: PLAYER_CHARACTER.def + (level - 1) * 1,
+      spd: PLAYER_CHARACTER.spd + (level - 1) * 1,
     };
 
     this.player = createBattler(heroData);
+    if (playerCurrentHp !== undefined) this.player.hp = playerCurrentHp;
+    if (playerMaxHp !== undefined) this.player.maxHp = playerMaxHp;
+
     this.enemy = createBattler(enemySource);
     
     this.teamList = [
@@ -253,16 +261,27 @@ export default class BattleScene extends Phaser.Scene {
 
     if (failed) {
       this.setLog("Impossible de fuir ! L'ennemi bloque le passage...");
+      this.locked = true;
       this.time.delayedCall(1200, () => {
-        this.enemyReply();
+        if (this.battleOver) return;
+        
+        const keepGoing = this.enemyReply();
+        if (keepGoing !== false && !this.battleOver) {
+          this.locked = false;
+          this.showMainMenu();
+        }
       });
     } else {
       this.setLog("Vous avez réussi à fuir le combat saine et sauve !");
       const { returnIsland, returnX, returnY } = this.battleData;
+      const gameState = this.game.registry.get("gameState") || {};
+      gameState.hp = this.player.hp;
+      this.game.registry.set("gameState", gameState);
+
       this.time.delayedCall(1500, () => {
         this.scene.start("World", {
           islandId: returnIsland || "start",
-          x: returnX || 5,
+          x: returnX || 20,
           y: returnY || 5,
         });
       });
@@ -325,8 +344,14 @@ export default class BattleScene extends Phaser.Scene {
     this.clearInterfaceElements();
     const { returnIsland, returnX, returnY } = this.battleData;
 
+    const gameState = this.game.registry.get("gameState") || {};
+    gameState.hp = this.player.hp;
+    this.game.registry.set("gameState", gameState);
+
     if (playerWon) {
-      const expGained = this.battleMode === "recruit" ? 40 : 20;
+      const enemyLevel = this.enemy.level || 1;
+      const baseExp = this.battleMode === "recruit" ? 40 : 20;
+      const expGained = baseExp * enemyLevel;
 
       if (this.battleMode === "recruit") {
         const recruit = CHARACTERS[this.targetCharacterId] || { name: "Inconnu", recruitLine: "Bien joué !" };
@@ -334,7 +359,7 @@ export default class BattleScene extends Phaser.Scene {
         this.time.delayedCall(2800, () => {
           this.scene.start("World", {
             islandId: returnIsland || "start",
-            x: returnX || 5,
+            x: returnX || 20,
             y: returnY || 5,
             recruitedId: this.targetCharacterId,
             expGained: expGained,
@@ -346,7 +371,7 @@ export default class BattleScene extends Phaser.Scene {
         this.time.delayedCall(2200, () => {
           this.scene.start("World", {
             islandId: returnIsland || "start",
-            x: returnX || 5,
+            x: returnX || 20,
             y: returnY || 5,
             berrysGained: loot,
             expGained: expGained,
@@ -355,12 +380,39 @@ export default class BattleScene extends Phaser.Scene {
       }
     } else {
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
+      
       this.time.delayedCall(2000, () => {
-        const respawnData = this.game.registry.get("gameState") || {};
+        // Soin complet des PV
+        gameState.hp = gameState.maxHp || 100;
+        if (gameState.crewDetails) {
+          gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
+        }
+
+        // SÉCURITÉ DE SECOURS : Si aucune taverne n'a été enregistrée, on prend la taverne de l'île actuelle ou le spawn par défaut
+        const currentIslandKey = gameState.islandId || returnIsland || "start";
+        const islandData = ISLANDS[currentIslandKey];
+
+        if (!gameState.respawnIsland) {
+          gameState.respawnIsland = currentIslandKey;
+        }
+        if (gameState.respawnX === undefined || gameState.respawnY === undefined) {
+          if (islandData && islandData.tavern) {
+            gameState.respawnX = islandData.tavern.x;
+            gameState.respawnY = islandData.tavern.y;
+          } else if (islandData && islandData.playerStart) {
+            gameState.respawnX = islandData.playerStart.x;
+            gameState.respawnY = islandData.playerStart.y;
+          } else {
+            gameState.respawnX = returnX || 5;
+            gameState.respawnY = returnY || 5;
+          }
+        }
+
+        this.game.registry.set("gameState", gameState);
+
+        // On bascule vers World en demandant explicitement le respawn
         this.scene.start("World", {
-          islandId: respawnData.respawnIsland || returnIsland || "start",
-          x: respawnData.respawnX || returnX || 5,
-          y: respawnData.respawnY || returnY || 5,
+          isRespawn: true
         });
       });
     }
