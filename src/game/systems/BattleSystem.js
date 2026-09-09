@@ -8,6 +8,20 @@ export function createBattler(charData) {
   };
 }
 
+// Adapte les stats d'un ennemi sauvage au niveau de sa zone d'apparition
+// (les stats de base dans characters.js représentent le niveau 1).
+export function scaleEnemyForLevel(baseEnemy, level) {
+  const lvl = Math.max(1, level || 1);
+  return {
+    ...baseEnemy,
+    level: lvl,
+    maxHp: baseEnemy.maxHp + (lvl - 1) * 6,
+    atk: baseEnemy.atk + (lvl - 1) * 2,
+    def: baseEnemy.def + (lvl - 1) * 1,
+    spd: baseEnemy.spd + (lvl - 1) * 1,
+  };
+}
+
 // Détermine qui joue en premier selon la vitesse (avec une marge d'aléatoire)
 export function getTurnOrder(a, b) {
   const scoreA = a.spd + Math.random() * 4;
