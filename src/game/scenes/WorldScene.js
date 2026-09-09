@@ -151,12 +151,23 @@ export default class WorldScene extends Phaser.Scene {
     this.tileLayer = this.add.group();
     this.npcSprites = {};
 
+    const zoneColors = { 1: 0xffffff, 2: 0xf3c46a, 3: 0xe8895f, 4: 0xb07cd6 };
+    const zoneAt = (x, y) =>
+      island.wildZones.find((z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2);
+
     for (let y = 0; y < island.grid.length; y++) {
       const row = island.grid[y];
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
-        const key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
-        this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, key).setDepth(0);
+        let key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
+
+        const zone = tile === "." ? zoneAt(x, y) : null;
+        if (zone) key = "tile-wild";
+
+        const img = this.add
+          .image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, key)
+          .setDepth(0);
+        if (zone) img.setTint(zoneColors[zone.level] || 0xe8895f);
       }
     }
 
