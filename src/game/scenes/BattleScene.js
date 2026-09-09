@@ -334,7 +334,6 @@ export default class BattleScene extends Phaser.Scene {
     const { returnIsland, returnX, returnY } = this.battleData;
 
     if (playerWon) {
-      // Calcul de l'XP dynamique basé sur le niveau de l'ennemi
       const enemyLevel = this.enemy.level || 1;
       const baseExp = this.battleMode === "recruit" ? 40 : 20;
       const expGained = baseExp * enemyLevel;
@@ -349,6 +348,7 @@ export default class BattleScene extends Phaser.Scene {
             y: returnY || 5,
             recruitedId: this.targetCharacterId,
             expGained: expGained,
+            // AUCUN SOHIN ICI : L'équipe garde ses PV actuels
           });
         });
       } else {
@@ -361,23 +361,23 @@ export default class BattleScene extends Phaser.Scene {
             y: returnY || 5,
             berrysGained: loot,
             expGained: expGained,
+            // AUCUN SOIN ICI NON PLUS
           });
         });
       }
     } else {
+      // C'est uniquement ici (en cas de défaite/mort) qu'on soigne et renvoie à la taverne
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
       
       this.time.delayedCall(2000, () => {
-        // On récupère le bon état global pour être sûr de lire la taverne
         const gameState = this.game.registry.get("gameState") || {};
         
-        // On remet les PV à fond avant le retour, sinon le perso réapparaît mort sur la case
+        // Soin uniquement lors du respawn à la taverne suite à une défaite
         if (gameState.maxHp) gameState.hp = gameState.maxHp;
         if (gameState.crewDetails) {
           gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
         }
-        
-        // On cible bien l'île et les coordonnées de la taverne (!== undefined est indispensable car 0 est une coordonnée valide)
+
         const targetIsland = gameState.respawnIsland || returnIsland || "start";
         const targetX = gameState.respawnX !== undefined ? gameState.respawnX : (returnX || 20);
         const targetY = gameState.respawnY !== undefined ? gameState.respawnY : (returnY || 5);
@@ -390,4 +390,3 @@ export default class BattleScene extends Phaser.Scene {
       });
     }
   }
-}
