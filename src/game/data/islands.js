@@ -1,4 +1,3 @@
-
 export const TILE_SIZE = 32;
 
 export const ISLANDS = {
@@ -39,7 +38,7 @@ export const ISLANDS = {
       "################################################",
     ],
     playerStart: { x: 24, y: 16 },
-    taverne: { x: 20, y: 5 }, 
+    tavern: { x: 20, y: 5 },
     buildings: [
       { x: 20, y: 5, key: "taverne" }
     ],
