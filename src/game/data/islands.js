@@ -46,8 +46,11 @@ export const ISLANDS = {
       { x: 8, y: 6, characterId: "bretteur" },
       { x: 39, y: 25, characterId: "charpentier" },
     ],
-    wildZones: [{ x1: 2, y1: 2, x2: 45, y2: 29 }],
-    wildEncounterRate: 0.04,
+    wildZones: [
+      { x1: 18, y1: 10, x2: 30, y2: 22, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue", "pirateRival"] },
+      { x1: 4, y1: 4, x2: 16, y2: 14, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
+      { x1: 32, y1: 18, x2: 45, y2: 29, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
+    ],
     warps: [{ x: 45, y: 16, toIsland: "ile-brume", toX: 3, toY: 16 }],
   },
 
@@ -93,8 +96,11 @@ export const ISLANDS = {
       { x: 30, y: 24, characterId: "tireur" },
       { x: 50, y: 7, characterId: "musicien" },
     ],
-    wildZones: [{ x1: 2, y1: 2, x2: 61, y2: 29 }],
-    wildEncounterRate: 0.06,
+    wildZones: [
+      { x1: 4, y1: 6, x2: 20, y2: 26, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue", "pirateRival"] },
+      { x1: 22, y1: 4, x2: 42, y2: 28, level: 2, encounterRate: 0.045, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
+      { x1: 44, y1: 4, x2: 61, y2: 28, level: 3, encounterRate: 0.05, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+    ],
     warps: [
       { x: 2, y: 16, toIsland: "ile-depart", toX: 44, toY: 16 },
       { x: 61, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16 },
@@ -143,8 +149,11 @@ export const ISLANDS = {
       { x: 50, y: 24, characterId: "cuisinier" },
       { x: 32, y: 26, characterId: "archeologue" },
     ],
-    wildZones: [{ x1: 2, y1: 2, x2: 61, y2: 29 }],
-    wildEncounterRate: 0.07,
+    wildZones: [
+      { x1: 4, y1: 4, x2: 22, y2: 28, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
+      { x1: 24, y1: 4, x2: 44, y2: 28, level: 3, encounterRate: 0.05, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+      { x1: 46, y1: 4, x2: 61, y2: 28, level: 4, encounterRate: 0.055, enemyPool: ["officierMarine", "chasseurDePrimes"] },
+    ],
     warps: [{ x: 2, y: 16, toIsland: "ile-brume", toX: 60, toY: 16 }],
   },
 };

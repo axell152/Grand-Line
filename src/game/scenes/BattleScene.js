@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { PLAYER_CHARACTER, CHARACTERS, ENEMY_CHARACTERS } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
-import { createBattler, getTurnOrder, applyMove, isDefeated } from "@/game/systems/BattleSystem";
+import { createBattler, getTurnOrder, applyMove, isDefeated, scaleEnemyForLevel } from "@/game/systems/BattleSystem";
 import { ISLANDS } from "@/game/data/islands"; // Import nécessaire pour récupérer les infos de secours de l'île
 
 export default class BattleScene extends Phaser.Scene {
@@ -14,12 +14,14 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   create() {
-    const { mode, characterId, crew, playerLevel, playerCurrentHp, playerMaxHp } = this.battleData;
+    const { mode, characterId, crew, playerLevel, playerCurrentHp, playerMaxHp, enemyLevel } = this.battleData;
     this.battleMode = mode || "wild";
     this.targetCharacterId = characterId;
 
     const enemySource =
-      this.battleMode === "recruit" ? CHARACTERS[characterId] : ENEMY_CHARACTERS[characterId || "bandit"];
+      this.battleMode === "recruit"
+        ? CHARACTERS[characterId]
+        : scaleEnemyForLevel(ENEMY_CHARACTERS[characterId || "marineRecrue"], enemyLevel || 1);
 
     const level = playerLevel || 1;
     const heroData = {

@@ -151,12 +151,23 @@ export default class WorldScene extends Phaser.Scene {
     this.tileLayer = this.add.group();
     this.npcSprites = {};
 
+    const zoneColors = { 1: 0xffffff, 2: 0xf3c46a, 3: 0xe8895f, 4: 0xb07cd6 };
+    const zoneAt = (x, y) =>
+      island.wildZones.find((z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2);
+
     for (let y = 0; y < island.grid.length; y++) {
       const row = island.grid[y];
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
-        const key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
-        this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, key).setDepth(0);
+        let key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
+
+        const zone = tile === "." ? zoneAt(x, y) : null;
+        if (zone) key = "tile-wild";
+
+        const img = this.add
+          .image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, key)
+          .setDepth(0);
+        if (zone) img.setTint(zoneColors[zone.level] || 0xe8895f);
       }
     }
 
@@ -305,23 +316,24 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const inWildZone = island.wildZones.some(
+    const zone = island.wildZones.find(
       (z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2
     );
-    if (inWildZone && Math.random() < island.wildEncounterRate) {
-      const ids = Object.keys(ENEMY_CHARACTERS);
-      const randomId = ids[Math.floor(Math.random() * ids.length)];
-      this.startBattle({ mode: "wild", characterId: randomId });
+    if (zone && Math.random() < zone.encounterRate) {
+      const pool = zone.enemyPool && zone.enemyPool.length ? zone.enemyPool : Object.keys(ENEMY_CHARACTERS);
+      const randomId = pool[Math.floor(Math.random() * pool.length)];
+      this.startBattle({ mode: "wild", characterId: randomId, enemyLevel: zone.level || 1 });
       return;
     }
 
     this.updateHud();
   }
 
-  startBattle({ mode, characterId }) {
+  startBattle({ mode, characterId, enemyLevel }) {
     this.scene.start("Battle", {
       mode,
       characterId,
+      enemyLevel,
       crew: this.state.crew,
       playerLevel: this.state.level,
       playerExp: this.state.exp,
