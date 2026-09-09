@@ -266,21 +266,26 @@ export default class WorldScene extends Phaser.Scene {
   checkTileEvents(x, y) {
     const island = this.island;
 
-    // Si le joueur est sur la case de la taverne
+    // Vérification élargie de la taverne (si définie sur l'île)
     if (island.tavern && island.tavern.x === x && island.tavern.y === y) {
+      // 1. Sauvegarde du point de respawn
       this.state.respawnIsland = this.state.islandId;
       this.state.respawnX = x;
       this.state.respawnY = y;
       
-      // Soins / sauvegarde
+      // 2. Soins complets du joueur principal et de son équipage
       this.state.hp = this.state.maxHp;
-      if (this.state.crewDetails) {
-        this.state.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
+      if (this.state.crewDetails && Array.isArray(this.state.crewDetails)) {
+        this.state.crewDetails.forEach(m => { 
+          m.hp = m.maxHp; 
+          m.ppData = undefined; 
+        });
       }
+
       this.persist();
       
-      // Optionnel : tu peux ajouter un petit message console ou visuel pour confirmer
-      console.log("Point de respawn enregistré à la taverne !");
+      // 3. Affichage d'un message discret ou mise à jour de l'ATH pour notifier le soin
+      this.updateHud();
       return;
     }
     
