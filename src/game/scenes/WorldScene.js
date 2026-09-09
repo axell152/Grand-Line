@@ -305,23 +305,24 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const inWildZone = island.wildZones.some(
+    const zone = island.wildZones.find(
       (z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2
     );
-    if (inWildZone && Math.random() < island.wildEncounterRate) {
-      const ids = Object.keys(ENEMY_CHARACTERS);
-      const randomId = ids[Math.floor(Math.random() * ids.length)];
-      this.startBattle({ mode: "wild", characterId: randomId });
+    if (zone && Math.random() < zone.encounterRate) {
+      const pool = zone.enemyPool && zone.enemyPool.length ? zone.enemyPool : Object.keys(ENEMY_CHARACTERS);
+      const randomId = pool[Math.floor(Math.random() * pool.length)];
+      this.startBattle({ mode: "wild", characterId: randomId, enemyLevel: zone.level || 1 });
       return;
     }
 
     this.updateHud();
   }
 
-  startBattle({ mode, characterId }) {
+  startBattle({ mode, characterId, enemyLevel }) {
     this.scene.start("Battle", {
       mode,
       characterId,
+      enemyLevel,
       crew: this.state.crew,
       playerLevel: this.state.level,
       playerExp: this.state.exp,
