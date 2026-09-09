@@ -378,20 +378,14 @@ export default class BattleScene extends Phaser.Scene {
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
       
       this.time.delayedCall(2000, () => {
-        // Soin uniquement lors du respawn d'urgence à la taverne après une défaite
         gameState.hp = gameState.maxHp || 100;
         if (gameState.crewDetails) {
           gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
         }
-
-        const targetIsland = gameState.respawnIsland || returnIsland || "start";
-        const targetX = gameState.respawnX !== undefined ? gameState.respawnX : (returnX || 20);
-        const targetY = gameState.respawnY !== undefined ? gameState.respawnY : (returnY || 5);
+        this.game.registry.set("gameState", gameState);
 
         this.scene.start("World", {
-          islandId: targetIsland,
-          x: targetX,
-          y: targetY,
+          isRespawn: true
         });
       });
     }
