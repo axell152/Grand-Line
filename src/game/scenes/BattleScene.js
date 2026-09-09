@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { PLAYER_CHARACTER, CHARACTERS, ENEMY_CHARACTERS } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
 import { createBattler, getTurnOrder, applyMove, isDefeated } from "@/game/systems/BattleSystem";
+import { ISLANDS } from "@/game/data/islands"; // Import nécessaire pour récupérer les infos de secours de l'île
 
 export default class BattleScene extends Phaser.Scene {
   constructor() {
@@ -339,7 +340,6 @@ export default class BattleScene extends Phaser.Scene {
     this.clearInterfaceElements();
     const { returnIsland, returnX, returnY } = this.battleData;
 
-    // Sauvegarde des PV actuels du joueur pour conserver ses blessures ou victoires
     const gameState = this.game.registry.get("gameState") || {};
     gameState.hp = this.player.hp;
     this.game.registry.set("gameState", gameState);
@@ -378,12 +378,35 @@ export default class BattleScene extends Phaser.Scene {
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
       
       this.time.delayedCall(2000, () => {
+        // Soin complet des PV
         gameState.hp = gameState.maxHp || 100;
         if (gameState.crewDetails) {
           gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
         }
+
+        // SÉCURITÉ DE SECOURS : Si aucune taverne n'a été enregistrée, on prend la taverne de l'île actuelle ou le spawn par défaut
+        const currentIslandKey = gameState.islandId || returnIsland || "start";
+        const islandData = ISLANDS[currentIslandKey];
+
+        if (!gameState.respawnIsland) {
+          gameState.respawnIsland = currentIslandKey;
+        }
+        if (gameState.respawnX === undefined || gameState.respawnY === undefined) {
+          if (islandData && islandData.tavern) {
+            gameState.respawnX = islandData.tavern.x;
+            gameState.respawnY = islandData.tavern.y;
+          } else if (islandData && islandData.playerStart) {
+            gameState.respawnX = islandData.playerStart.x;
+            gameState.respawnY = islandData.playerStart.y;
+          } else {
+            gameState.respawnX = returnX || 5;
+            gameState.respawnY = returnY || 5;
+          }
+        }
+
         this.game.registry.set("gameState", gameState);
 
+        // On bascule vers World en demandant explicitement le respawn
         this.scene.start("World", {
           isRespawn: true
         });
