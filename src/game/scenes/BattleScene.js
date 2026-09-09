@@ -253,8 +253,16 @@ export default class BattleScene extends Phaser.Scene {
 
     if (failed) {
       this.setLog("Impossible de fuir ! L'ennemi bloque le passage...");
+      this.locked = true;
       this.time.delayedCall(1200, () => {
-        this.enemyReply();
+        if (this.battleOver) return;
+        
+        // On permet à l'ennemi de riposter. Si la partie prend fin, runSequence/executeMove bloquera la suite.
+        const keepGoing = this.enemyReply();
+        if (keepGoing !== false && !this.battleOver) {
+          this.locked = false;
+          this.showMainMenu();
+        }
       });
     } else {
       this.setLog("Vous avez réussi à fuir le combat saine et sauve !");
@@ -358,12 +366,26 @@ export default class BattleScene extends Phaser.Scene {
       }
     } else {
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
+      
       this.time.delayedCall(2000, () => {
-        const respawnData = this.game.registry.get("gameState") || {};
+        // On récupère le bon état global pour être sûr de lire la taverne
+        const gameState = this.game.registry.get("gameState") || {};
+        
+        // On remet les PV à fond avant le retour, sinon le perso réapparaît mort sur la case
+        if (gameState.maxHp) gameState.hp = gameState.maxHp;
+        if (gameState.crewDetails) {
+          gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
+        }
+        
+        // On cible bien l'île et les coordonnées de la taverne (!== undefined est indispensable car 0 est une coordonnée valide)
+        const targetIsland = gameState.respawnIsland || returnIsland || "start";
+        const targetX = gameState.respawnX !== undefined ? gameState.respawnX : (returnX || 20);
+        const targetY = gameState.respawnY !== undefined ? gameState.respawnY : (returnY || 5);
+
         this.scene.start("World", {
-          islandId: respawnData.respawnIsland || returnIsland || "start",
-          x: respawnData.respawnX || returnX || 20,
-          y: respawnData.respawnY || returnY || 5,
+          islandId: targetIsland,
+          x: targetX,
+          y: targetY,
         });
       });
     }
