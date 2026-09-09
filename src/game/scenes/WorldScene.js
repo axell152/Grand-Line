@@ -50,7 +50,6 @@ export default class WorldScene extends Phaser.Scene {
       while (this.state.exp >= this.state.maxExp) {
         this.state.exp -= this.state.maxExp;
         this.state.level += 1;
-        // Le prochain niveau demande 40% d'XP en plus
         this.state.maxExp = Math.round(this.state.maxExp * 1.4);
       }
       this.persist();
@@ -107,7 +106,6 @@ export default class WorldScene extends Phaser.Scene {
 
     this.state = registry.get("gameState");
 
-    // Sécurités pour éviter les undefined sur les sauvegardes existantes
     if (this.state.level === undefined) this.state.level = 1;
     if (this.state.exp === undefined) this.state.exp = 0;
     if (this.state.maxExp === undefined) this.state.maxExp = 100;
@@ -138,11 +136,11 @@ export default class WorldScene extends Phaser.Scene {
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
         const key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
-        this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, key);
+        this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, key).setDepth(0);
       }
     }
 
-    // Affichage des bâtiments (dont la taverne) avec échelle réduite et profondeur de base
+    // Affichage des bâtiments
     if (island.buildings) {
       island.buildings.forEach((b) => {
         const buildingSprite = this.add.image(
@@ -151,9 +149,8 @@ export default class WorldScene extends Phaser.Scene {
           b.key
         )
         .setOrigin(0.5, 1)
-        .setDepth(b.y); // Profondeur basée sur sa ligne de base
+        .setDepth(b.y); // Profondeur du bâtiment basée sur sa ligne
 
-        // Taille réduite drastiquement (divisée par ~3.3 par rapport à 0.5)
         buildingSprite.setScale(0.15); 
       });
     }
@@ -163,7 +160,7 @@ export default class WorldScene extends Phaser.Scene {
         warp.x * TILE_SIZE + TILE_SIZE / 2,
         warp.y * TILE_SIZE + TILE_SIZE / 2,
         "warp-marker"
-      );
+      ).setDepth(warp.y);
     });
 
     island.recruitNpcs
@@ -180,14 +177,15 @@ export default class WorldScene extends Phaser.Scene {
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
       });
 
+    // Joueur positionné avec une profondeur garantie pour passer au-dessus des éléments
     this.player = this.add.image(
       this.state.x * TILE_SIZE + TILE_SIZE / 2,
       this.state.y * TILE_SIZE + TILE_SIZE / 2,
       "token"
     );
     this.player.setTint(0xd4a24c);
-    // On met un léger offset (+0.5) pour que le joueur passe devant si son Y est égal ou supérieur à la base du bâtiment
-    this.player.setDepth(this.state.y + 0.1);
+    // On met un depth élevé basé sur le Y + un gros bonus pour qu'il soit toujours au premier plan
+    this.player.setDepth(999); 
 
     this.cameras.main.setBounds(0, 0, island.grid[0].length * TILE_SIZE, island.grid.length * TILE_SIZE);
     this.cameras.main.startFollow(this.player, true);
@@ -249,8 +247,8 @@ export default class WorldScene extends Phaser.Scene {
     this.state.x = targetX;
     this.state.y = targetY;
 
-    // Met à jour la profondeur du joueur dynamiquement
-    this.player.setDepth(targetY + 0.1);
+    // Le joueur garde sa priorité d'affichage au premier plan
+    this.player.setDepth(999);
 
     this.tweens.add({
       targets: this.player,
