@@ -13,7 +13,7 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   create() {
-    const { mode, characterId, crew, playerLevel } = this.battleData;
+    const { mode, characterId, crew, playerLevel, playerCurrentHp, playerMaxHp } = this.battleData;
     this.battleMode = mode || "wild";
     this.targetCharacterId = characterId;
 
@@ -26,6 +26,9 @@ export default class BattleScene extends Phaser.Scene {
     };
 
     this.player = createBattler(heroData);
+    if (playerCurrentHp !== undefined) this.player.hp = playerCurrentHp;
+    if (playerMaxHp !== undefined) this.player.maxHp = playerMaxHp;
+
     this.enemy = createBattler(enemySource);
     
     this.teamList = [
@@ -266,6 +269,10 @@ export default class BattleScene extends Phaser.Scene {
     } else {
       this.setLog("Vous avez réussi à fuir le combat saine et sauve !");
       const { returnIsland, returnX, returnY } = this.battleData;
+      const gameState = this.game.registry.get("gameState") || {};
+      gameState.hp = this.player.hp;
+      this.game.registry.set("gameState", gameState);
+
       this.time.delayedCall(1500, () => {
         this.scene.start("World", {
           islandId: returnIsland || "start",
@@ -332,6 +339,11 @@ export default class BattleScene extends Phaser.Scene {
     this.clearInterfaceElements();
     const { returnIsland, returnX, returnY } = this.battleData;
 
+    // Sauvegarde des PV actuels du joueur pour conserver ses blessures ou victoires
+    const gameState = this.game.registry.get("gameState") || {};
+    gameState.hp = this.player.hp;
+    this.game.registry.set("gameState", gameState);
+
     if (playerWon) {
       const enemyLevel = this.enemy.level || 1;
       const baseExp = this.battleMode === "recruit" ? 40 : 20;
@@ -366,9 +378,8 @@ export default class BattleScene extends Phaser.Scene {
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
       
       this.time.delayedCall(2000, () => {
-        const gameState = this.game.registry.get("gameState") || {};
-        
-        if (gameState.maxHp) gameState.hp = gameState.maxHp;
+        // Soin uniquement lors du respawn d'urgence à la taverne après une défaite
+        gameState.hp = gameState.maxHp || 100;
         if (gameState.crewDetails) {
           gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
         }
