@@ -257,7 +257,6 @@ export default class BattleScene extends Phaser.Scene {
       this.time.delayedCall(1200, () => {
         if (this.battleOver) return;
         
-        // On permet à l'ennemi de riposter. Si la partie prend fin, runSequence/executeMove bloquera la suite.
         const keepGoing = this.enemyReply();
         if (keepGoing !== false && !this.battleOver) {
           this.locked = false;
@@ -348,7 +347,6 @@ export default class BattleScene extends Phaser.Scene {
             y: returnY || 5,
             recruitedId: this.targetCharacterId,
             expGained: expGained,
-            // AUCUN SOHIN ICI : L'équipe garde ses PV actuels
           });
         });
       } else {
@@ -361,18 +359,15 @@ export default class BattleScene extends Phaser.Scene {
             y: returnY || 5,
             berrysGained: loot,
             expGained: expGained,
-            // AUCUN SOIN ICI NON PLUS
           });
         });
       }
     } else {
-      // C'est uniquement ici (en cas de défaite/mort) qu'on soigne et renvoie à la taverne
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
       
       this.time.delayedCall(2000, () => {
         const gameState = this.game.registry.get("gameState") || {};
         
-        // Soin uniquement lors du respawn à la taverne suite à une défaite
         if (gameState.maxHp) gameState.hp = gameState.maxHp;
         if (gameState.crewDetails) {
           gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
@@ -390,3 +385,4 @@ export default class BattleScene extends Phaser.Scene {
       });
     }
   }
+}
