@@ -73,11 +73,12 @@ export default class WorldScene extends Phaser.Scene {
     if (!registry.get("gameState")) {
       registry.set("gameState", {
         islandId: STARTING_ISLAND,
-        x: ISLANDS[STARTING_ISLAND].playerStart.x,
-        y: ISLANDS[STARTING_ISLAND].playerStart.y,
+        // Si tu veux que le tout premier spawn soit à la taverne, pointe vers elle :
+        x: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.x : ISLANDS[STARTING_ISLAND].playerStart.x,
+        y: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.y : ISLANDS[STARTING_ISLAND].playerStart.y,
         respawnIsland: STARTING_ISLAND,
-        respawnX: ISLANDS[STARTING_ISLAND].playerStart.x,
-        respawnY: ISLANDS[STARTING_ISLAND].playerStart.y,
+        respawnX: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.x : ISLANDS[STARTING_ISLAND].playerStart.x,
+        respawnY: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.y : ISLANDS[STARTING_ISLAND].playerStart.y,
         crew: [],
         berrys: 0,
         level: 1,
