@@ -29,7 +29,6 @@ export default class WorldScene extends Phaser.Scene {
     this.isMoving = false;
     this.cursors = this.input.keyboard.createCursorKeys();
     
-    // Support ZQSD / AZERTY
     this.wasd = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.Z,
       left: Phaser.Input.Keyboard.KeyCodes.Q,
@@ -37,13 +36,11 @@ export default class WorldScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D
     });
 
-    // Écoute de la touche T pour ouvrir la gestion d'équipage
     this.input.keyboard.on('keydown-T', () => {
       this.scene.launch("CrewScene", { state: this.state });
       this.scene.pause();
     });
 
-    // Gestion de l'XP et des montées de niveau cumulatives
     if (typeof this.incoming.expGained === "number") {
       this.state.exp += this.incoming.expGained;
       
@@ -90,20 +87,6 @@ export default class WorldScene extends Phaser.Scene {
         hp: 100,
         maxHp: 100,
       });
-    }
-
-    this.state = registry.get("gameState");
-
-    // Si on arrive avec des données de respawn spécifiques (suite à une défaite par exemple)
-    if (this.incoming.isRespawn) {
-      this.state.islandId = this.state.respawnIsland || this.state.islandId;
-      this.state.x = this.state.respawnX !== undefined ? this.state.respawnX : this.state.x;
-      this.state.y = this.state.respawnY !== undefined ? this.state.respawnY : this.state.y;
-    } else if (this.incoming.islandId) {
-      this.state.islandId = this.incoming.islandId;
-      this.state.x = this.incoming.x;
-      this.state.y = this.incoming.y;
-    }
 
       loadGame().then((save) => {
         if (save) {
@@ -140,12 +123,16 @@ export default class WorldScene extends Phaser.Scene {
     if (this.state.respawnX === undefined) this.state.respawnX = this.state.x;
     if (this.state.respawnY === undefined) this.state.respawnY = this.state.y;
 
-    if (this.incoming.islandId) {
+    if (this.incoming.isRespawn) {
+      this.state.islandId = this.state.respawnIsland;
+      this.state.x = this.state.respawnX;
+      this.state.y = this.state.respawnY;
+    } else if (this.incoming.islandId) {
       this.state.islandId = this.incoming.islandId;
       this.state.x = this.incoming.x;
       this.state.y = this.incoming.y;
     }
-  
+  }
 
   persist() {
     this.game.registry.set("gameState", this.state);
