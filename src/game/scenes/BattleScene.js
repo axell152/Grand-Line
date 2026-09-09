@@ -21,9 +21,13 @@ export default class BattleScene extends Phaser.Scene {
     const enemySource =
       this.battleMode === "recruit" ? CHARACTERS[characterId] : ENEMY_CHARACTERS[characterId || "bandit"];
 
+    const level = playerLevel || 1;
     const heroData = {
       ...PLAYER_CHARACTER,
-      level: playerLevel || 1,
+      level,
+      atk: PLAYER_CHARACTER.atk + (level - 1) * 2,
+      def: PLAYER_CHARACTER.def + (level - 1) * 1,
+      spd: PLAYER_CHARACTER.spd + (level - 1) * 1,
     };
 
     this.player = createBattler(heroData);
