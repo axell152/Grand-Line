@@ -71,19 +71,24 @@ export default class WorldScene extends Phaser.Scene {
   initState() {
     const registry = this.game.registry;
     if (!registry.get("gameState")) {
+      const startingIslandData = ISLANDS[STARTING_ISLAND];
+      const defaultX = startingIslandData.tavern ? startingIslandData.tavern.x : startingIslandData.playerStart.x;
+      const defaultY = startingIslandData.tavern ? startingIslandData.tavern.y : startingIslandData.playerStart.y;
+
       registry.set("gameState", {
         islandId: STARTING_ISLAND,
-        // Si tu veux que le tout premier spawn soit à la taverne, pointe vers elle :
-        x: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.x : ISLANDS[STARTING_ISLAND].playerStart.x,
-        y: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.y : ISLANDS[STARTING_ISLAND].playerStart.y,
+        x: defaultX,
+        y: defaultY,
         respawnIsland: STARTING_ISLAND,
-        respawnX: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.x : ISLANDS[STARTING_ISLAND].playerStart.x,
-        respawnY: ISLANDS[STARTING_ISLAND].tavern ? ISLANDS[STARTING_ISLAND].tavern.y : ISLANDS[STARTING_ISLAND].playerStart.y,
+        respawnX: defaultX,
+        respawnY: defaultY,
         crew: [],
         berrys: 0,
         level: 1,
         exp: 0,
         maxExp: 100,
+        hp: 100,
+        maxHp: 100,
       });
 
       loadGame().then((save) => {
@@ -92,11 +97,16 @@ export default class WorldScene extends Phaser.Scene {
             islandId: save.islandId,
             x: save.x,
             y: save.y,
+            respawnIsland: save.respawnIsland || save.islandId,
+            respawnX: save.respawnX !== undefined ? save.respawnX : save.x,
+            respawnY: save.respawnY !== undefined ? save.respawnY : save.y,
             crew: save.crew || [],
             berrys: save.berrys || 0,
             level: save.level || 1,
             exp: save.exp || 0,
             maxExp: save.maxExp || 100,
+            hp: save.hp !== undefined ? save.hp : 100,
+            maxHp: save.maxHp !== undefined ? save.maxHp : 100,
           });
           if (this.scene.isActive("World")) {
             this.scene.restart();
@@ -110,6 +120,11 @@ export default class WorldScene extends Phaser.Scene {
     if (this.state.level === undefined) this.state.level = 1;
     if (this.state.exp === undefined) this.state.exp = 0;
     if (this.state.maxExp === undefined) this.state.maxExp = 100;
+    if (this.state.hp === undefined) this.state.hp = 100;
+    if (this.state.maxHp === undefined) this.state.maxHp = 100;
+    if (this.state.respawnIsland === undefined) this.state.respawnIsland = this.state.islandId;
+    if (this.state.respawnX === undefined) this.state.respawnX = this.state.x;
+    if (this.state.respawnY === undefined) this.state.respawnY = this.state.y;
 
     if (this.incoming.islandId) {
       this.state.islandId = this.incoming.islandId;
@@ -141,7 +156,6 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
-    // Affichage des bâtiments
     if (island.buildings) {
       island.buildings.forEach((b) => {
         const buildingSprite = this.add.image(
@@ -150,7 +164,7 @@ export default class WorldScene extends Phaser.Scene {
           b.key
         )
         .setOrigin(0.5, 1)
-        .setDepth(b.y); // Profondeur du bâtiment basée sur sa ligne
+        .setDepth(b.y);
 
         buildingSprite.setScale(0.15); 
       });
@@ -178,14 +192,12 @@ export default class WorldScene extends Phaser.Scene {
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
       });
 
-    // Joueur positionné avec une profondeur garantie pour passer au-dessus des éléments
     this.player = this.add.image(
       this.state.x * TILE_SIZE + TILE_SIZE / 2,
       this.state.y * TILE_SIZE + TILE_SIZE / 2,
       "token"
     );
     this.player.setTint(0xd4a24c);
-    // On met un depth élevé basé sur le Y + un gros bonus pour qu'il soit toujours au premier plan
     this.player.setDepth(999); 
 
     this.cameras.main.setBounds(0, 0, island.grid[0].length * TILE_SIZE, island.grid.length * TILE_SIZE);
@@ -209,7 +221,7 @@ export default class WorldScene extends Phaser.Scene {
   updateHud() {
     const island = this.island;
     this.hudText.setText(
-      `${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level}`
+      `${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | PV: ${this.state.hp}/${this.state.maxHp}`
     );
   }
 
@@ -248,7 +260,6 @@ export default class WorldScene extends Phaser.Scene {
     this.state.x = targetX;
     this.state.y = targetY;
 
-    // Le joueur garde sa priorité d'affichage au premier plan
     this.player.setDepth(999);
 
     this.tweens.add({
@@ -267,14 +278,11 @@ export default class WorldScene extends Phaser.Scene {
   checkTileEvents(x, y) {
     const island = this.island;
 
-    // Vérification élargie de la taverne (si définie sur l'île)
     if (island.tavern && island.tavern.x === x && island.tavern.y === y) {
-      // 1. Sauvegarde du point de respawn
       this.state.respawnIsland = this.state.islandId;
       this.state.respawnX = x;
       this.state.respawnY = y;
       
-      // 2. Soins complets du joueur principal et de son équipage
       this.state.hp = this.state.maxHp;
       if (this.state.crewDetails && Array.isArray(this.state.crewDetails)) {
         this.state.crewDetails.forEach(m => { 
@@ -282,10 +290,7 @@ export default class WorldScene extends Phaser.Scene {
           m.ppData = undefined; 
         });
       }
-
       this.persist();
-      
-      // 3. Affichage d'un message discret ou mise à jour de l'ATH pour notifier le soin
       this.updateHud();
       return;
     }
@@ -316,6 +321,8 @@ export default class WorldScene extends Phaser.Scene {
       crew: this.state.crew,
       playerLevel: this.state.level,
       playerExp: this.state.exp,
+      playerCurrentHp: this.state.hp,
+      playerMaxHp: this.state.maxHp,
       returnIsland: this.state.islandId,
       returnX: this.state.x,
       returnY: this.state.y,
