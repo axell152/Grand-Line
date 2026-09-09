@@ -90,6 +90,20 @@ export default class WorldScene extends Phaser.Scene {
         hp: 100,
         maxHp: 100,
       });
+    }
+
+    this.state = registry.get("gameState");
+
+    // Si on arrive avec des données de respawn spécifiques (suite à une défaite par exemple)
+    if (this.incoming.isRespawn) {
+      this.state.islandId = this.state.respawnIsland || this.state.islandId;
+      this.state.x = this.state.respawnX !== undefined ? this.state.respawnX : this.state.x;
+      this.state.y = this.state.respawnY !== undefined ? this.state.respawnY : this.state.y;
+    } else if (this.incoming.islandId) {
+      this.state.islandId = this.incoming.islandId;
+      this.state.x = this.incoming.x;
+      this.state.y = this.incoming.y;
+    }
 
       loadGame().then((save) => {
         if (save) {
@@ -131,7 +145,7 @@ export default class WorldScene extends Phaser.Scene {
       this.state.x = this.incoming.x;
       this.state.y = this.incoming.y;
     }
-  }
+  
 
   persist() {
     this.game.registry.set("gameState", this.state);
