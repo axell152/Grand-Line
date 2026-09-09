@@ -262,7 +262,7 @@ export default class BattleScene extends Phaser.Scene {
       this.time.delayedCall(1500, () => {
         this.scene.start("World", {
           islandId: returnIsland || "start",
-          x: returnX || 5,
+          x: returnX || 20,
           y: returnY || 5,
         });
       });
@@ -337,7 +337,7 @@ export default class BattleScene extends Phaser.Scene {
         this.time.delayedCall(2800, () => {
           this.scene.start("World", {
             islandId: returnIsland || "start",
-            x: returnX || 5,
+            x: returnX || 20,
             y: returnY || 5,
             recruitedId: this.targetCharacterId,
             expGained: expGained,
@@ -349,7 +349,7 @@ export default class BattleScene extends Phaser.Scene {
         this.time.delayedCall(2200, () => {
           this.scene.start("World", {
             islandId: returnIsland || "start",
-            x: returnX || 5,
+            x: returnX || 20,
             y: returnY || 5,
             berrysGained: loot,
             expGained: expGained,
@@ -362,7 +362,7 @@ export default class BattleScene extends Phaser.Scene {
         const respawnData = this.game.registry.get("gameState") || {};
         this.scene.start("World", {
           islandId: respawnData.respawnIsland || returnIsland || "start",
-          x: respawnData.respawnX || returnX || 5,
+          x: respawnData.respawnX || returnX || 20,
           y: respawnData.respawnY || returnY || 5,
         });
       });
