@@ -10,6 +10,7 @@ export default class BootScene extends Phaser.Scene {
     this.load.image("tile-floor", "/tiles/floor.png");
     this.load.image("tile-wall", "/tiles/wall.png");
     this.load.image("tile-path", "/tiles/path.png");
+    this.load.image("tile-wild", "/tiles/wild.png");
   }
 
   create() {
