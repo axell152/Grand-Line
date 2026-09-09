@@ -48,6 +48,9 @@ export default class WorldScene extends Phaser.Scene {
         this.state.exp -= this.state.maxExp;
         this.state.level += 1;
         this.state.maxExp = Math.round(this.state.maxExp * 1.4);
+        // Les PV max augmentent avec le niveau, et le gain soigne d'autant
+        this.state.maxHp += 8;
+        this.state.hp += 8;
       }
       this.persist();
     }
