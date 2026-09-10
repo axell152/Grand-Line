@@ -14,9 +14,21 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   create() {
-    const { mode, characterId, crew, playerLevel, playerCurrentHp, playerMaxHp, enemyLevel } = this.battleData;
+    const {
+      mode,
+      characterId,
+      crew,
+      teamOrder,
+      playerLevel,
+      playerCurrentHp,
+      playerMaxHp,
+      playerPpData,
+      crewDetails,
+      enemyLevel,
+    } = this.battleData;
     this.battleMode = mode || "wild";
     this.targetCharacterId = characterId;
+    this.crewDetails = crewDetails || {};
 
     const enemySource =
       this.battleMode === "recruit"
@@ -32,22 +44,43 @@ export default class BattleScene extends Phaser.Scene {
       spd: PLAYER_CHARACTER.spd + (level - 1) * 1,
     };
 
-    this.player = createBattler(heroData);
-    if (playerCurrentHp !== undefined) this.player.hp = playerCurrentHp;
-    if (playerMaxHp !== undefined) this.player.maxHp = playerMaxHp;
+    const captainBattler = createBattler(heroData);
+    captainBattler.isCaptain = true;
+    if (playerCurrentHp !== undefined) captainBattler.hp = playerCurrentHp;
+    if (playerMaxHp !== undefined) captainBattler.maxHp = playerMaxHp;
+    if (playerPpData) captainBattler.ppData = { ...playerPpData };
 
     this.enemy = createBattler(enemySource);
-    
-    this.teamList = [
-      { ...this.player, isMain: true },
-      ...(crew || []).map(charId => createBattler(CHARACTERS[charId]))
-    ];
 
-    this.teamList.forEach(member => {
+    // L'ordre de l'équipe (capitaine + recrues) vient du menu Équipage : le
+    // capitaine n'est plus forcément en tête.
+    const order = teamOrder && teamOrder.length ? teamOrder : ["captain", ...(crew || [])];
+    this.teamList = order
+      .map((entry) => {
+        if (entry === "captain") return captainBattler;
+        if (!crew || !crew.includes(entry)) return null;
+        const battler = createBattler(CHARACTERS[entry]);
+        battler.crewId = entry;
+        const saved = this.crewDetails[entry];
+        if (saved) {
+          battler.hp = saved.hp;
+          battler.maxHp = saved.maxHp || battler.maxHp;
+          if (saved.ppData) battler.ppData = { ...saved.ppData };
+        }
+        return battler;
+      })
+      .filter(Boolean);
+
+    if (this.teamList.length === 0) this.teamList = [captainBattler];
+
+    // Le premier membre vivant de l'ordre choisi part au combat
+    this.player = this.teamList.find((m) => m.hp > 0) || this.teamList[0];
+
+    this.teamList.forEach((member) => {
       if (!member.ppData) {
         member.ppData = {};
         const moves = member.moves || ["taillade"];
-        moves.forEach(mKey => {
+        moves.forEach((mKey) => {
           const moveInfo = MOVES[mKey] || { maxPp: 10 };
           member.ppData[mKey] = moveInfo.maxPp || 10;
         });
@@ -223,7 +256,7 @@ export default class BattleScene extends Phaser.Scene {
 
     this.teamList.forEach((member, index) => {
       const y = 615 + (index * 26);
-      const isCurrent = member.id === this.player.id;
+      const isCurrent = member === this.player;
       const color = isCurrent ? "#7f8c8d" : "#ead9b8";
 
       const txt = this.add.text(650, y, `• ${member.name} (${member.hp}/${member.maxHp}PV)`, {
@@ -246,15 +279,20 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   switchCharacter(newMember) {
+    if (this.locked || this.battleOver) return;
     this.clearInterfaceElements();
+    this.locked = true;
     this.setLog(`Vous rappelez ${this.player.name} et envoyez ${newMember.name} au combat !`);
     this.player = newMember;
     this.playerToken.setFillStyle(this.player.color || 0xd4a24c);
     this.refreshBars();
 
-    this.time.delayedCall(1200, () => {
-      this.enemyReply();
-    });
+    // Changer de personnage consomme le tour : l'ennemi riposte ensuite,
+    // puis le menu principal doit se rouvrir (c'est ça qui plantait avant).
+    this.runSequence([
+      () => true,
+      () => this.enemyReply(),
+    ]);
   }
 
   attemptEscape() {
@@ -275,12 +313,10 @@ export default class BattleScene extends Phaser.Scene {
       });
     } else {
       this.setLog("Vous avez réussi à fuir le combat saine et sauve !");
-      const { returnIsland, returnX, returnY } = this.battleData;
-      const gameState = this.game.registry.get("gameState") || {};
-      gameState.hp = this.player.hp;
-      this.game.registry.set("gameState", gameState);
+      this.saveTeamState();
 
       this.time.delayedCall(1500, () => {
+        const { returnIsland, returnX, returnY } = this.battleData;
         this.scene.start("World", {
           islandId: returnIsland || "start",
           x: returnX || 20,
@@ -288,6 +324,30 @@ export default class BattleScene extends Phaser.Scene {
         });
       });
     }
+  }
+
+  // Sauvegarde l'état (PV + PP) de tous les membres de l'équipe ayant combattu
+  // — capitaine ET recrues — pour que ça persiste d'un combat à l'autre,
+  // exactement comme les PV (reset uniquement à la taverne ou en cas de K.O.).
+  saveTeamState() {
+    const gameState = this.game.registry.get("gameState") || {};
+    gameState.crewDetails = gameState.crewDetails || {};
+
+    this.teamList.forEach((member) => {
+      if (member.isCaptain) {
+        gameState.hp = member.hp;
+        gameState.ppData = { ...member.ppData };
+      } else if (member.crewId) {
+        gameState.crewDetails[member.crewId] = {
+          hp: member.hp,
+          maxHp: member.maxHp,
+          ppData: { ...member.ppData },
+        };
+      }
+    });
+
+    this.game.registry.set("gameState", gameState);
+    return gameState;
   }
 
   playerTurnAction(moveKey) {
@@ -346,9 +406,7 @@ export default class BattleScene extends Phaser.Scene {
     this.clearInterfaceElements();
     const { returnIsland, returnX, returnY } = this.battleData;
 
-    const gameState = this.game.registry.get("gameState") || {};
-    gameState.hp = this.player.hp;
-    this.game.registry.set("gameState", gameState);
+    const gameState = this.saveTeamState();
 
     if (playerWon) {
       const enemyLevel = this.enemy.level || 1;
@@ -384,11 +442,14 @@ export default class BattleScene extends Phaser.Scene {
       this.setLog("Votre équipe est K.O... Réveil d'urgence à la taverne !");
       
       this.time.delayedCall(2000, () => {
-        // Soin complet des PV
+        // Soin complet des PV ET des PP de toute l'équipe (capitaine + recrues)
         gameState.hp = gameState.maxHp || 100;
-        if (gameState.crewDetails) {
-          gameState.crewDetails.forEach(m => { m.hp = m.maxHp; m.ppData = undefined; });
-        }
+        gameState.ppData = {};
+        Object.keys(gameState.crewDetails || {}).forEach((id) => {
+          const detail = gameState.crewDetails[id];
+          detail.hp = detail.maxHp;
+          detail.ppData = {};
+        });
 
         // SÉCURITÉ DE SECOURS : Si aucune taverne n'a été enregistrée, on prend la taverne de l'île actuelle ou le spawn par défaut
         const currentIslandKey = gameState.islandId || returnIsland || "start";
