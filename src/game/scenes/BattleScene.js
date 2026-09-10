@@ -327,7 +327,7 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   switchCharacter(newMember, forced = false) {
-    if (this.locked || this.battleOver || !newMember || newMember.hp <= 0) return;
+    if ((this.locked && !forced) || this.battleOver || !newMember || newMember.hp <= 0) return;
     this.clearInterfaceElements();
     this.locked = true;
 
