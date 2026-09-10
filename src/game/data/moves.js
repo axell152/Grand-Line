@@ -1,4 +1,3 @@
-// Chaque attaque : nom, puissance de base, type, précision, et maxPp (limite d'utilisation)
 export const MOVES = {
   taillade: { name: "Taillade", power: 35, type: "tranchant", accuracy: 0.95, maxPp: 15 },
   coupTonnerre: { name: "Coup de Tonnerre", power: 45, type: "choc", accuracy: 0.85, maxPp: 10 },
