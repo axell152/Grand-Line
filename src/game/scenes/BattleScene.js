@@ -79,14 +79,25 @@ export default class BattleScene extends Phaser.Scene {
       .map((entry) => {
         if (entry === "captain") return captainBattler;
         if (!crew || !crew.includes(entry)) return null;
-        const battler = createBattler(CHARACTERS[entry]);
+
+        const base = CHARACTERS[entry];
+        if (!base) return null;
+
+        const saved = this.crewDetails[entry] || {};
+        const level = saved.level || 1;
+        const battler = createBattler({
+          ...base,
+          level,
+          maxHp: base.maxHp + (level - 1) * 8,
+          atk: base.atk + (level - 1) * 2,
+          def: base.def + (level - 1) * 1,
+          spd: base.spd + (level - 1) * 1,
+        });
         battler.crewId = entry;
-        const saved = this.crewDetails[entry];
-        if (saved) {
-          battler.hp = saved.hp;
-          battler.maxHp = saved.maxHp || battler.maxHp;
-          if (saved.ppData) battler.ppData = { ...saved.ppData };
-        }
+        battler.exp = saved.exp || 0;
+        battler.maxExp = saved.maxExp || 100;
+        if (saved.hp !== undefined) battler.hp = Math.min(saved.hp, battler.maxHp);
+        if (saved.ppData) battler.ppData = { ...saved.ppData };
         return battler;
       })
       .filter(Boolean);
@@ -266,20 +277,29 @@ export default class BattleScene extends Phaser.Scene {
     });
   }
 
-  showTeamMenu() {
+  showTeamMenu(forceSwitch = false) {
     this.clearInterfaceElements();
 
     const boxBg = this.add.rectangle(800, 660, 320, 160, 0x0b2545, 0.95).setStrokeStyle(4, 0xead9b8);
     this.menuGroup.add(boxBg);
 
-    const backTxt = this.add.text(880, 590, "[RETOUR]", {
-      fontFamily: "monospace",
-      fontSize: "14px",
-      color: "#d4a24c",
-    })
-    .setInteractive({ useHandCursor: true })
-    .on("pointerdown", () => this.showMainMenu());
-    this.menuGroup.add(backTxt);
+    if (!forceSwitch) {
+      const backTxt = this.add.text(880, 590, "[RETOUR]", {
+        fontFamily: "monospace",
+        fontSize: "14px",
+        color: "#d4a24c",
+      })
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.showMainMenu());
+      this.menuGroup.add(backTxt);
+    } else {
+      const forcedTxt = this.add.text(650, 590, "⚠ CHOISISSEZ UN PERSONNAGE VIVANT", {
+        fontFamily: "monospace",
+        fontSize: "14px",
+        color: "#e67e22",
+      });
+      this.menuGroup.add(forcedTxt);
+    }
 
     this.teamList.forEach((member, index) => {
       const y = 615 + (index * 26);
@@ -292,10 +312,11 @@ export default class BattleScene extends Phaser.Scene {
         color: color,
       });
 
-      if (!isCurrent && member.hp > 0) {
+      const canSelect = member.hp > 0 && (forceSwitch || !isCurrent);
+      if (canSelect) {
         txt.setInteractive({ useHandCursor: true })
            .on("pointerdown", () => {
-             this.switchCharacter(member);
+             this.switchCharacter(member, forceSwitch);
            })
            .on("pointerover", () => txt.setColor("#ffffff"))
            .on("pointerout", () => txt.setColor(color));
@@ -305,21 +326,37 @@ export default class BattleScene extends Phaser.Scene {
     });
   }
 
-  switchCharacter(newMember) {
-    if (this.locked || this.battleOver) return;
+  switchCharacter(newMember, forced = false) {
+    if (this.locked || this.battleOver || !newMember || newMember.hp <= 0) return;
     this.clearInterfaceElements();
     this.locked = true;
-    this.setLog(`Vous rappelez ${this.player.name} et envoyez ${newMember.name} au combat !`);
+
+    const previousName = this.player && this.player.hp <= 0 ? `${this.player.name} est K.O.` : `Vous rappelez ${this.player.name}`;
+    this.setLog(`${previousName} ${forced ? "Vous envoyez" : "et envoyez"} ${newMember.name} au combat !`);
     this.player = newMember;
     this.playerSprite.setTexture(spriteKey(this.player.crewId || "captain"), 1);
     this.refreshBars();
 
-    // Changer de personnage consomme le tour : l'ennemi riposte ensuite,
-    // puis le menu principal doit se rouvrir (c'est ça qui plantait avant).
-    this.runSequence([
-      () => true,
-      () => this.enemyReply(),
-    ]);
+    if (forced) {
+      // Après un K.O., l'attaque ennemie est déjà terminée : choisir un
+      // nouveau membre ne consomme pas un tour supplémentaire.
+      this.time.delayedCall(900, () => {
+        if (this.battleOver) return;
+        this.locked = false;
+        this.showMainMenu();
+      });
+      return;
+    }
+
+    // Un changement volontaire consomme le tour et l'ennemi riposte.
+    this.time.delayedCall(900, () => {
+      if (this.battleOver) return;
+      const keepGoing = this.enemyReply();
+      if (keepGoing !== false && !this.battleOver) {
+        this.locked = false;
+        this.showMainMenu();
+      }
+    });
   }
 
   attemptEscape() {
@@ -368,6 +405,9 @@ export default class BattleScene extends Phaser.Scene {
         gameState.crewDetails[member.crewId] = {
           hp: member.hp,
           maxHp: member.maxHp,
+          level: member.level || 1,
+          exp: member.exp || 0,
+          maxExp: member.maxExp || 100,
           ppData: { ...member.ppData },
         };
       }
@@ -416,10 +456,36 @@ export default class BattleScene extends Phaser.Scene {
     this.refreshBars();
 
     if (isDefeated(defender)) {
-      this.endBattle(defender === this.enemy);
+      if (defender === this.enemy) {
+        // Le membre actif est le seul bénéficiaire de l'XP : exactement comme
+        // dans Pokémon, c'est le personnage qui met l'ennemi K.O. qui gagne l'XP.
+        this.endBattle(true, attacker);
+      } else if (defender === this.player) {
+        this.handlePlayerDefeated();
+      }
       return false;
     }
     return true;
+  }
+
+  handlePlayerDefeated() {
+    if (this.battleOver) return false;
+
+    const livingMembers = this.teamList.filter((member) => member.hp > 0);
+    this.saveTeamState();
+
+    if (livingMembers.length === 0) {
+      this.endBattle(false);
+      return false;
+    }
+
+    this.locked = true;
+    this.setLog(`${this.player.name} est K.O. ! Choisissez un autre membre de l'équipage.`);
+    this.time.delayedCall(700, () => {
+      if (this.battleOver) return;
+      this.showTeamMenu(true);
+    });
+    return false;
   }
 
   enemyReply() {
@@ -428,7 +494,7 @@ export default class BattleScene extends Phaser.Scene {
     return this.executeMove(this.enemy, this.player, moveKey);
   }
 
-  endBattle(playerWon) {
+  endBattle(playerWon, expRecipient = null) {
     this.battleOver = true;
     this.clearInterfaceElements();
     const { returnIsland, returnX, returnY } = this.battleData;
@@ -440,28 +506,34 @@ export default class BattleScene extends Phaser.Scene {
       const baseExp = this.battleMode === "recruit" ? 40 : 20;
       const expGained = baseExp * enemyLevel;
 
+      const expRecipientId = expRecipient && expRecipient.isCaptain
+        ? "captain"
+        : expRecipient?.crewId || "captain";
+
       if (this.battleMode === "recruit") {
         const recruit = CHARACTERS[this.targetCharacterId] || { name: "Inconnu", recruitLine: "Bien joué !" };
-        this.setLog(`${recruit.name} est vaincu(e) !\n+${expGained} XP. "${recruit.recruitLine}"`);
+        this.setLog(`${recruit.name} est vaincu(e) !\n${expRecipient?.name || "Le combattant"} gagne +${expGained} XP. "${recruit.recruitLine}"`);
         this.time.delayedCall(2800, () => {
           this.scene.start("World", {
             islandId: returnIsland || "start",
             x: returnX || 20,
             y: returnY || 5,
             recruitedId: this.targetCharacterId,
-            expGained: expGained,
+            expGained,
+            expRecipientId,
           });
         });
       } else {
         const loot = 20 + Math.floor(Math.random() * 30);
-        this.setLog(`Victoire ! +${expGained} XP et ${loot} berrys récupérés.`);
+        this.setLog(`Victoire ! ${expRecipient?.name || "Le combattant"} gagne +${expGained} XP et ${loot} berrys récupérés.`);
         this.time.delayedCall(2200, () => {
           this.scene.start("World", {
             islandId: returnIsland || "start",
             x: returnX || 20,
             y: returnY || 5,
             berrysGained: loot,
-            expGained: expGained,
+            expGained,
+            expRecipientId,
           });
         });
       }

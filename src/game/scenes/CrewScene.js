@@ -56,6 +56,18 @@ export default class CrewScene extends Phaser.Scene {
     return CHARACTERS[entry] || { name: entry, title: "", moves: [] };
   }
 
+  getMemberProgress(entry) {
+    if (entry === "captain") {
+      return { level: this.gameState.level || 1, exp: this.gameState.exp || 0, maxExp: this.gameState.maxExp || 100 };
+    }
+    const detail = this.gameState.crewDetails && this.gameState.crewDetails[entry];
+    return {
+      level: detail?.level || 1,
+      exp: detail?.exp || 0,
+      maxExp: detail?.maxExp || 100,
+    };
+  }
+
   getMemberHp(entry) {
     if (entry === "captain") {
       return { hp: this.gameState.hp, maxHp: this.gameState.maxHp };
@@ -156,16 +168,15 @@ export default class CrewScene extends Phaser.Scene {
 
     let y = 185;
 
-    if (entry === "captain") {
-      this.detailGroup.add(this.add.text(570, y, `Niveau ${this.gameState.level}`, {
-        fontFamily: "monospace", fontSize: "18px", color: "#ffffff",
-      }));
-      y += 26;
-      this.detailGroup.add(this.add.text(570, y, `XP : ${this.gameState.exp} / ${this.gameState.maxExp}`, {
-        fontFamily: "monospace", fontSize: "16px", color: "#9fb4c7",
-      }));
-      y += 34;
-    }
+    const progress = this.getMemberProgress(entry);
+    this.detailGroup.add(this.add.text(570, y, `Niveau ${progress.level}`, {
+      fontFamily: "monospace", fontSize: "18px", color: "#ffffff",
+    }));
+    y += 26;
+    this.detailGroup.add(this.add.text(570, y, `XP : ${progress.exp} / ${progress.maxExp}`, {
+      fontFamily: "monospace", fontSize: "16px", color: "#9fb4c7",
+    }));
+    y += 34;
 
     this.detailGroup.add(this.add.text(570, y, `PV : ${hp} / ${maxHp}`, {
       fontFamily: "monospace", fontSize: "18px", color: "#9fd18f",
