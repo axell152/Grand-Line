@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import { CHARACTERS } from "@/game/data/characters";
+import { PLAYER_CHARACTER, CHARACTERS } from "@/game/data/characters";
+import { saveGame } from "@/game/systems/SaveManager";
 
 export default class CrewScene extends Phaser.Scene {
   constructor() {
@@ -7,110 +8,115 @@ export default class CrewScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.state = data.state || {};
+    this.gameState = data.state;
   }
 
   create() {
-    // Fond semi-transparent ou couleur de l'UI
-    const g = this.add.graphics();
-    g.fillGradientStyle(0x0b2545, 0x0b2545, 0x13315c, 0x13315c, 1);
-    g.fillRect(0, 0, 1024, 768);
+    // Fond semi-transparent
+    this.add.rectangle(512, 384, 1024, 768, 0x0b2545, 0.95);
 
-    // Titre principal
     this.add.text(512, 60, "GESTION DE L'ÉQUIPAGE", {
       fontFamily: "monospace",
-      fontSize: "28px",
+      fontSize: "32px",
       color: "#ead9b8",
-      fontStyle: "bold",
     }).setOrigin(0.5);
 
-    // Section Capitaine (Niveau, Expérience et PV)
-    this.add.text(100, 140, "Capitaine (Niveau " + (this.state.level || 1) + ")", {
+    this.add.text(100, 110, `Niveau ${this.gameState.level}  —  XP ${this.gameState.exp}/${this.gameState.maxExp}`, {
       fontFamily: "monospace",
-      fontSize: "20px",
-      color: "#d4a24c",
-      fontStyle: "bold",
+      fontSize: "18px",
+      color: "#ffffff",
     });
 
-    this.add.text(100, 180, "Expérience : " + (this.state.exp || 0) + " / " + (this.state.maxExp || 100), {
+    this.add.text(100, 150, "Ordre de combat (le 1er entre au combat en premier) :", {
       fontFamily: "monospace",
-      fontSize: "16px",
+      fontSize: "18px",
       color: "#ead9b8",
     });
 
-    this.add.text(100, 210, "Points de Vie : " + (this.state.hp || 100) + " / " + (this.state.maxHp || 100), {
+    this.add.text(512, 720, "[ ▲ / ▼ ] pour réordonner  —  [ T ] ou [ Échap ] pour reprendre la mer", {
       fontFamily: "monospace",
       fontSize: "16px",
-      color: "#27ae60",
-    });
-
-    // Section Membres d'équipage
-    const crewIds = this.state.crew || [];
-    this.add.text(100, 270, "Membres à bord (" + crewIds.length + ") :", {
-      fontFamily: "monospace",
-      fontSize: "20px",
       color: "#ead9b8",
-      fontStyle: "bold",
-    });
+    }).setOrigin(0.5);
 
-    if (crewIds.length === 0) {
-      this.add.text(100, 310, "Aucun membre pour l'instant. Explorez et recrutez !", {
-        fontFamily: "monospace",
-        fontSize: "14px",
-        color: "#7f8c8d",
-      });
-    } else {
-      // S'assure que crewDetails existe pour stocker les PV des membres
-      if (!this.state.crewDetails) {
-        this.state.crewDetails = crewIds.map(id => {
-          const charData = CHARACTERS[id] || {};
-          return {
-            id: id,
-            name: charData.name || id,
-            hp: charData.maxHp || 100,
-            maxHp: charData.maxHp || 100,
-          };
-        });
-      }
-
-      // Affichage de chaque membre de l'équipage avec ses PV
-      crewIds.forEach((charId, index) => {
-        const charData = CHARACTERS[charId] || { name: charId };
-        
-        // Récupère les PV du membre s'ils existent dans l'état, sinon valeurs par défaut
-        const memberDetail = this.state.crewDetails.find(m => m.id === charId) || {
-          hp: charData.maxHp || 100,
-          maxHp: charData.maxHp || 100,
-        };
-
-        const yPos = 310 + (index * 40);
-        this.add.text(120, yPos, `• ${charData.name}`, {
-          fontFamily: "monospace",
-          fontSize: "16px",
-          color: "#ffffff",
-        });
-
-        this.add.text(350, yPos, `PV : ${memberDetail.hp} / ${memberDetail.maxHp}`, {
-          fontFamily: "monospace",
-          fontSize: "16px",
-          color: "#27ae60",
-        });
-      });
+    if (this.gameState.teamOrder === undefined) {
+      this.gameState.teamOrder = ["captain", ...this.gameState.crew];
     }
 
-    // Instructions de fermeture
-    this.add.text(512, 700, "Appuyez sur [ T ] ou [ Échap ] pour reprendre la mer", {
-      fontFamily: "monospace",
-      fontSize: "14px",
-      color: "#ead9b8",
-    }).setOrigin(0.5);
+    this.drawList();
 
-    // Gestionnaires de fermeture de la scène (T ou Échap)
-    this.input.keyboard.on('keydown-T', () => this.closeScene());
-    this.input.keyboard.on('keydown-ESC', () => this.closeScene());
+    this.input.keyboard.on("keydown-T", () => this.resumeWorld());
+    this.input.keyboard.on("keydown-ESC", () => this.resumeWorld());
   }
 
-  closeScene() {
+  getMemberData(entry) {
+    if (entry === "captain") {
+      return { name: PLAYER_CHARACTER.name, title: "Capitaine", color: PLAYER_CHARACTER.color };
+    }
+    const c = CHARACTERS[entry];
+    return c ? { name: c.name, title: c.title, color: c.color } : { name: entry, title: "" };
+  }
+
+  drawList() {
+    if (this.listGroup) this.listGroup.destroy(true);
+    this.listGroup = this.add.group();
+
+    const order = this.gameState.teamOrder;
+
+    order.forEach((entry, index) => {
+      const data = this.getMemberData(entry);
+      const y = 190 + index * 46;
+
+      const swatch = this.add.circle(120, y + 8, 12, data.color || 0xd4a24c).setStrokeStyle(2, 0x1c1c1c);
+      const label = this.add.text(150, y, `${index + 1}. ${data.name} — ${data.title}`, {
+        fontFamily: "monospace",
+        fontSize: "18px",
+        color: "#ffffff",
+      });
+      this.listGroup.add(swatch);
+      this.listGroup.add(label);
+
+      if (index > 0) {
+        const up = this.add.text(820, y, "▲", { fontFamily: "monospace", fontSize: "20px", color: "#d4a24c" })
+          .setInteractive({ useHandCursor: true })
+          .on("pointerdown", () => this.moveEntry(index, index - 1))
+          .on("pointerover", () => up.setColor("#ffffff"))
+          .on("pointerout", () => up.setColor("#d4a24c"));
+        this.listGroup.add(up);
+      }
+      if (index < order.length - 1) {
+        const down = this.add.text(860, y, "▼", { fontFamily: "monospace", fontSize: "20px", color: "#d4a24c" })
+          .setInteractive({ useHandCursor: true })
+          .on("pointerdown", () => this.moveEntry(index, index + 1))
+          .on("pointerover", () => down.setColor("#ffffff"))
+          .on("pointerout", () => down.setColor("#d4a24c"));
+        this.listGroup.add(down);
+      }
+    });
+
+    if (order.length <= 1) {
+      this.listGroup.add(
+        this.add.text(150, 190 + order.length * 46 + 10, "Recrutez des membres d'équipage pour pouvoir les réordonner.", {
+          fontFamily: "monospace",
+          fontSize: "14px",
+          color: "#888888",
+        })
+      );
+    }
+  }
+
+  moveEntry(from, to) {
+    const order = this.gameState.teamOrder;
+    const [moved] = order.splice(from, 1);
+    order.splice(to, 0, moved);
+
+    this.game.registry.set("gameState", this.gameState);
+    saveGame(this.gameState);
+
+    this.drawList();
+  }
+
+  resumeWorld() {
     this.scene.stop();
     this.scene.resume("World");
   }
