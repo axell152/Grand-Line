@@ -158,7 +158,7 @@ export default class BattleScene extends Phaser.Scene {
 
   showMovesMenu() {
     this.clearInterfaceElements(); this.addMenuBox();
-    this.makeButton("[RETOUR]", 900, 570, () => this.showMainMenu(), true);
+    this.makeButton("[RETOUR]", 910, 700, () => this.showMainMenu(), true);
     (this.player.moves || ["taillade"]).forEach((key, i) => {
       const move = MOVES[key] || { name: key, maxPp: 10, accuracy: 1 };
       const pp = this.player.ppData[key] ?? move.maxPp;
