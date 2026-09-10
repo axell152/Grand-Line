@@ -1,6 +1,13 @@
 import Phaser from "phaser";
 import { TILE_SIZE } from "@/game/data/islands";
 
+const SPRITES = [
+  "character_01", "character_02", "character_03", "character_04",
+  "character_05", "character_06", "character_07", "character_08",
+  "character_09", "character_10", "character_11", "character_12",
+  "character_13", "character_14",
+];
+
 export default class BootScene extends Phaser.Scene {
   constructor() {
     super("Boot");
@@ -11,12 +18,20 @@ export default class BootScene extends Phaser.Scene {
     this.load.image("tile-wall", "/tiles/wall.png");
     this.load.image("tile-path", "/tiles/path.png");
     this.load.image("tile-wild", "/tiles/wild.png");
+
+    // Les personnages fournis sont des spritesheets de 10 frames de 16x16.
+    SPRITES.forEach((key) => {
+      this.load.spritesheet(key, `/sprites/${key}.png`, {
+        frameWidth: 16,
+        frameHeight: 16,
+        endFrame: 9,
+      });
+    });
   }
 
   create() {
     this.makeWarpMarker();
-    this.makeTokenTexture();
-
+    this.createCharacterAnimations();
     this.scene.start("World");
   }
 
@@ -28,15 +43,25 @@ export default class BootScene extends Phaser.Scene {
     g.destroy();
   }
 
-  makeTokenTexture() {
-    // Jeton générique blanc — sera teinté (tint) selon le personnage
-    const size = 28;
-    const g = this.add.graphics();
-    g.fillStyle(0xffffff, 1);
-    g.fillCircle(size / 2, size / 2, size / 2 - 2);
-    g.lineStyle(2, 0x1c1c1c, 1);
-    g.strokeCircle(size / 2, size / 2, size / 2 - 2);
-    g.generateTexture("token", size, size);
-    g.destroy();
+  createCharacterAnimations() {
+    // Organisation utilisée par les sprites fournis :
+    // 0-2 = bas, 3-5 = haut, 6-7 = gauche, 8-9 = droite.
+    SPRITES.forEach((key) => {
+      const animations = [
+        { suffix: "down", frames: [0, 1, 2] },
+        { suffix: "up", frames: [3, 4, 5] },
+        { suffix: "left", frames: [6, 7] },
+        { suffix: "right", frames: [8, 9] },
+      ];
+
+      animations.forEach(({ suffix, frames }) => {
+        this.anims.create({
+          key: `${key}-${suffix}`,
+          frames: frames.map((frame) => ({ key, frame })),
+          frameRate: 8,
+          repeat: -1,
+        });
+      });
+    });
   }
 }

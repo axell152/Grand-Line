@@ -3,6 +3,26 @@ import { PLAYER_CHARACTER, CHARACTERS, ENEMY_CHARACTERS } from "@/game/data/char
 import { MOVES } from "@/game/data/moves";
 import { createBattler, getTurnOrder, applyMove, isDefeated, scaleEnemyForLevel } from "@/game/systems/BattleSystem";
 import { ISLANDS } from "@/game/data/islands"; // Import nécessaire pour récupérer les infos de secours de l'île
+const CHARACTER_SPRITES = {
+  captain: "character_01",
+  bretteur: "character_03",
+  navigatrice: "character_04",
+  tireur: "character_05",
+  medecin: "character_06",
+  cuisinier: "character_08",
+  charpentier: "character_07",
+  musicien: "character_14",
+  archeologue: "character_02",
+  marineRecrue: "character_10",
+  pirateRival: "character_09",
+  chasseurDePrimes: "character_13",
+  officierMarine: "character_12",
+};
+
+function spriteKey(characterId) {
+  return CHARACTER_SPRITES[characterId] || "character_01";
+}
+
 
 export default class BattleScene extends Phaser.Scene {
   constructor() {
@@ -109,7 +129,11 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   drawCombatants() {
-    this.enemyToken = this.add.circle(760, 220, 52, this.enemy.color || 0x555555).setStrokeStyle(4, 0x1c1c1c);
+    const enemyId = this.targetCharacterId || "marineRecrue";
+    this.enemySprite = this.add.sprite(760, 220, spriteKey(enemyId), 4);
+    this.enemySprite.setScale(5);
+    this.enemySprite.setOrigin(0.5, 0.82);
+    this.enemySprite.setDepth(10);
     this.enemyNameText = this.add.text(480, 80, "", {
       fontFamily: "monospace",
       fontSize: "24px",
@@ -118,7 +142,10 @@ export default class BattleScene extends Phaser.Scene {
     this.enemyHpBarBg = this.add.rectangle(480, 120, 280, 18, 0x1c1c1c).setOrigin(0, 0.5);
     this.enemyHpBar = this.add.rectangle(482, 120, 276, 14, 0xc0392b).setOrigin(0, 0.5);
 
-    this.playerToken = this.add.circle(240, 460, 52, this.player.color || 0xd4a24c).setStrokeStyle(4, 0x1c1c1c);
+    this.playerSprite = this.add.sprite(240, 460, spriteKey(this.player.crewId || "captain"), 1);
+    this.playerSprite.setScale(5);
+    this.playerSprite.setOrigin(0.5, 0.82);
+    this.playerSprite.setDepth(10);
     this.playerNameText = this.add.text(300, 500, "", {
       fontFamily: "monospace",
       fontSize: "24px",
@@ -284,7 +311,7 @@ export default class BattleScene extends Phaser.Scene {
     this.locked = true;
     this.setLog(`Vous rappelez ${this.player.name} et envoyez ${newMember.name} au combat !`);
     this.player = newMember;
-    this.playerToken.setFillStyle(this.player.color || 0xd4a24c);
+    this.playerSprite.setTexture(spriteKey(this.player.crewId || "captain"), 1);
     this.refreshBars();
 
     // Changer de personnage consomme le tour : l'ennemi riposte ensuite,

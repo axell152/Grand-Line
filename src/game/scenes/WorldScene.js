@@ -10,6 +10,26 @@ const DIRECTIONS = {
   right: { dx: 1, dy: 0 },
 };
 
+const CHARACTER_SPRITES = {
+  captain: "character_01",
+  bretteur: "character_03",
+  navigatrice: "character_04",
+  tireur: "character_05",
+  medecin: "character_06",
+  cuisinier: "character_08",
+  charpentier: "character_07",
+  musicien: "character_14",
+  archeologue: "character_02",
+  marineRecrue: "character_10",
+  pirateRival: "character_09",
+  chasseurDePrimes: "character_13",
+  officierMarine: "character_12",
+};
+
+function spriteKey(characterId) {
+  return CHARACTER_SPRITES[characterId] || "character_01";
+}
+
 export default class WorldScene extends Phaser.Scene {
   constructor() {
     super("World");
@@ -206,24 +226,29 @@ export default class WorldScene extends Phaser.Scene {
     island.recruitNpcs
       .filter((npc) => !this.state.crew.includes(npc.characterId))
       .forEach((npc) => {
-        const charData = CHARACTERS[npc.characterId];
-        const sprite = this.add.image(
+        const sprite = this.add.sprite(
           npc.x * TILE_SIZE + TILE_SIZE / 2,
           npc.y * TILE_SIZE + TILE_SIZE / 2,
-          "token"
+          spriteKey(npc.characterId),
+          1
         );
-        sprite.setTint(charData.color);
-        sprite.setDepth(npc.y);
+        sprite.setScale(2.5);
+        sprite.setOrigin(0.5, 0.78);
+        sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
       });
 
-    this.player = this.add.image(
+    this.player = this.add.sprite(
       this.state.x * TILE_SIZE + TILE_SIZE / 2,
       this.state.y * TILE_SIZE + TILE_SIZE / 2,
-      "token"
+      spriteKey("captain"),
+      1
     );
-    this.player.setTint(0xd4a24c);
-    this.player.setDepth(999); 
+    this.player.setScale(2.5);
+    this.player.setOrigin(0.5, 0.78);
+    this.player.setDepth(999);
+    this.playerDirection = "down";
+    this.player.play(`${spriteKey("captain")}-down`);
 
     this.cameras.main.setBounds(0, 0, island.grid[0].length * TILE_SIZE, island.grid.length * TILE_SIZE);
     this.cameras.main.startFollow(this.player, true);
@@ -270,6 +295,8 @@ export default class WorldScene extends Phaser.Scene {
     if (!dir) return;
 
     const { dx, dy } = DIRECTIONS[dir];
+    this.playerDirection = dir;
+    this.player.play(`${spriteKey("captain")}-${dir}`);
     const targetX = this.state.x + dx;
     const targetY = this.state.y + dy;
     const key = `${targetX},${targetY}`;
@@ -294,6 +321,9 @@ export default class WorldScene extends Phaser.Scene {
       duration: 140,
       onComplete: () => {
         this.isMoving = false;
+        const idleFrame = { down: 1, up: 4, left: 6, right: 8 }[this.playerDirection] ?? 1;
+        this.player.stop();
+        this.player.setFrame(idleFrame);
         this.persist();
         this.checkTileEvents(targetX, targetY);
       },
