@@ -62,22 +62,32 @@ export default class WorldScene extends Phaser.Scene {
     });
 
     if (typeof this.incoming.expGained === "number") {
-      this.state.exp += this.incoming.expGained;
-      
-      while (this.state.exp >= this.state.maxExp) {
-        this.state.exp -= this.state.maxExp;
-        this.state.level += 1;
-        this.state.maxExp = Math.round(this.state.maxExp * 1.4);
-        // Les PV max augmentent avec le niveau, et le gain soigne d'autant
-        this.state.maxHp += 8;
-        this.state.hp += 8;
-      }
+      this.applyExperience(
+        this.incoming.expRecipientId || "captain",
+        this.incoming.expGained
+      );
       this.persist();
     }
 
     if (this.incoming.recruitedId) {
-      this.state.crew.push(this.incoming.recruitedId);
-      this.state.teamOrder.push(this.incoming.recruitedId);
+      const recruitedId = this.incoming.recruitedId;
+      if (!this.state.crew.includes(recruitedId)) {
+        this.state.crew.push(recruitedId);
+      }
+      if (!this.state.teamOrder.includes(recruitedId)) {
+        this.state.teamOrder.push(recruitedId);
+      }
+      if (!this.state.crewDetails[recruitedId]) {
+        const base = CHARACTERS[recruitedId];
+        this.state.crewDetails[recruitedId] = {
+          level: 1,
+          exp: 0,
+          maxExp: 100,
+          hp: base?.maxHp || 1,
+          maxHp: base?.maxHp || 1,
+          ppData: {},
+        };
+      }
       this.persist();
     }
     if (typeof this.incoming.berrysGained === "number") {
@@ -165,6 +175,54 @@ export default class WorldScene extends Phaser.Scene {
       this.state.x = this.incoming.x;
       this.state.y = this.incoming.y;
     }
+  }
+
+  applyExperience(memberId, amount) {
+    const xp = Math.max(0, Number(amount) || 0);
+    if (!xp) return;
+
+    if (memberId === "captain") {
+      this.state.exp += xp;
+
+      while (this.state.exp >= this.state.maxExp) {
+        this.state.exp -= this.state.maxExp;
+        this.state.level += 1;
+        this.state.maxExp = Math.round(this.state.maxExp * 1.4);
+        this.state.maxHp += 8;
+        this.state.hp = Math.min(this.state.maxHp, this.state.hp + 8);
+      }
+      return;
+    }
+
+    const base = CHARACTERS[memberId];
+    if (!base) return;
+
+    this.state.crewDetails = this.state.crewDetails || {};
+    const detail = this.state.crewDetails[memberId] || {
+      level: 1,
+      exp: 0,
+      maxExp: 100,
+      hp: base.maxHp,
+      maxHp: base.maxHp,
+      ppData: {},
+    };
+
+    detail.level = detail.level || 1;
+    detail.exp = detail.exp || 0;
+    detail.maxExp = detail.maxExp || 100;
+    detail.maxHp = detail.maxHp || base.maxHp + (detail.level - 1) * 8;
+    detail.hp = detail.hp ?? detail.maxHp;
+    detail.exp += xp;
+
+    while (detail.exp >= detail.maxExp) {
+      detail.exp -= detail.maxExp;
+      detail.level += 1;
+      detail.maxExp = Math.round(detail.maxExp * 1.4);
+      detail.maxHp += 8;
+      detail.hp = Math.min(detail.maxHp, detail.hp + 8);
+    }
+
+    this.state.crewDetails[memberId] = detail;
   }
 
   persist() {
