@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { ISLANDS, STARTING_ISLAND, TILE_SIZE } from "@/game/data/islands";
 import { CHARACTERS, ENEMY_CHARACTERS } from "@/game/data/characters";
+import { STARTING_ITEMS } from "@/game/data/items";
 import { saveGame, loadGame } from "@/game/systems/SaveManager";
 
 const DIRECTIONS = {
@@ -123,6 +124,7 @@ export default class WorldScene extends Phaser.Scene {
         maxHp: 100,
         ppData: {},
         crewDetails: {},
+        items: { ...STARTING_ITEMS },
       });
 
       loadGame().then((save) => {
@@ -144,6 +146,7 @@ export default class WorldScene extends Phaser.Scene {
             maxHp: save.maxHp !== undefined ? save.maxHp : 100,
             ppData: save.ppData || {},
             crewDetails: save.crewDetails || {},
+            items: save.items || { ...STARTING_ITEMS },
           });
           if (this.scene.isActive("World")) {
             this.scene.restart();
@@ -165,6 +168,7 @@ export default class WorldScene extends Phaser.Scene {
     if (this.state.teamOrder === undefined) this.state.teamOrder = ["captain", ...this.state.crew];
     if (this.state.ppData === undefined) this.state.ppData = {};
     if (this.state.crewDetails === undefined) this.state.crewDetails = {};
+    if (this.state.items === undefined) this.state.items = { ...STARTING_ITEMS };
 
     if (this.incoming.isRespawn) {
       this.state.islandId = this.state.respawnIsland;
@@ -440,6 +444,7 @@ export default class WorldScene extends Phaser.Scene {
       playerMaxHp: this.state.maxHp,
       playerPpData: this.state.ppData,
       crewDetails: this.state.crewDetails,
+      items: this.state.items,
       returnIsland: this.state.islandId,
       returnX: this.state.x,
       returnY: this.state.y,
