@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { PLAYER_CHARACTER, CHARACTERS } from "@/game/data/characters";
+import { MOVES } from "@/game/data/moves";
 import { saveGame } from "@/game/systems/SaveManager";
 
 export default class CrewScene extends Phaser.Scene {
@@ -12,30 +13,26 @@ export default class CrewScene extends Phaser.Scene {
   }
 
   create() {
-    // Fond semi-transparent
     this.add.rectangle(512, 384, 1024, 768, 0x0b2545, 0.95);
 
-    this.add.text(512, 60, "GESTION DE L'ÉQUIPAGE", {
+    this.add.text(512, 40, "GESTION DE L'ÉQUIPAGE", {
       fontFamily: "monospace",
-      fontSize: "32px",
+      fontSize: "30px",
       color: "#ead9b8",
     }).setOrigin(0.5);
 
-    this.add.text(100, 110, `Niveau ${this.gameState.level}  —  XP ${this.gameState.exp}/${this.gameState.maxExp}`, {
+    this.add.text(90, 82, "Ordre de combat (clique un nom pour voir le détail) :", {
       fontFamily: "monospace",
-      fontSize: "18px",
-      color: "#ffffff",
-    });
-
-    this.add.text(100, 150, "Ordre de combat (le 1er entre au combat en premier) :", {
-      fontFamily: "monospace",
-      fontSize: "18px",
+      fontSize: "16px",
       color: "#ead9b8",
     });
 
-    this.add.text(512, 720, "[ ▲ / ▼ ] pour réordonner  —  [ T ] ou [ Échap ] pour reprendre la mer", {
+    // Séparation visuelle entre la liste (gauche) et le détail (droite)
+    this.add.rectangle(534, 400, 2, 620, 0xead9b8, 0.4);
+
+    this.add.text(512, 740, "[ ▲/▼ ] réordonner   [ T ] ou [ Échap ] reprendre la mer", {
       fontFamily: "monospace",
-      fontSize: "16px",
+      fontSize: "15px",
       color: "#ead9b8",
     }).setOrigin(0.5);
 
@@ -43,7 +40,10 @@ export default class CrewScene extends Phaser.Scene {
       this.gameState.teamOrder = ["captain", ...this.gameState.crew];
     }
 
+    this.selected = this.gameState.teamOrder[0];
+
     this.drawList();
+    this.drawDetail();
 
     this.input.keyboard.on("keydown-T", () => this.resumeWorld());
     this.input.keyboard.on("keydown-ESC", () => this.resumeWorld());
@@ -51,10 +51,29 @@ export default class CrewScene extends Phaser.Scene {
 
   getMemberData(entry) {
     if (entry === "captain") {
-      return { name: PLAYER_CHARACTER.name, title: "Capitaine", color: PLAYER_CHARACTER.color };
+      return { ...PLAYER_CHARACTER, title: "Capitaine" };
     }
-    const c = CHARACTERS[entry];
-    return c ? { name: c.name, title: c.title, color: c.color } : { name: entry, title: "" };
+    return CHARACTERS[entry] || { name: entry, title: "", moves: [] };
+  }
+
+  getMemberHp(entry) {
+    if (entry === "captain") {
+      return { hp: this.gameState.hp, maxHp: this.gameState.maxHp };
+    }
+    const detail = this.gameState.crewDetails && this.gameState.crewDetails[entry];
+    const base = CHARACTERS[entry];
+    if (detail) return { hp: detail.hp, maxHp: detail.maxHp || base.maxHp };
+    return { hp: base.maxHp, maxHp: base.maxHp };
+  }
+
+  getMemberPp(entry, moveKey, maxPp) {
+    if (entry === "captain") {
+      const pp = this.gameState.ppData && this.gameState.ppData[moveKey];
+      return pp === undefined ? maxPp : pp;
+    }
+    const detail = this.gameState.crewDetails && this.gameState.crewDetails[entry];
+    const pp = detail && detail.ppData && detail.ppData[moveKey];
+    return pp === undefined ? maxPp : pp;
   }
 
   drawList() {
@@ -65,19 +84,37 @@ export default class CrewScene extends Phaser.Scene {
 
     order.forEach((entry, index) => {
       const data = this.getMemberData(entry);
-      const y = 190 + index * 46;
+      const { hp, maxHp } = this.getMemberHp(entry);
+      const y = 120 + index * 60;
+      const isSelected = entry === this.selected;
 
-      const swatch = this.add.circle(120, y + 8, 12, data.color || 0xd4a24c).setStrokeStyle(2, 0x1c1c1c);
-      const label = this.add.text(150, y, `${index + 1}. ${data.name} — ${data.title}`, {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#ffffff",
-      });
+      const swatch = this.add.circle(110, y + 8, 12, data.color || 0xd4a24c).setStrokeStyle(2, 0x1c1c1c);
       this.listGroup.add(swatch);
-      this.listGroup.add(label);
+
+      const nameTxt = this.add.text(140, y, `${index + 1}. ${data.name}`, {
+        fontFamily: "monospace",
+        fontSize: "17px",
+        color: isSelected ? "#ffffff" : "#ead9b8",
+        fontStyle: isSelected ? "bold" : "normal",
+      })
+        .setInteractive({ useHandCursor: true })
+        .on("pointerdown", () => {
+          this.selected = entry;
+          this.drawList();
+          this.drawDetail();
+        });
+      this.listGroup.add(nameTxt);
+
+      const hpColor = hp <= 0 ? "#c0392b" : hp < maxHp * 0.3 ? "#e67e22" : "#9fd18f";
+      const hpTxt = this.add.text(140, y + 20, `PV ${hp}/${maxHp}`, {
+        fontFamily: "monospace",
+        fontSize: "14px",
+        color: hpColor,
+      });
+      this.listGroup.add(hpTxt);
 
       if (index > 0) {
-        const up = this.add.text(820, y, "▲", { fontFamily: "monospace", fontSize: "20px", color: "#d4a24c" })
+        const up = this.add.text(460, y, "▲", { fontFamily: "monospace", fontSize: "18px", color: "#d4a24c" })
           .setInteractive({ useHandCursor: true })
           .on("pointerdown", () => this.moveEntry(index, index - 1))
           .on("pointerover", () => up.setColor("#ffffff"))
@@ -85,7 +122,7 @@ export default class CrewScene extends Phaser.Scene {
         this.listGroup.add(up);
       }
       if (index < order.length - 1) {
-        const down = this.add.text(860, y, "▼", { fontFamily: "monospace", fontSize: "20px", color: "#d4a24c" })
+        const down = this.add.text(490, y, "▼", { fontFamily: "monospace", fontSize: "18px", color: "#d4a24c" })
           .setInteractive({ useHandCursor: true })
           .on("pointerdown", () => this.moveEntry(index, index + 1))
           .on("pointerover", () => down.setColor("#ffffff"))
@@ -93,15 +130,79 @@ export default class CrewScene extends Phaser.Scene {
         this.listGroup.add(down);
       }
     });
+  }
 
-    if (order.length <= 1) {
-      this.listGroup.add(
-        this.add.text(150, 190 + order.length * 46 + 10, "Recrutez des membres d'équipage pour pouvoir les réordonner.", {
-          fontFamily: "monospace",
-          fontSize: "14px",
-          color: "#888888",
-        })
-      );
+  drawDetail() {
+    if (this.detailGroup) this.detailGroup.destroy(true);
+    this.detailGroup = this.add.group();
+
+    const entry = this.selected;
+    const data = this.getMemberData(entry);
+    const { hp, maxHp } = this.getMemberHp(entry);
+
+    const title = this.add.text(570, 110, `${data.name}`, {
+      fontFamily: "monospace",
+      fontSize: "24px",
+      color: "#d4a24c",
+    });
+    this.detailGroup.add(title);
+
+    const subtitle = this.add.text(570, 145, data.title || "", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#9fb4c7",
+    });
+    this.detailGroup.add(subtitle);
+
+    let y = 185;
+
+    if (entry === "captain") {
+      this.detailGroup.add(this.add.text(570, y, `Niveau ${this.gameState.level}`, {
+        fontFamily: "monospace", fontSize: "18px", color: "#ffffff",
+      }));
+      y += 26;
+      this.detailGroup.add(this.add.text(570, y, `XP : ${this.gameState.exp} / ${this.gameState.maxExp}`, {
+        fontFamily: "monospace", fontSize: "16px", color: "#9fb4c7",
+      }));
+      y += 34;
+    }
+
+    this.detailGroup.add(this.add.text(570, y, `PV : ${hp} / ${maxHp}`, {
+      fontFamily: "monospace", fontSize: "18px", color: "#9fd18f",
+    }));
+    y += 30;
+    this.detailGroup.add(this.add.text(570, y, `ATQ ${data.atk}   DEF ${data.def}   VIT ${data.spd}`, {
+      fontFamily: "monospace", fontSize: "16px", color: "#ffffff",
+    }));
+    y += 40;
+
+    this.detailGroup.add(this.add.text(570, y, "Attaques :", {
+      fontFamily: "monospace", fontSize: "18px", color: "#d4a24c",
+    }));
+    y += 30;
+
+    const moves = data.moves || [];
+    moves.forEach((moveKey) => {
+      const move = MOVES[moveKey] || { name: moveKey, power: 0, maxPp: 10, accuracy: 1 };
+      const maxPp = move.maxPp || 10;
+      const currentPp = this.getMemberPp(entry, moveKey, maxPp);
+      const effect = move.heal
+        ? `Soigne ${move.heal} PV`
+        : `Dégâts : ${move.power}`;
+
+      this.detailGroup.add(this.add.text(590, y, `• ${move.name}`, {
+        fontFamily: "monospace", fontSize: "16px", color: "#ead9b8",
+      }));
+      this.detailGroup.add(this.add.text(590, y + 20, `   ${effect}   |   PP ${currentPp}/${maxPp}   |   Précision ${Math.round((move.accuracy || 1) * 100)}%`, {
+        fontFamily: "monospace", fontSize: "14px", color: currentPp > 0 ? "#9fb4c7" : "#7f8c8d",
+      }));
+      y += 48;
+    });
+
+    if (moves.length === 0) {
+      this.detailGroup.add(this.add.text(590, y, "Aucune attaque connue.", {
+        fontFamily: "monospace", fontSize: "14px", color: "#7f8c8d",
+      }));
     }
   }
 
