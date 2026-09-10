@@ -148,7 +148,6 @@ export default class BattleScene extends Phaser.Scene {
     this.makeButton("▶ ATTAQUE", 655, 610, () => this.showMovesMenu());
     this.makeButton("▶ TEAM", 835, 610, () => this.showTeamMenu());
     this.makeButton("▶ OBJETS", 655, 675, () => this.showItemsMenu());
-    this.makeButton("▶ DÉFENSE", 835, 675, () => this.playerDefend());
     this.makeButton("▶ FUITE", 835, 720, () => this.attemptEscape());
   }
 
@@ -159,7 +158,7 @@ export default class BattleScene extends Phaser.Scene {
 
   showMovesMenu() {
     this.clearInterfaceElements(); this.addMenuBox();
-    this.makeButton("[RETOUR]", 1000, 590, () => this.showMainMenu(), true);
+    this.makeButton("[RETOUR]", 640, 590, () => this.showMainMenu(), true);
     (this.player.moves || ["taillade"]).forEach((key, i) => {
       const move = MOVES[key] || { name: key, maxPp: 10, accuracy: 1 };
       const pp = this.player.ppData[key] ?? move.maxPp;
@@ -172,7 +171,7 @@ export default class BattleScene extends Phaser.Scene {
 
   showItemsMenu() {
     this.clearInterfaceElements(); this.addMenuBox();
-    this.makeButton("[RETOUR]", 1000, 590, () => this.showMainMenu());
+    this.makeButton("[RETOUR]", 640, 590, () => this.showMainMenu());
     Object.keys(ITEMS).forEach((id, i) => {
       const item = ITEMS[id]; const count = this.items[id] || 0;
       const usable = count > 0 && this.player.hp > 0 && this.player.hp < this.player.maxHp;
@@ -183,7 +182,7 @@ export default class BattleScene extends Phaser.Scene {
 
   showTeamMenu(forceSwitch = false) {
     this.clearInterfaceElements(); this.addMenuBox();
-    if (!forceSwitch) this.makeButton("[RETOUR]", 1000, 590, () => this.showMainMenu());
+    if (!forceSwitch) this.makeButton("[RETOUR]", 640, 590, () => this.showMainMenu());
     else this.menuGroup.add(this.add.text(640, 585, "⚠ CHOISISSEZ UN PERSONNAGE VIVANT", { fontFamily: "monospace", fontSize: "14px", color: "#e67e22" }));
 
     this.teamList.forEach((member, index) => {
@@ -213,16 +212,6 @@ export default class BattleScene extends Phaser.Scene {
     });
   }
 
-  playerDefend() {
-    if (this.locked || this.battleOver) return;
-    this.locked = true; this.clearInterfaceElements();
-    this.player.defending = true;
-    this.setLog(`${this.player.name} se met en position défensive. Les dégâts reçus sont réduits.`);
-    this.time.delayedCall(700, () => {
-      const keep = this.enemyReply();
-      if (keep !== false && !this.battleOver) { this.player.defending = false; this.locked = false; this.showMainMenu(); }
-    });
-  }
 
   useItem(id) {
     if (this.locked || this.battleOver || !this.items[id] || !ITEMS[id]) return;
