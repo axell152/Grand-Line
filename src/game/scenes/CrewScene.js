@@ -3,6 +3,8 @@ import { PLAYER_CHARACTER, CHARACTERS } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
 import { saveGame } from "@/game/systems/SaveManager";
 
+const CHARACTER_SPRITES = { captain: "character_01", bretteur: "character_03", navigatrice: "character_04", tireur: "character_05", medecin: "character_06", cuisinier: "character_08", charpentier: "character_07", musicien: "character_14", archeologue: "character_02" };
+
 export default class CrewScene extends Phaser.Scene {
   constructor() {
     super("CrewScene");
@@ -100,8 +102,8 @@ export default class CrewScene extends Phaser.Scene {
       const y = 120 + index * 60;
       const isSelected = entry === this.selected;
 
-      const swatch = this.add.circle(110, y + 8, 12, data.color || 0xd4a24c).setStrokeStyle(2, 0x1c1c1c);
-      this.listGroup.add(swatch);
+      const sprite = this.add.sprite(110, y + 12, CHARACTER_SPRITES[entry] || "character_01", 1).setScale(2.1);
+      this.listGroup.add(sprite);
 
       const nameTxt = this.add.text(140, y, `${index + 1}. ${data.name}`, {
         fontFamily: "monospace",
@@ -151,6 +153,9 @@ export default class CrewScene extends Phaser.Scene {
     const entry = this.selected;
     const data = this.getMemberData(entry);
     const { hp, maxHp } = this.getMemberHp(entry);
+
+    const portrait = this.add.sprite(820, 215, CHARACTER_SPRITES[entry] || "character_01", 1).setScale(5);
+    this.detailGroup.add(portrait);
 
     const title = this.add.text(570, 110, `${data.name}`, {
       fontFamily: "monospace",
