@@ -54,18 +54,19 @@ export default class WorldScene extends Phaser.Scene {
       }
       this.persist();
     }
-    
-    this.drawIsland();
-    this.drawHud();
 
     if (this.incoming.recruitedId) {
       this.state.crew.push(this.incoming.recruitedId);
+      this.state.teamOrder.push(this.incoming.recruitedId);
       this.persist();
     }
     if (typeof this.incoming.berrysGained === "number") {
       this.state.berrys += this.incoming.berrysGained;
       this.persist();
     }
+
+    this.drawIsland();
+    this.drawHud();
   }
 
   initState() {
@@ -83,12 +84,15 @@ export default class WorldScene extends Phaser.Scene {
         respawnX: defaultX,
         respawnY: defaultY,
         crew: [],
+        teamOrder: ["captain"],
         berrys: 0,
         level: 1,
         exp: 0,
         maxExp: 100,
         hp: 100,
         maxHp: 100,
+        ppData: {},
+        crewDetails: {},
       });
 
       loadGame().then((save) => {
@@ -101,12 +105,15 @@ export default class WorldScene extends Phaser.Scene {
             respawnX: save.respawnX !== undefined ? save.respawnX : save.x,
             respawnY: save.respawnY !== undefined ? save.respawnY : save.y,
             crew: save.crew || [],
+            teamOrder: save.teamOrder || ["captain", ...(save.crew || [])],
             berrys: save.berrys || 0,
             level: save.level || 1,
             exp: save.exp || 0,
             maxExp: save.maxExp || 100,
             hp: save.hp !== undefined ? save.hp : 100,
             maxHp: save.maxHp !== undefined ? save.maxHp : 100,
+            ppData: save.ppData || {},
+            crewDetails: save.crewDetails || {},
           });
           if (this.scene.isActive("World")) {
             this.scene.restart();
@@ -125,6 +132,9 @@ export default class WorldScene extends Phaser.Scene {
     if (this.state.respawnIsland === undefined) this.state.respawnIsland = this.state.islandId;
     if (this.state.respawnX === undefined) this.state.respawnX = this.state.x;
     if (this.state.respawnY === undefined) this.state.respawnY = this.state.y;
+    if (this.state.teamOrder === undefined) this.state.teamOrder = ["captain", ...this.state.crew];
+    if (this.state.ppData === undefined) this.state.ppData = {};
+    if (this.state.crewDetails === undefined) this.state.crewDetails = {};
 
     if (this.incoming.isRespawn) {
       this.state.islandId = this.state.respawnIsland;
@@ -299,12 +309,12 @@ export default class WorldScene extends Phaser.Scene {
       this.state.respawnY = y;
       
       this.state.hp = this.state.maxHp;
-      if (this.state.crewDetails && Array.isArray(this.state.crewDetails)) {
-        this.state.crewDetails.forEach(m => { 
-          m.hp = m.maxHp; 
-          m.ppData = undefined; 
-        });
-      }
+      this.state.ppData = {};
+      Object.keys(this.state.crewDetails || {}).forEach((id) => {
+        const detail = this.state.crewDetails[id];
+        detail.hp = detail.maxHp;
+        detail.ppData = {};
+      });
       this.persist();
       this.updateHud();
       return;
@@ -335,10 +345,13 @@ export default class WorldScene extends Phaser.Scene {
       characterId,
       enemyLevel,
       crew: this.state.crew,
+      teamOrder: this.state.teamOrder,
       playerLevel: this.state.level,
       playerExp: this.state.exp,
       playerCurrentHp: this.state.hp,
       playerMaxHp: this.state.maxHp,
+      playerPpData: this.state.ppData,
+      crewDetails: this.state.crewDetails,
       returnIsland: this.state.islandId,
       returnX: this.state.x,
       returnY: this.state.y,
