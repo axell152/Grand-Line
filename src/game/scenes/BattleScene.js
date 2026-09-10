@@ -171,7 +171,7 @@ export default class BattleScene extends Phaser.Scene {
 
   showItemsMenu() {
     this.clearInterfaceElements(); this.addMenuBox();
-    this.makeButton("[RETOUR]", 900, 570, () => this.showMainMenu());
+    this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu());
     Object.keys(ITEMS).forEach((id, i) => {
       const item = ITEMS[id]; const count = this.items[id] || 0;
       const usable = count > 0 && this.player.hp > 0 && this.player.hp < this.player.maxHp;
@@ -182,7 +182,7 @@ export default class BattleScene extends Phaser.Scene {
 
   showTeamMenu(forceSwitch = false) {
     this.clearInterfaceElements(); this.addMenuBox();
-    if (!forceSwitch) this.makeButton("[RETOUR]", 900, 570, () => this.showMainMenu());
+    if (!forceSwitch) this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu());
     else this.menuGroup.add(this.add.text(640, 585, "⚠ CHOISISSEZ UN PERSONNAGE VIVANT", { fontFamily: "monospace", fontSize: "14px", color: "#e67e22" }));
 
     this.teamList.forEach((member, index) => {
