@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { put, list } from "@vercel/blob";
+import { put, get } from "@vercel/blob";
 
 export const runtime = "nodejs";
 
@@ -26,6 +26,7 @@ export async function POST(request) {
         access: "private",
         contentType: "application/json",
         addRandomSuffix: false,
+        allowOverwrite: true,
       }
     );
 
@@ -37,7 +38,10 @@ export async function POST(request) {
     console.error("Erreur sauvegarde Blob :", error);
 
     return NextResponse.json(
-      { error: "Impossible de sauvegarder la partie" },
+      {
+        error: "Impossible de sauvegarder la partie",
+        details: error?.message || "Erreur inconnue",
+      },
       { status: 500 }
     );
   }
@@ -54,43 +58,36 @@ export async function GET(request) {
       );
     }
 
-    const path = getBlobPath(saveId);
+    const pathname = getBlobPath(saveId);
 
-    const result = await list({
-      prefix: path,
-      limit: 1,
+    const result = await get(pathname, {
+      access: "private",
+      useCache: false,
     });
 
-    const blob = result.blobs.find(
-      (item) => item.pathname === path
-    );
-
-    if (!blob) {
+    if (!result) {
       return NextResponse.json(
         { error: "Aucune sauvegarde" },
         { status: 404 }
       );
     }
 
-    const response = await fetch(blob.url, {
-      cache: "no-store",
+    const response = new Response(result.stream);
+
+    const text = await response.text();
+    const save = JSON.parse(text);
+
+    return NextResponse.json({
+      save,
     });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "Impossible de lire la sauvegarde" },
-        { status: 500 }
-      );
-    }
-
-    const save = await response.json();
-
-    return NextResponse.json({ save });
   } catch (error) {
     console.error("Erreur chargement Blob :", error);
 
     return NextResponse.json(
-      { error: "Impossible de charger la sauvegarde" },
+      {
+        error: "Impossible de charger la sauvegarde",
+        details: error?.message || "Erreur inconnue",
+      },
       { status: 500 }
     );
   }
