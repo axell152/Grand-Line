@@ -1,35 +1,109 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { put, list } from "@vercel/blob";
 
-const dbConfigured = () => Boolean(process.env.DATABASE_URL);
+export const runtime = "nodejs";
 
-export async function GET(request) {
-  if (!dbConfigured()) return NextResponse.json({ error: "DATABASE_URL non configurée" }, { status: 503 });
-  const saveId = new URL(request.url).searchParams.get("saveId");
-  if (!saveId) return NextResponse.json({ error: "saveId manquant" }, { status: 400 });
-  const save = await prisma.saveGame.findUnique({ where: { saveId } });
-  if (!save) return NextResponse.json({ error: "Aucune sauvegarde" }, { status: 404 });
-
-  const state = save.flags && typeof save.flags === "object" ? save.flags._state : null;
-  return NextResponse.json({ save: state ? { ...save, ...state } : save });
+function getBlobPath(saveId) {
+  return `saves/${saveId}.json`;
 }
 
 export async function POST(request) {
-  if (!dbConfigured()) return NextResponse.json({ error: "DATABASE_URL non configurée" }, { status: 503 });
-  const body = await request.json();
-  const { saveId, islandId, x, y, crew, berrys, flags, ...rest } = body;
-  if (!saveId) return NextResponse.json({ error: "saveId manquant" }, { status: 400 });
+  try {
+    const body = await request.json();
 
-  const persistedFlags = {
-    ...(flags && typeof flags === "object" ? flags : {}),
-    _state: { islandId, x, y, crew, berrys, ...rest },
-  };
+    const { saveId } = body;
 
-  const save = await prisma.saveGame.upsert({
-    where: { saveId },
-    update: { islandId, x, y, crew, berrys, flags: persistedFlags },
-    create: { saveId, islandId, x, y, crew, berrys, flags: persistedFlags },
-  });
+    if (!saveId) {
+      return NextResponse.json(
+        { error: "saveId manquant" },
+        { status: 400 }
+      );
+    }
 
-  return NextResponse.json({ save: { ...save, ...rest, flags } });
+    const blob = await put(
+      getBlobPath(saveId),
+      JSON.stringify(body),
+      {
+        access: "public",
+        contentType: "application/json",
+        addRandomSuffix: false,
+        cacheControlMaxAge: 0,
+      }
+    );
+
+    return NextResponse.json({
+      success: true,
+      saveId,
+      url: blob.url,
+    });
+  } catch (error) {
+    console.error("Erreur sauvegarde Blob :", error);
+
+    return NextResponse.json(
+      {
+        error: "Impossible de sauvegarder la partie",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request) {
+  try {
+    const saveId = new URL(request.url).searchParams.get("saveId");
+
+    if (!saveId) {
+      return NextResponse.json(
+        { error: "saveId manquant" },
+        { status: 400 }
+      );
+    }
+
+    const path = getBlobPath(saveId);
+
+    const result = await list({
+      prefix: path,
+      limit: 1,
+    });
+
+    const blob = result.blobs.find(
+      (item) => item.pathname === path
+    );
+
+    if (!blob) {
+      return NextResponse.json(
+        { error: "Aucune sauvegarde" },
+        { status: 404 }
+      );
+    }
+
+    const response = await fetch(
+      `${blob.url}?t=${Date.now()}`,
+      {
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: "Impossible de lire la sauvegarde" },
+        { status: 500 }
+      );
+    }
+
+    const save = await response.json();
+
+    return NextResponse.json({
+      save,
+    });
+  } catch (error) {
+    console.error("Erreur chargement Blob :", error);
+
+    return NextResponse.json(
+      {
+        error: "Impossible de charger la sauvegarde",
+      },
+      { status: 500 }
+    );
+  }
 }
