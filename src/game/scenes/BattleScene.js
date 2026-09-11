@@ -34,12 +34,15 @@ export default class BattleScene extends Phaser.Scene {
       ...PLAYER_CHARACTER,
       level,
       maxHp: d.playerMaxHp ?? (PLAYER_CHARACTER.maxHp + (level - 1) * 8),
-      atk: PLAYER_CHARACTER.atk + (level - 1) * 2,
-      def: PLAYER_CHARACTER.def + (level - 1),
-      spd: PLAYER_CHARACTER.spd + (level - 1),
+      atk: d.playerAtk ?? (PLAYER_CHARACTER.atk + (level - 1) * 2),
+      def: d.playerDef ?? (PLAYER_CHARACTER.def + (level - 1)),
+      spd: d.playerSpd ?? (PLAYER_CHARACTER.spd + (level - 1)),
+      moves: d.playerMoves?.length ? d.playerMoves : PLAYER_CHARACTER.moves,
     });
     captain.isCaptain = true;
     captain.crewId = "captain";
+    captain.exp = d.playerExp || 0;
+    captain.maxExp = d.playerMaxExp || 100;
     if (d.playerCurrentHp !== undefined) captain.hp = Math.min(d.playerCurrentHp, captain.maxHp);
     captain.ppData = { ...(d.playerPpData || {}) };
 
@@ -50,15 +53,18 @@ export default class BattleScene extends Phaser.Scene {
     this.teamList = order.map((entry) => {
       if (entry === "captain") return captain;
       if (!d.crew?.includes(entry) || !CHARACTERS[entry]) return null;
+
       const base = CHARACTERS[entry];
       const saved = this.crewDetails[entry] || {};
       const lvl = saved.level || 1;
       const member = createBattler({
-        ...base, level: lvl,
+        ...base,
+        level: lvl,
         maxHp: saved.maxHp || base.maxHp + (lvl - 1) * 8,
-        atk: base.atk + (lvl - 1) * 2,
-        def: base.def + (lvl - 1),
-        spd: base.spd + (lvl - 1),
+        atk: saved.atk ?? base.atk + (lvl - 1) * 2,
+        def: saved.def ?? base.def + (lvl - 1),
+        spd: saved.spd ?? base.spd + (lvl - 1),
+        moves: saved.moves?.length ? saved.moves : base.moves,
       });
       member.crewId = entry;
       member.exp = saved.exp || 0;
@@ -126,8 +132,12 @@ export default class BattleScene extends Phaser.Scene {
 
   drawLog() {
     this.add.rectangle(340, 675, 650, 145, 0x071522, 0.94).setStrokeStyle(3, 0xead9b8);
-    this.logText = this.add.text(60, 615, "", { fontFamily: "monospace", fontSize: "18px", color: "#ffffff", wordWrap: { width: 580 } });
+    this.logText = this.add.text(60, 615, "", {
+      fontFamily: "monospace", fontSize: "18px", color: "#ffffff",
+      wordWrap: { width: 580 },
+    });
   }
+
   setLog(text) { this.logText?.setText(text); }
 
   clearInterfaceElements() {
@@ -136,10 +146,20 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   makeButton(label, x, y, action, enabled = true) {
-    const txt = this.add.text(x, y, label, { fontFamily: "monospace", fontSize: "19px", color: enabled ? "#ead9b8" : "#5d6570" })
-      .setInteractive({ useHandCursor: enabled });
-    if (enabled) txt.on("pointerdown", action).on("pointerover", () => txt.setColor("#ffffff")).on("pointerout", () => txt.setColor("#ead9b8"));
-    this.menuGroup.add(txt); return txt;
+    const txt = this.add.text(x, y, label, {
+      fontFamily: "monospace",
+      fontSize: "19px",
+      color: enabled ? "#ead9b8" : "#5d6570",
+    }).setInteractive({ useHandCursor: enabled });
+
+    if (enabled) {
+      txt.on("pointerdown", action)
+        .on("pointerover", () => txt.setColor("#ffffff"))
+        .on("pointerout", () => txt.setColor("#ead9b8"));
+    }
+
+    this.menuGroup.add(txt);
+    return txt;
   }
 
   showMainMenu() {
@@ -157,23 +177,29 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   showMovesMenu() {
-    this.clearInterfaceElements(); this.addMenuBox();
+    this.clearInterfaceElements();
+    this.addMenuBox();
     this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu(), true);
+
     (this.player.moves || ["taillade"]).forEach((key, i) => {
       const move = MOVES[key] || { name: key, maxPp: 10, accuracy: 1 };
       const pp = this.player.ppData[key] ?? move.maxPp;
       this.makeButton(`• ${move.name}  ${pp}/${move.maxPp}`, 640, 615 + i * 30, () => {
         this.player.ppData[key] = Math.max(0, pp - 1);
-        this.clearInterfaceElements(); this.playerTurnAction(key);
+        this.clearInterfaceElements();
+        this.playerTurnAction(key);
       }, pp > 0);
     });
   }
 
   showItemsMenu() {
-    this.clearInterfaceElements(); this.addMenuBox();
+    this.clearInterfaceElements();
+    this.addMenuBox();
     this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu());
+
     Object.keys(ITEMS).forEach((id, i) => {
-      const item = ITEMS[id]; const count = this.items[id] || 0;
+      const item = ITEMS[id];
+      const count = this.items[id] || 0;
       const usable = count > 0 && this.player.hp > 0 && this.player.hp < this.player.maxHp;
       this.makeButton(`• ${item.name} x${count}`, 640, 615 + i * 30, () => this.useItem(id), usable);
     });
@@ -181,123 +207,238 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   showTeamMenu(forceSwitch = false) {
-    this.clearInterfaceElements(); this.addMenuBox();
-    if (!forceSwitch) this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu());
-    else this.menuGroup.add(this.add.text(640, 585, "⚠ CHOISISSEZ UN PERSONNAGE VIVANT", { fontFamily: "monospace", fontSize: "14px", color: "#e67e22" }));
+    this.clearInterfaceElements();
+    this.addMenuBox();
+
+    if (!forceSwitch) {
+      this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu());
+    } else {
+      this.menuGroup.add(this.add.text(640, 585, "⚠ CHOISISSEZ UN PERSONNAGE VIVANT", {
+        fontFamily: "monospace", fontSize: "14px", color: "#e67e22",
+      }));
+    }
 
     this.teamList.forEach((member, index) => {
       const y = 615 + index * 26;
       const current = member === this.player;
       const alive = member.hp > 0;
       const canSelect = alive && (!current || forceSwitch);
-      this.makeButton(`• ${member.name}  ${member.hp}/${member.maxHp} PV`, 640, y, () => this.switchCharacter(member, forceSwitch), canSelect);
+      this.makeButton(
+        `• ${member.name}  ${member.hp}/${member.maxHp} PV`,
+        640, y,
+        () => this.switchCharacter(member, forceSwitch),
+        canSelect
+      );
     });
   }
 
   switchCharacter(newMember, forced = false) {
-    if (this.battleOver || !newMember || newMember.hp <= 0 || (!forced && this.locked) || (!forced && newMember === this.player)) return;
-    this.clearInterfaceElements(); this.locked = true;
+    if (
+      this.battleOver ||
+      !newMember ||
+      newMember.hp <= 0 ||
+      (!forced && this.locked) ||
+      (!forced && newMember === this.player)
+    ) return;
+
+    this.clearInterfaceElements();
+    this.locked = true;
+
     const old = this.player;
     this.player = newMember;
     this.playerSprite.setTexture(spriteKey(newMember.crewId), 1);
     this.setLog(`${old.name} ${old.hp <= 0 ? "est K.O." : "revient à bord"} ! ${newMember.name} prend sa place.`);
     this.refreshBars();
+
     this.playerSprite.setAlpha(0.4);
     this.tweens.add({ targets: this.playerSprite, alpha: 1, duration: 350 });
+
     this.time.delayedCall(850, () => {
       if (this.battleOver) return;
-      if (forced) { this.locked = false; this.showMainMenu(); return; }
+      if (forced) {
+        this.locked = false;
+        this.showMainMenu();
+        return;
+      }
+
       const keep = this.enemyReply();
-      if (keep !== false && !this.battleOver) { this.locked = false; this.showMainMenu(); }
+      if (keep !== false && !this.battleOver) {
+        this.locked = false;
+        this.showMainMenu();
+      }
     });
   }
 
-
   useItem(id) {
     if (this.locked || this.battleOver || !this.items[id] || !ITEMS[id]) return;
+
     const item = ITEMS[id];
-    if (this.player.hp >= this.player.maxHp) { this.setLog("Les PV sont déjà au maximum."); return; }
-    this.items[id] -= 1; this.locked = true; this.clearInterfaceElements();
+    if (this.player.hp >= this.player.maxHp) {
+      this.setLog("Les PV sont déjà au maximum.");
+      return;
+    }
+
+    this.items[id] -= 1;
+    this.locked = true;
+    this.clearInterfaceElements();
+
     const before = this.player.hp;
     this.player.hp = Math.min(this.player.maxHp, this.player.hp + item.heal);
     this.setLog(`${this.player.name} utilise ${item.name} et récupère ${this.player.hp - before} PV !`);
     this.showFloatingText(`+${this.player.hp - before} PV`, this.playerSprite.x, this.playerSprite.y - 70, "#9fd18f");
     this.refreshBars();
+
     this.time.delayedCall(900, () => {
       const keep = this.enemyReply();
-      if (keep !== false && !this.battleOver) { this.locked = false; this.showMainMenu(); }
+      if (keep !== false && !this.battleOver) {
+        this.locked = false;
+        this.showMainMenu();
+      }
     });
   }
 
   playerTurnAction(moveKey) {
     if (this.locked || this.battleOver) return;
+
     this.locked = true;
     const order = getTurnOrder(this.player, this.enemy);
     const first = order[0] === this.player;
+
     const steps = first
-      ? [() => this.executeMove(this.player, this.enemy, moveKey), () => this.enemyReply()]
-      : [() => this.enemyReply(), () => this.executeMove(this.player, this.enemy, moveKey)];
+      ? [
+          () => this.executeMove(this.player, this.enemy, moveKey),
+          () => this.enemyReply(),
+        ]
+      : [
+          () => this.enemyReply(),
+          () => this.executeMove(this.player, this.enemy, moveKey),
+        ];
+
     this.runSequence(steps);
   }
 
   runSequence(steps, i = 0) {
     if (i >= steps.length || this.battleOver) {
-      if (!this.battleOver) { this.player.defending = false; this.locked = false; this.showMainMenu(); }
+      if (!this.battleOver) {
+        this.locked = false;
+        this.showMainMenu();
+      }
       return;
     }
+
     const keep = steps[i]();
     if (keep === false) return;
+
     this.time.delayedCall(950, () => this.runSequence(steps, i + 1));
   }
 
   executeMove(attacker, defender, moveKey) {
     const move = MOVES[moveKey];
     const result = applyMove(attacker, defender, moveKey);
+
     this.setLog(result.text);
     this.refreshBars();
+
     if (result.damage) {
       const targetSprite = defender === this.enemy ? this.enemySprite : this.playerSprite;
       this.flashSprite(targetSprite);
-      this.showFloatingText(`${result.critical ? "CRIT ! " : ""}-${result.damage}`, targetSprite.x, targetSprite.y - 65, result.critical ? "#f1c40f" : "#ffffff");
-      this.animateAttack(attacker === this.player ? this.playerSprite : this.enemySprite, targetSprite);
+      this.showFloatingText(
+        `${result.critical ? "CRIT ! " : ""}-${result.damage}`,
+        targetSprite.x,
+        targetSprite.y - 65,
+        result.critical ? "#f1c40f" : "#ffffff"
+      );
+      this.animateAttack(
+        attacker === this.player ? this.playerSprite : this.enemySprite,
+        targetSprite
+      );
     }
-    if (result.heal) this.showFloatingText(`+${result.heal} PV`, attacker === this.player ? this.playerSprite.x : this.enemySprite.x, (attacker === this.player ? this.playerSprite.y : this.enemySprite.y) - 65, "#9fd18f");
+
+    if (result.heal) {
+      this.showFloatingText(
+        `+${result.heal} PV`,
+        attacker === this.player ? this.playerSprite.x : this.enemySprite.x,
+        (attacker === this.player ? this.playerSprite.y : this.enemySprite.y) - 65,
+        "#9fd18f"
+      );
+    }
+
     if (isDefeated(defender)) {
-      if (defender === this.enemy) { this.endBattle(true, attacker); }
-      else { this.handlePlayerDefeated(); }
+      if (defender === this.enemy) {
+        // Le combattant qui porte le dernier coup est explicitement transmis.
+        this.endBattle(true, attacker);
+      } else {
+        this.handlePlayerDefeated();
+      }
       return false;
     }
+
     return true;
   }
 
   animateAttack(from, to) {
     if (!from || !to) return;
-    const x = from.x, y = from.y;
-    this.tweens.add({ targets: from, x: to.x + (from === this.playerSprite ? -70 : 70), duration: 180, yoyo: true, onComplete: () => { from.x = x; from.y = y; } });
+    const x = from.x;
+    const y = from.y;
+
+    this.tweens.add({
+      targets: from,
+      x: to.x + (from === this.playerSprite ? -70 : 70),
+      duration: 180,
+      yoyo: true,
+      onComplete: () => {
+        from.x = x;
+        from.y = y;
+      },
+    });
   }
+
   flashSprite(sprite) {
     sprite.setTint(0xffffff);
     this.time.delayedCall(120, () => sprite.clearTint());
   }
+
   showFloatingText(text, x, y, color) {
-    const t = this.add.text(x, y, text, { fontFamily: "monospace", fontSize: "24px", fontStyle: "bold", color }).setOrigin(0.5).setDepth(30);
-    this.tweens.add({ targets: t, y: y - 45, alpha: 0, duration: 800, onComplete: () => t.destroy() });
+    const t = this.add.text(x, y, text, {
+      fontFamily: "monospace",
+      fontSize: "24px",
+      fontStyle: "bold",
+      color,
+    }).setOrigin(0.5).setDepth(30);
+
+    this.tweens.add({
+      targets: t,
+      y: y - 45,
+      alpha: 0,
+      duration: 800,
+      onComplete: () => t.destroy(),
+    });
   }
 
   handlePlayerDefeated() {
     if (this.battleOver) return false;
-    this.player.defending = false;
+
     const living = this.teamList.filter((m) => m.hp > 0);
     this.saveTeamState();
-    if (!living.length) { this.endBattle(false); return false; }
+
+    if (!living.length) {
+      this.endBattle(false);
+      return false;
+    }
+
     this.locked = true;
     this.setLog(`${this.player.name} est K.O. ! Choisissez un autre membre de l'équipage.`);
-    this.time.delayedCall(650, () => { if (!this.battleOver) this.showTeamMenu(true); });
+
+    this.time.delayedCall(650, () => {
+      if (!this.battleOver) this.showTeamMenu(true);
+    });
+
     return false;
   }
 
   enemyReply() {
     if (isDefeated(this.enemy) || this.battleOver) return false;
+
     const moves = this.enemy.moves || ["taillade"];
     const key = moves[Math.floor(Math.random() * moves.length)];
     return this.executeMove(this.enemy, this.player, key);
@@ -305,32 +446,56 @@ export default class BattleScene extends Phaser.Scene {
 
   attemptEscape() {
     if (this.locked || this.battleOver) return;
-    this.clearInterfaceElements(); this.locked = true;
+
+    this.clearInterfaceElements();
+    this.locked = true;
+
     if (Math.random() < 0.3) {
       this.setLog("Impossible de fuir ! L'ennemi bloque le passage...");
       this.time.delayedCall(900, () => {
         const keep = this.enemyReply();
-        if (keep !== false && !this.battleOver) { this.locked = false; this.showMainMenu(); }
+        if (keep !== false && !this.battleOver) {
+          this.locked = false;
+          this.showMainMenu();
+        }
       });
       return;
     }
-    this.setLog("Vous avez réussi à fuir le combat !"); this.saveTeamState();
+
+    this.setLog("Vous avez réussi à fuir le combat !");
+    this.saveTeamState();
     this.time.delayedCall(1000, () => this.returnToWorld());
   }
 
   saveTeamState() {
     const state = this.game.registry.get("gameState") || {};
     state.crewDetails ||= {};
+
     this.teamList.forEach((m) => {
       if (m.isCaptain) {
-        state.hp = m.hp; state.maxHp = m.maxHp; state.ppData = { ...m.ppData };
+        state.hp = m.hp;
+        state.maxHp = m.maxHp;
+        state.level = m.level || 1;
+        state.exp = m.exp || 0;
+        state.maxExp = m.maxExp || 100;
+        state.moves = [...(m.moves || [])];
+        state.ppData = { ...m.ppData };
       } else if (m.crewId) {
         state.crewDetails[m.crewId] = {
-          hp: m.hp, maxHp: m.maxHp, level: m.level || 1,
-          exp: m.exp || 0, maxExp: m.maxExp || 100, ppData: { ...m.ppData },
+          hp: m.hp,
+          maxHp: m.maxHp,
+          atk: m.atk,
+          def: m.def,
+          spd: m.spd,
+          level: m.level || 1,
+          exp: m.exp || 0,
+          maxExp: m.maxExp || 100,
+          moves: [...(m.moves || [])],
+          ppData: { ...m.ppData },
         };
       }
     });
+
     state.items = { ...this.items };
     this.game.registry.set("gameState", state);
     return state;
@@ -338,27 +503,62 @@ export default class BattleScene extends Phaser.Scene {
 
   endBattle(playerWon, expRecipient = null) {
     if (this.battleOver) return;
-    this.battleOver = true; this.clearInterfaceElements();
+
+    this.battleOver = true;
+    this.clearInterfaceElements();
+
     const state = this.saveTeamState();
     const { returnIsland, returnX, returnY } = this.battleData;
+
     if (playerWon) {
       const exp = (this.battleMode === "recruit" ? 40 : 20) * (this.enemy.level || 1);
-      const id = expRecipient?.isCaptain ? "captain" : (expRecipient?.crewId || "captain");
-      const loot = this.battleMode === "recruit" ? 0 : 20 + Math.floor(Math.random() * 30);
-      if (this.battleMode !== "recruit") state.berrys = (state.berrys || 0) + loot;
+
+      // L'XP va au personnage qui a réellement vaincu l'ennemi.
+      const id = expRecipient?.isCaptain
+        ? "captain"
+        : (expRecipient?.crewId || "captain");
+
+      const loot = this.battleMode === "recruit"
+        ? 0
+        : 20 + Math.floor(Math.random() * 30);
+
+      if (this.battleMode !== "recruit") {
+        state.berrys = (state.berrys || 0) + loot;
+      }
+
       this.showFloatingText(`+${exp} XP`, 510, 385, "#f1c40f");
-      this.setLog(`Victoire ! ${expRecipient?.name || "Le combattant"} gagne ${exp} XP${loot ? ` et ${loot} berrys` : ""}.`);
-      this.time.delayedCall(1800, () => this.scene.start("World", { islandId: returnIsland || "start", x: returnX || 20, y: returnY || 5, berrysGained: 0, expGained: exp, expRecipientId: id }));
+      this.setLog(
+        `Victoire ! ${expRecipient?.name || "Le combattant"} gagne ${exp} XP${loot ? ` et ${loot} berrys` : ""}.`
+      );
+
+      this.scene.start("World", {
+  islandId: returnIsland || "start",
+  x: returnX || 20,
+  y: returnY || 5,
+  berrysGained: 0,
+  expGained: exp,
+  expRecipientId: id,
+  recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
+});
     } else {
       this.setLog("Toute votre équipe est K.O... Réveil d'urgence à la taverne !");
+
       this.time.delayedCall(1700, () => {
-        state.hp = state.maxHp || PLAYER_CHARACTER.maxHp; state.ppData = {};
-        Object.values(state.crewDetails || {}).forEach((d) => { d.hp = d.maxHp; d.ppData = {}; });
+        state.hp = state.maxHp || PLAYER_CHARACTER.maxHp;
+        state.ppData = {};
+
+        Object.values(state.crewDetails || {}).forEach((d) => {
+          d.hp = d.maxHp;
+          d.ppData = {};
+        });
+
         const islandKey = state.islandId || returnIsland || "ile-depart";
         const island = ISLANDS[islandKey];
+
         state.respawnIsland ||= islandKey;
         state.respawnX ??= island?.tavern?.x ?? island?.playerStart?.x ?? returnX ?? 5;
         state.respawnY ??= island?.tavern?.y ?? island?.playerStart?.y ?? returnY ?? 5;
+
         this.game.registry.set("gameState", state);
         this.scene.start("World", { isRespawn: true });
       });
@@ -367,6 +567,10 @@ export default class BattleScene extends Phaser.Scene {
 
   returnToWorld() {
     const { returnIsland, returnX, returnY } = this.battleData;
-    this.scene.start("World", { islandId: returnIsland || "ile-depart", x: returnX || 20, y: returnY || 5 });
+    this.scene.start("World", {
+      islandId: returnIsland || "ile-depart",
+      x: returnX || 20,
+      y: returnY || 5,
+    });
   }
 }
