@@ -57,10 +57,17 @@ export async function GET(request) {
       );
     }
 
-    const result = await get(BLOB_PATH, {
+    const pathname = `saves/${saveId}.json`;
+
+    console.log("=== LECTURE BLOB ===");
+    console.log("pathname :", pathname);
+
+    const result = await get(pathname, {
       access: "private",
       useCache: false,
     });
+
+    console.log("result :", result);
 
     if (!result) {
       return NextResponse.json(
@@ -71,15 +78,20 @@ export async function GET(request) {
 
     const response = new Response(result.stream);
     const text = await response.text();
+
+    console.log("contenu Blob reçu :", text.length, "caractères");
+
     const save = JSON.parse(text);
 
-    return NextResponse.json({ save });
+    return NextResponse.json({
+      save,
+    });
   } catch (error) {
-    console.error("Erreur chargement Blob :", error);
+    console.error("ERREUR GET BLOB :", error);
 
     return NextResponse.json(
       {
-        error: "Impossible de charger la sauvegarde",
+        error: "Impossible de lire la sauvegarde",
         details: error?.message || "Erreur inconnue",
       },
       { status: 500 }
