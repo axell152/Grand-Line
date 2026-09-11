@@ -48,11 +48,10 @@ export default class BootScene extends Phaser.Scene {
     // 0-2 = bas, 3-5 = haut, 6-7 = gauche, 8-9 = droite.
     SPRITES.forEach((key) => {
       const animations = [
-        { suffix: "down", frames: [0, 1, 2] },
-        { suffix: "up", frames: [3, 4, 5] },
-        { suffix: "left", frames: [6, 7] },
-        { suffix: "right", frames: [8, 9] },
-      ];
+  { suffix: "down", frames: [0, 4, 5] },
+  { suffix: "up", frames: [1, 6, 7] },
+  { suffix: "side", frames: [2, 8, 9] },
+];
 
       animations.forEach(({ suffix, frames }) => {
         this.anims.create({
