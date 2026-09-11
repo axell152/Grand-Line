@@ -1,17 +1,11 @@
 const LOCAL_KEY = "grand-line-tactics-save";
-const SAVE_ID_KEY = "grand-line-tactics-save-id";
+
+// Identifiant stable de ta sauvegarde.
+// Il ne change pas lors d'un nouveau déploiement Vercel.
+const SAVE_ID = "grand-line-tactics-main-save";
 
 function getSaveId() {
-  if (typeof window === "undefined") return null;
-
-  let id = window.localStorage.getItem(SAVE_ID_KEY);
-
-  if (!id) {
-    id = `save-${Math.random().toString(36).slice(2)}-${Date.now()}`;
-    window.localStorage.setItem(SAVE_ID_KEY, id);
-  }
-
-  return id;
+  return SAVE_ID;
 }
 
 function saveLocal(state) {
