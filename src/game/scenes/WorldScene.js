@@ -292,7 +292,7 @@ export default class WorldScene extends Phaser.Scene {
           npc.x * TILE_SIZE + TILE_SIZE / 2,
           npc.y * TILE_SIZE + TILE_SIZE / 2,
           spriteKey(npc.characterId),
-          1
+          0
         );
         sprite.setScale(2.5);
         sprite.setOrigin(0.5, 0.78);
@@ -304,7 +304,7 @@ export default class WorldScene extends Phaser.Scene {
       this.state.x * TILE_SIZE + TILE_SIZE / 2,
       this.state.y * TILE_SIZE + TILE_SIZE / 2,
       spriteKey("captain"),
-      1
+      0
     );
     this.player.setScale(2.5);
     this.player.setOrigin(0.5, 0.78);
@@ -358,7 +358,17 @@ export default class WorldScene extends Phaser.Scene {
 
     const { dx, dy } = DIRECTIONS[dir];
     this.playerDirection = dir;
-    this.player.play(`${spriteKey("captain")}-${dir}`);
+    const captainKey = spriteKey("captain");
+if (dir === "left") {
+  this.player.setFlipX(true);
+  this.player.play(`${captainKey}-side`, true);
+} else if (dir === "right") {
+  this.player.setFlipX(false);
+  this.player.play(`${captainKey}-side`, true);
+} else {
+  this.player.setFlipX(false);
+  this.player.play(`${captainKey}-${dir}`, true);
+}
     const targetX = this.state.x + dx;
     const targetY = this.state.y + dy;
     const key = `${targetX},${targetY}`;
@@ -383,7 +393,7 @@ export default class WorldScene extends Phaser.Scene {
       duration: 140,
       onComplete: () => {
         this.isMoving = false;
-        const idleFrame = { down: 1, up: 4, left: 6, right: 8 }[this.playerDirection] ?? 1;
+        const idleFrame = { down: 0, up: 6, left: 8, right: 8 }[this.playerDirection] ?? 0;
         this.player.stop();
         this.player.setFrame(idleFrame);
         this.persist();
