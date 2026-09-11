@@ -3,24 +3,21 @@ import { put, get } from "@vercel/blob";
 
 export const runtime = "nodejs";
 
-function getBlobPath(saveId) {
-  return `saves/${saveId}.json`;
-}
+const BLOB_PATH = "saves/grand-line-tactics-main-save.json";
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { saveId } = body;
 
-    if (!saveId) {
+    if (!body?.saveId) {
       return NextResponse.json(
         { error: "saveId manquant" },
         { status: 400 }
       );
     }
 
-    await put(
-      getBlobPath(saveId),
+    const result = await put(
+      BLOB_PATH,
       JSON.stringify(body),
       {
         access: "private",
@@ -30,9 +27,11 @@ export async function POST(request) {
       }
     );
 
+    console.log("BLOB SAUVEGARDE :", result);
+
     return NextResponse.json({
       success: true,
-      saveId,
+      saveId: body.saveId,
     });
   } catch (error) {
     console.error("Erreur sauvegarde Blob :", error);
@@ -58,9 +57,7 @@ export async function GET(request) {
       );
     }
 
-    const pathname = getBlobPath(saveId);
-
-    const result = await get(pathname, {
+    const result = await get(BLOB_PATH, {
       access: "private",
       useCache: false,
     });
@@ -73,13 +70,10 @@ export async function GET(request) {
     }
 
     const response = new Response(result.stream);
-
     const text = await response.text();
     const save = JSON.parse(text);
 
-    return NextResponse.json({
-      save,
-    });
+    return NextResponse.json({ save });
   } catch (error) {
     console.error("Erreur chargement Blob :", error);
 
