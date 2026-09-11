@@ -179,7 +179,7 @@ export default class BattleScene extends Phaser.Scene {
   showMovesMenu() {
     this.clearInterfaceElements();
     this.addMenuBox();
-    this.makeButton("[RETOUR]", 640, 590, () => this.showMainMenu(), true);
+    this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu(), true);
 
     (this.player.moves || ["taillade"]).forEach((key, i) => {
       const move = MOVES[key] || { name: key, maxPp: 10, accuracy: 1 };
@@ -195,7 +195,7 @@ export default class BattleScene extends Phaser.Scene {
   showItemsMenu() {
     this.clearInterfaceElements();
     this.addMenuBox();
-    this.makeButton("[RETOUR]", 640, 590, () => this.showMainMenu());
+    this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu());
 
     Object.keys(ITEMS).forEach((id, i) => {
       const item = ITEMS[id];
@@ -211,7 +211,7 @@ export default class BattleScene extends Phaser.Scene {
     this.addMenuBox();
 
     if (!forceSwitch) {
-      this.makeButton("[RETOUR]", 640, 590, () => this.showMainMenu());
+      this.makeButton("[RETOUR]", 930, 600, () => this.showMainMenu());
     } else {
       this.menuGroup.add(this.add.text(640, 585, "⚠ CHOISISSEZ UN PERSONNAGE VIVANT", {
         fontFamily: "monospace", fontSize: "14px", color: "#e67e22",
