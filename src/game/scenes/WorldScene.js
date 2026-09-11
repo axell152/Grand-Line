@@ -656,6 +656,14 @@ export default class WorldScene extends Phaser.Scene {
     this.player.setDepth(999);
     this.playerDirection = "down";
     this.player.play(`${spriteKey("captain")}-down`);
+    this.cameras.main.setBounds(
+  0,
+  0,
+  island.grid[0].length * TILE_SIZE,
+  island.grid.length * TILE_SIZE
+);
+
+this.cameras.main.startFollow(this.player, true);
   }
 
   drawHud() {
