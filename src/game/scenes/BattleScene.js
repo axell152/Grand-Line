@@ -531,14 +531,15 @@ export default class BattleScene extends Phaser.Scene {
         `Victoire ! ${expRecipient?.name || "Le combattant"} gagne ${exp} XP${loot ? ` et ${loot} berrys` : ""}.`
       );
 
-      this.time.delayedCall(1800, () => this.scene.start("World", {
-        islandId: returnIsland || "start",
-        x: returnX || 20,
-        y: returnY || 5,
-        berrysGained: 0,
-        expGained: exp,
-        expRecipientId: id,
-      }));
+      this.scene.start("World", {
+  islandId: returnIsland || "start",
+  x: returnX || 20,
+  y: returnY || 5,
+  berrysGained: 0,
+  expGained: exp,
+  expRecipientId: id,
+  recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
+});
     } else {
       this.setLog("Toute votre équipe est K.O... Réveil d'urgence à la taverne !");
 
