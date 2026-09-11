@@ -10,7 +10,6 @@ function getBlobPath(saveId) {
 export async function POST(request) {
   try {
     const body = await request.json();
-
     const { saveId } = body;
 
     if (!saveId) {
@@ -20,29 +19,25 @@ export async function POST(request) {
       );
     }
 
-    const blob = await put(
+    await put(
       getBlobPath(saveId),
       JSON.stringify(body),
       {
-        access: "public",
+        access: "private",
         contentType: "application/json",
         addRandomSuffix: false,
-        cacheControlMaxAge: 0,
       }
     );
 
     return NextResponse.json({
       success: true,
       saveId,
-      url: blob.url,
     });
   } catch (error) {
     console.error("Erreur sauvegarde Blob :", error);
 
     return NextResponse.json(
-      {
-        error: "Impossible de sauvegarder la partie",
-      },
+      { error: "Impossible de sauvegarder la partie" },
       { status: 500 }
     );
   }
@@ -77,12 +72,9 @@ export async function GET(request) {
       );
     }
 
-    const response = await fetch(
-      `${blob.url}?t=${Date.now()}`,
-      {
-        cache: "no-store",
-      }
-    );
+    const response = await fetch(blob.url, {
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       return NextResponse.json(
@@ -93,16 +85,12 @@ export async function GET(request) {
 
     const save = await response.json();
 
-    return NextResponse.json({
-      save,
-    });
+    return NextResponse.json({ save });
   } catch (error) {
     console.error("Erreur chargement Blob :", error);
 
     return NextResponse.json(
-      {
-        error: "Impossible de charger la sauvegarde",
-      },
+      { error: "Impossible de charger la sauvegarde" },
       { status: 500 }
     );
   }
