@@ -101,7 +101,7 @@ export default class BattleScene extends Phaser.Scene {
 
   drawCombatants() {
     const enemyId = this.targetCharacterId || "marineRecrue";
-    this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 1).setScale(7).setOrigin(0.5, 0.82).setDepth(10);
+    this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 0).setScale(7).setOrigin(0.5, 0.82).setDepth(10);
     this.enemyNameText = this.add.text(480, 72, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
     this.enemyHpBarBg = this.add.rectangle(480, 110, 300, 20, 0x161616).setOrigin(0, 0.5);
     this.enemyHpBar = this.add.rectangle(482, 110, 296, 16, 0xc0392b).setOrigin(0, 0.5);
