@@ -102,7 +102,7 @@ export default class CrewScene extends Phaser.Scene {
       const y = 120 + index * 60;
       const isSelected = entry === this.selected;
 
-      const sprite = this.add.sprite(110, y + 12, CHARACTER_SPRITES[entry] || "character_01", 1).setScale(2.1);
+      const sprite = this.add.sprite(110, y + 12, CHARACTER_SPRITES[entry] || "character_01", 0).setScale(2.1);
       this.listGroup.add(sprite);
 
       const nameTxt = this.add.text(140, y, `${index + 1}. ${data.name}`, {
@@ -154,7 +154,7 @@ export default class CrewScene extends Phaser.Scene {
     const data = this.getMemberData(entry);
     const { hp, maxHp } = this.getMemberHp(entry);
 
-    const portrait = this.add.sprite(820, 215, CHARACTER_SPRITES[entry] || "character_01", 1).setScale(5);
+    const portrait = this.add.sprite(820, 215, CHARACTER_SPRITES[entry] || "character_01", 0).setScale(5);
     this.detailGroup.add(portrait);
 
     const title = this.add.text(570, 110, `${data.name}`, {
