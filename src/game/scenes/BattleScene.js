@@ -43,6 +43,7 @@ export default class BattleScene extends Phaser.Scene {
       spd: d.playerSpd ?? (PLAYER_CHARACTER.spd + (level - 1)),
       moves: d.playerMoves?.length ? d.playerMoves : PLAYER_CHARACTER.moves,
     });
+    captain.name = d.playerName || captain.name || "Capitaine";
     captain.isCaptain = true;
     captain.crewId = "captain";
     captain.exp = d.playerExp || 0;
@@ -105,8 +106,8 @@ export default class BattleScene extends Phaser.Scene {
     this.drawLog();
     this.showMainMenu();
     this.setLog(this.battleMode === "recruit"
-      ? `${this.enemy.name} vous barre la route. Que faites-vous ?`
-      : `Un ${this.enemy.name} sauvage apparaît ! Que faites-vous ?`);
+      ? `${captain.name} fait face à ${this.enemy.name}.`
+      : `${captain.name} rencontre un ${this.enemy.name} sauvage !`);
   }
 
   initPp(member) {
@@ -446,7 +447,7 @@ export default class BattleScene extends Phaser.Scene {
       this.bossExpRewards.push({
         recipientId,
         xp,
-        winnerName: attacker?.name || "Le combattant",
+        winnerName: attacker?.name || this.battleData.playerName || "Capitaine",
         enemyName: enemy.name,
       });
     }
@@ -529,7 +530,7 @@ export default class BattleScene extends Phaser.Scene {
       return;
     }
 
-    this.setLog("Vous avez réussi à fuir le combat !");
+    this.setLog(`${this.player.name} réussit à fuir le combat !`);
     this.saveTeamState();
     this.time.delayedCall(1000, () => this.returnToWorld());
   }
@@ -587,14 +588,14 @@ export default class BattleScene extends Phaser.Scene {
         expRewards = [{
           recipientId: id,
           xp: exp,
-          winnerName: expRecipient?.name || "Le combattant",
+          winnerName: expRecipient?.name || this.battleData.playerName || "Capitaine",
           enemyName: this.enemy.name,
         }];
       }
 
       const totalXp = expRewards.reduce((sum, reward) => sum + (Number(reward.xp) || 0), 0);
       const loot = this.battleMode === "recruit" ? 0 : (this.isBossBattle ? 1000 : 20 + Math.floor(Math.random() * 30));
-      const lastWinner = expRecipient?.name || expRewards[expRewards.length - 1]?.winnerName || "Le combattant";
+      const lastWinner = expRecipient?.name || expRewards[expRewards.length - 1]?.winnerName || this.battleData.playerName || "Capitaine";
       const completeBossVictory = this.isBossBattle;
       const respawnMinutes = Number(this.battleData.bossRespawnMinutes) || 15;
       const bossRespawnAt = completeBossVictory ? Date.now() + respawnMinutes * 60 * 1000 : undefined;

@@ -53,7 +53,7 @@ export default class CrewScene extends Phaser.Scene {
 
   getMemberData(entry) {
     if (entry === "captain") {
-      return { ...PLAYER_CHARACTER, title: "Capitaine" };
+      return { ...PLAYER_CHARACTER, name: this.gameState?.playerName || "Capitaine", title: "Capitaine" };
     }
     return CHARACTERS[entry] || { name: entry, title: "", moves: [] };
   }

@@ -32,7 +32,7 @@ export default class BootScene extends Phaser.Scene {
   create() {
     this.makeWarpMarker();
     this.createCharacterAnimations();
-    this.scene.start("World");
+    this.scene.start("Title");
   }
 
   makeWarpMarker() {

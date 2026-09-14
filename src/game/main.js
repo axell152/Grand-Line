@@ -1,4 +1,5 @@
 import BootScene from "@/game/scenes/BootScene";
+import TitleScene from "@/game/scenes/TitleScene";
 import WorldScene from "@/game/scenes/WorldScene";
 import BattleScene from "@/game/scenes/BattleScene";
 import CrewScene from "@/game/scenes/CrewScene";
@@ -19,6 +20,6 @@ export function createGameConfig(Phaser, parentId) {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, WorldScene, BattleScene, CrewScene],
+    scene: [BootScene, TitleScene, WorldScene, BattleScene, CrewScene],
   };
 }
