@@ -78,14 +78,14 @@ export const ISLANDS = {
       x: 44,
       y: 25,
       enemyId: "officierMarine",
-      level: 15,
+      level: 1,
       name: "Capitaine Morgan",
       unlockFlag: "boss_ile-depart",
       respawnMinutes: 15,
       team: [
-        { characterId: "marineRecrue", level: 10 },
-        { characterId: "marineRecrue", level: 10 },
-        { characterId: "officierMarine", level: 15, isBoss: true },
+        { characterId: "marineRecrue", level: 1 },
+        { characterId: "marineRecrue", level: 1 },
+        { characterId: "officierMarine", level: 1, isBoss: true },
       ],
     },
     wildZones: [
