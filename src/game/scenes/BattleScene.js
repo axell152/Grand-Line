@@ -511,7 +511,11 @@ export default class BattleScene extends Phaser.Scene {
     const { returnIsland, returnX, returnY } = this.battleData;
 
     if (playerWon) {
-      const exp = (this.battleMode === "recruit" ? 40 : 20) * (this.enemy.level || 1);
+      const enemyLevel = this.enemy.level || 1;
+
+const exp = this.battleMode === "recruit"
+  ? 40 * enemyLevel
+  : 20 * enemyLevel;
 
       // L'XP va au personnage qui a réellement vaincu l'ennemi.
       const id = expRecipient?.isCaptain
