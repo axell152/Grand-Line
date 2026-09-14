@@ -146,7 +146,7 @@ export default class WorldScene extends Phaser.Scene {
     ? this.incoming.expRewards.reduce((sum, reward) => sum + (Number(reward.xp) || 0), 0)
     : (Number(this.incoming.expGained) || 0);
   const berrys = Number(this.incoming.berrysGained) || 0;
-  const winner = this.incoming.battleWinnerName || "Le combattant";
+  const winner = this.incoming.battleWinnerName || this.state.playerName || "Capitaine";
 
   this.showVictoryReward(winner, xp, berrys);
 }
@@ -174,6 +174,7 @@ export default class WorldScene extends Phaser.Scene {
         respawnIsland: STARTING_ISLAND,
         respawnX: defaultX,
         respawnY: defaultY,
+        playerName: this.incoming.playerName || "Capitaine",
         crew: [],
         teamOrder: ["captain"],
         berrys: 0,
@@ -202,6 +203,7 @@ export default class WorldScene extends Phaser.Scene {
             respawnIsland: save.respawnIsland || save.islandId,
             respawnX: save.respawnX !== undefined ? save.respawnX : save.x,
             respawnY: save.respawnY !== undefined ? save.respawnY : save.y,
+            playerName: save.playerName || "Capitaine",
             crew: save.crew || [],
             teamOrder: save.teamOrder || ["captain", ...(save.crew || [])],
             berrys: save.berrys || 0,
@@ -230,6 +232,7 @@ export default class WorldScene extends Phaser.Scene {
 
     this.state = registry.get("gameState");
 
+    if (!this.state.playerName) this.state.playerName = "Capitaine";
     if (this.state.level === undefined) this.state.level = 1;
     if (this.state.exp === undefined) this.state.exp = 0;
     if (this.state.maxExp === undefined) this.state.maxExp = 100;
@@ -969,7 +972,7 @@ showVictoryReward(winner, xp, berrys) {
   updateHud() {
     const island = this.island;
     this.hudText?.setText(
-      `${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
+      `${this.state.playerName}\n${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
     );
   }
 
@@ -1374,6 +1377,7 @@ showVictoryReward(winner, xp, berrys) {
       bossRespawnMinutes,
       bossName,
       bossUnlockFlag,
+      playerName: this.state.playerName,
       crew: this.state.crew,
       teamOrder: this.state.teamOrder,
       playerLevel: this.state.level,
