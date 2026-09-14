@@ -1008,8 +1008,7 @@ showVictoryReward(winner, xp, berrys) {
 
     this.showMessage(
       "SAUVEGARDE CRÉÉE",
-      "Le fichier de sauvegarde a été téléchargé.
-Conserve-le pour pouvoir restaurer ta partie plus tard."
+      "Le fichier de sauvegarde a été téléchargé.\nConserve-le pour pouvoir restaurer ta partie plus tard."
     );
   }
 
