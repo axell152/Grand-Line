@@ -47,6 +47,7 @@ export default class BattleScene extends Phaser.Scene {
     captain.ppData = { ...(d.playerPpData || {}) };
 
     this.enemy = createBattler(enemySource);
+    if (d.bossName) this.enemy.name = d.bossName;
     this.enemy.type = this.enemy.type || "tranchant";
 
     const order = d.teamOrder?.length ? d.teamOrder : ["captain", ...(d.crew || [])];
@@ -526,10 +527,6 @@ const exp = this.battleMode === "recruit"
         ? 0
         : 20 + Math.floor(Math.random() * 30);
 
-      if (this.battleMode !== "recruit") {
-        state.berrys = (state.berrys || 0) + loot;
-      }
-
       this.showFloatingText(`+${exp} XP`, 510, 385, "#f1c40f");
       this.setLog(
         `Victoire ! ${expRecipient?.name || "Le combattant"} gagne ${exp} XP${loot ? ` et ${loot} berrys` : ""}.`
@@ -548,6 +545,8 @@ const exp = this.battleMode === "recruit"
   // Permet à WorldScene d'afficher le récapitulatif
   battleVictory: true,
   battleWinnerName: expRecipient?.name || "Le combattant",
+  bossVictory: this.battleData.boss === true,
+  bossUnlockFlag: this.battleData.bossUnlockFlag,
 
   recruitedId:
     this.battleMode === "recruit"
