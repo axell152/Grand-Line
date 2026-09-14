@@ -767,21 +767,33 @@ export default class WorldScene extends Phaser.Scene {
     });
 
     // Coffres.
-    this.chestSprites = {};
-    (island.chests || []).forEach((chest) => {
-      if (this.state.openedChests?.[chest.id]) return;
+this.chestSprites = {};
+this.chestGraphics = {};
 
-      const g = this.add.graphics().setDepth(chest.y + 0.4);
-      const px = chest.x * TILE_SIZE + TILE_SIZE / 2;
-      const py = chest.y * TILE_SIZE + TILE_SIZE / 2;
-      g.fillStyle(0x8b5a2b, 1);
-      g.fillRect(px - 11, py - 7, 22, 14);
-      g.fillStyle(0xd4a24c, 1);
-      g.fillRect(px - 11, py - 7, 22, 4);
-      g.lineStyle(2, 0x3b2414, 1);
-      g.strokeRect(px - 11, py - 7, 22, 14);
-      this.chestSprites[`${chest.x},${chest.y}`] = chest;
-    });
+(island.chests || []).forEach((chest) => {
+  if (this.state.openedChests?.[chest.id]) return;
+
+  const key = `${chest.x},${chest.y}`;
+
+  const g = this.add.graphics().setDepth(chest.y + 0.4);
+  const px = chest.x * TILE_SIZE + TILE_SIZE / 2;
+  const py = chest.y * TILE_SIZE + TILE_SIZE / 2;
+
+  g.fillStyle(0x8b5a2b, 1);
+  g.fillRect(px - 11, py - 7, 22, 14);
+
+  g.fillStyle(0xd4a24c, 1);
+  g.fillRect(px - 11, py - 7, 22, 4);
+
+  g.lineStyle(2, 0x3b2414, 1);
+  g.strokeRect(px - 11, py - 7, 22, 14);
+
+  // Données du coffre
+  this.chestSprites[key] = chest;
+
+  // Véritable objet graphique Phaser
+  this.chestGraphics[key] = g;
+});
 
     // Boss d'île.
     this.bossSprite = null;
@@ -1050,9 +1062,9 @@ showVictoryReward(winner, xp, berrys) {
     );
 
     if (chest) {
-      this.openChest(chest);
-      return;
-    }
+  this.openChest(`${chest.x},${chest.y}`, chest);
+  return;
+}
 
     if (
       island.boss &&
@@ -1247,24 +1259,55 @@ showVictoryReward(winner, xp, berrys) {
     drawPage();
   }
 
-  openChest(chest) {
-    this.state.openedChests ||= {};
-    this.state.items ||= { ...STARTING_ITEMS };
+  openChest(key, chest) {
+  if (!chest || chest.opened) return;
 
-    this.state.openedChests[chest.id] = true;
-    this.state.items[chest.itemId] = (this.state.items[chest.itemId] || 0) + (chest.amount || 1);
-    this.persist();
+  chest.opened = true;
 
-    const key = `${chest.x},${chest.y}`;
-    this.chestSprites?.[key]?.destroy();
-    delete this.chestSprites?.[key];
+  // Récompense du coffre
+  const reward = chest.reward || {};
+  const berryReward = Number(reward.berrys || 0);
 
-    const item = chest.itemId === "superPotion" ? "Super Potion" : "Potion";
-    this.showMessage(
-      "COFFRE OUVERT !",
-      `Tu trouves ${chest.amount || 1} ${item}${(chest.amount || 1) > 1 ? "s" : ""}.`
-    );
+  if (berryReward > 0) {
+    this.state.berrys = (this.state.berrys || 0) + berryReward;
   }
+
+  if (reward.item) {
+    this.state.items = this.state.items || {};
+    this.state.items[reward.item] =
+      (this.state.items[reward.item] || 0) + (reward.quantity || 1);
+  }
+
+  // Supprime uniquement le véritable objet graphique Phaser
+  const sprite = this.chestGraphics?.[key];
+
+  if (sprite && typeof sprite.destroy === "function") {
+    sprite.destroy();
+  }
+
+  if (this.chestGraphics) {
+    delete this.chestGraphics[key];
+  }
+
+  // Sauvegarde le coffre comme ouvert
+  this.state.openedChests = this.state.openedChests || {};
+  this.state.openedChests[key] = true;
+
+  this.persist();
+
+  let message = "Coffre ouvert !";
+
+  if (berryReward > 0) {
+    message += `\n+${berryReward} Berrys`;
+  }
+
+  if (reward.item) {
+    const quantity = reward.quantity || 1;
+    message += `\n+${quantity} ${reward.item}`;
+  }
+
+  this.showMessage(message);
+}
 
   interact() {
     if (this.isMoving || this.learningObjects.length || this.dialogGroup || this.messageGroup) return;
@@ -1281,10 +1324,10 @@ showVictoryReward(winner, xp, berrys) {
     }
 
     const chest = this.chestSprites?.[key];
-    if (chest) {
-      this.openChest(chest);
-      return;
-    }
+if (chest) {
+  this.openChest(key, chest);
+  return;
+}
 
     const boss = this.island.boss;
     if (
