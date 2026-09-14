@@ -1,7 +1,7 @@
 import BootScene from "@/game/scenes/BootScene";
 import TitleScene from "@/game/scenes/TitleScene";
-import SailingScene from "@/game/scenes/SailingScene";
 import WorldScene from "@/game/scenes/WorldScene";
+import SailingScene from "@/game/scenes/SailingScene";
 import BattleScene from "@/game/scenes/BattleScene";
 import CrewScene from "@/game/scenes/CrewScene";
 
@@ -21,6 +21,6 @@ export function createGameConfig(Phaser, parentId) {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, TitleScene, SailingScene, WorldScene, BattleScene, CrewScene],
+    scene: [BootScene, TitleScene, WorldScene, SailingScene, BattleScene, CrewScene],
   };
 }
