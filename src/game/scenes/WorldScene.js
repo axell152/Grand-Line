@@ -120,6 +120,14 @@ export default class WorldScene extends Phaser.Scene {
       this.persist();
     }
 
+  if (this.incoming.battleVictory) {
+  const xp = Number(this.incoming.expGained) || 0;
+  const berrys = Number(this.incoming.berrysGained) || 0;
+  const winner = this.incoming.battleWinnerName || "Le combattant";
+
+  this.showVictoryReward(winner, xp, berrys);
+}
+    
     this.drawIsland();
     this.drawHud();
   }
@@ -760,6 +768,85 @@ export default class WorldScene extends Phaser.Scene {
 this.cameras.main.startFollow(this.player, true);
   }
 
+showVictoryReward(winner, xp, berrys) {
+  const width = this.scale.width;
+  const height = this.scale.height;
+
+  const objects = [];
+
+  const overlay = this.add.rectangle(
+    width / 2,
+    height / 2,
+    520,
+    220,
+    0x071a2d,
+    0.96
+  )
+    .setStrokeStyle(3, 0xe8c96b)
+    .setScrollFactor(0)
+    .setDepth(10000);
+
+  const title = this.add.text(
+    width / 2,
+    height / 2 - 75,
+    "🏆 VICTOIRE !",
+    {
+      fontFamily: "monospace",
+      fontSize: "30px",
+      fontStyle: "bold",
+      color: "#f1c40f",
+      align: "center",
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
+
+  const reward = this.add.text(
+    width / 2,
+    height / 2 - 15,
+    `${winner}\ngagne ${xp} XP`,
+    {
+      fontFamily: "monospace",
+      fontSize: "20px",
+      color: "#ffffff",
+      align: "center",
+      lineSpacing: 8,
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
+
+  const money = this.add.text(
+    width / 2,
+    height / 2 + 55,
+    `💰 +${berrys} Berrys`,
+    {
+      fontFamily: "monospace",
+      fontSize: "22px",
+      fontStyle: "bold",
+      color: "#f1c40f",
+      align: "center",
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
+
+  objects.push(overlay, title, reward, money);
+
+  this.tweens.add({
+    targets: objects,
+    alpha: 0,
+    delay: 2300,
+    duration: 500,
+    onComplete: () => {
+      objects.forEach((obj) => obj.destroy());
+    },
+  });
+}
+  
   drawHud() {
     this.hudText = this.add.text(6, 6, "", {
       fontFamily: "monospace",
