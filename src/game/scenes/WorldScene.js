@@ -3,7 +3,7 @@ import { ISLANDS, STARTING_ISLAND, TILE_SIZE } from "@/game/data/islands";
 import { CHARACTERS, ENEMY_CHARACTERS, PLAYER_CHARACTER } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
 import { STARTING_ITEMS } from "@/game/data/items";
-import { saveGame, loadGame } from "@/game/systems/SaveManager";
+import { saveGame, loadGame, downloadSaveFile } from "@/game/systems/SaveManager";
 
 const DIRECTIONS = {
   up: { dx: 0, dy: -1 },
@@ -78,6 +78,8 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.pause();
     });
 
+    this.input.keyboard.on("keydown-F", () => this.exportSaveFile());
+
     const expRewards = Array.isArray(this.incoming.expRewards)
       ? this.incoming.expRewards
       : (typeof this.incoming.expGained === "number"
@@ -87,6 +89,10 @@ export default class WorldScene extends Phaser.Scene {
     if (expRewards.length) {
       const allLearnQueue = [];
       expRewards.forEach((reward) => {
+        // L'XP des combats de boss peut déjà avoir été attribuée immédiatement
+        // après chaque K.O. dans BattleScene.
+        if (reward.alreadyApplied) return;
+
         const result = this.applyExperience(reward.recipientId || "captain", reward.xp);
         if (result?.learnQueue?.length) allLearnQueue.push(...result.learnQueue);
       });
@@ -146,7 +152,7 @@ export default class WorldScene extends Phaser.Scene {
     ? this.incoming.expRewards.reduce((sum, reward) => sum + (Number(reward.xp) || 0), 0)
     : (Number(this.incoming.expGained) || 0);
   const berrys = Number(this.incoming.berrysGained) || 0;
-  const winner = this.incoming.battleWinnerName || this.state.playerName || "Capitaine";
+  const winner = this.incoming.battleWinnerName || "Le combattant";
 
   this.showVictoryReward(winner, xp, berrys);
 }
@@ -174,7 +180,6 @@ export default class WorldScene extends Phaser.Scene {
         respawnIsland: STARTING_ISLAND,
         respawnX: defaultX,
         respawnY: defaultY,
-        playerName: this.incoming.playerName || "Capitaine",
         crew: [],
         teamOrder: ["captain"],
         berrys: 0,
@@ -203,7 +208,6 @@ export default class WorldScene extends Phaser.Scene {
             respawnIsland: save.respawnIsland || save.islandId,
             respawnX: save.respawnX !== undefined ? save.respawnX : save.x,
             respawnY: save.respawnY !== undefined ? save.respawnY : save.y,
-            playerName: save.playerName || "Capitaine",
             crew: save.crew || [],
             teamOrder: save.teamOrder || ["captain", ...(save.crew || [])],
             berrys: save.berrys || 0,
@@ -232,7 +236,6 @@ export default class WorldScene extends Phaser.Scene {
 
     this.state = registry.get("gameState");
 
-    if (!this.state.playerName) this.state.playerName = "Capitaine";
     if (this.state.level === undefined) this.state.level = 1;
     if (this.state.exp === undefined) this.state.exp = 0;
     if (this.state.maxExp === undefined) this.state.maxExp = 100;
@@ -787,8 +790,10 @@ export default class WorldScene extends Phaser.Scene {
 
     // Coffres.
     this.chestSprites = {};
+    this.chestGraphics = {};
     (island.chests || []).forEach((chest) => {
-      if (this.state.openedChests?.[chest.id]) return;
+      const key = `${chest.x},${chest.y}`;
+      if (this.state.openedChests?.[chest.id] || this.state.openedChests?.[key]) return;
 
       const g = this.add.graphics().setDepth(chest.y + 0.4);
       const px = chest.x * TILE_SIZE + TILE_SIZE / 2;
@@ -799,7 +804,8 @@ export default class WorldScene extends Phaser.Scene {
       g.fillRect(px - 11, py - 7, 22, 4);
       g.lineStyle(2, 0x3b2414, 1);
       g.strokeRect(px - 11, py - 7, 22, 14);
-      this.chestSprites[`${chest.x},${chest.y}`] = chest;
+      this.chestSprites[key] = chest;
+      this.chestGraphics[key] = g;
     });
 
     // Boss d'île.
@@ -966,13 +972,50 @@ showVictoryReward(winner, xp, berrys) {
       padding: { x: 6, y: 4 },
     }).setScrollFactor(0).setDepth(1000);
 
+    const saveBg = this.add.rectangle(915, 27, 190, 42, 0x0b2545, 0.96)
+      .setStrokeStyle(2, 0xe8c96b, 1)
+      .setScrollFactor(0)
+      .setDepth(1000)
+      .setInteractive({ useHandCursor: true });
+
+    const saveText = this.add.text(915, 27, "💾 SAUVEGARDER", {
+      fontFamily: "monospace",
+      fontSize: "13px",
+      fontStyle: "bold",
+      color: "#ead9b8",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+
+    saveBg.on("pointerover", () => {
+      saveBg.setFillStyle(0x173b5c, 1);
+      saveText.setColor("#ffffff");
+    });
+    saveBg.on("pointerout", () => {
+      saveBg.setFillStyle(0x0b2545, 0.96);
+      saveText.setColor("#ead9b8");
+    });
+    saveBg.on("pointerdown", () => this.exportSaveFile());
+
+    this.saveButtonObjects = [saveBg, saveText];
     this.updateHud();
+  }
+
+  exportSaveFile() {
+    if (!this.state) return;
+
+    // Le fichier est créé immédiatement, même si Vercel Blob est hors quota.
+    downloadSaveFile(this.state);
+    saveGame(this.state);
+
+    this.showMessage(
+      "SAUVEGARDE CRÉÉE",
+      "Le fichier de sauvegarde a été téléchargé.\nConserve-le pour pouvoir restaurer ta partie plus tard."
+    );
   }
 
   updateHud() {
     const island = this.island;
     this.hudText?.setText(
-      `${this.state.playerName}\n${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
+      `${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
     );
   }
 
@@ -1069,7 +1112,7 @@ showVictoryReward(winner, xp, berrys) {
     );
 
     if (chest) {
-      this.openChest(chest);
+      this.openChest(`${x},${y}`, chest);
       return;
     }
 
@@ -1119,7 +1162,13 @@ showVictoryReward(winner, xp, berrys) {
         return;
       }
 
-      this.scene.restart({ islandId: warp.toIsland, x: warp.toX, y: warp.toY });
+      this.scene.start("Sailing", {
+        fromIsland: this.state.islandId,
+        toIsland: warp.toIsland,
+        islandId: warp.toIsland,
+        x: warp.toX,
+        y: warp.toY,
+      });
       return;
     }
 
@@ -1301,7 +1350,7 @@ showVictoryReward(winner, xp, berrys) {
 
   // Sauvegarde le coffre comme ouvert
   this.state.openedChests = this.state.openedChests || {};
-  this.state.openedChests[key] = true;
+  this.state.openedChests[chest.id || key] = true;
 
   this.persist();
 
@@ -1335,7 +1384,7 @@ showVictoryReward(winner, xp, berrys) {
 
     const chest = this.chestSprites?.[key];
     if (chest) {
-      this.openChest(chest);
+      this.openChest(key, chest);
       return;
     }
 
@@ -1377,7 +1426,6 @@ showVictoryReward(winner, xp, berrys) {
       bossRespawnMinutes,
       bossName,
       bossUnlockFlag,
-      playerName: this.state.playerName,
       crew: this.state.crew,
       teamOrder: this.state.teamOrder,
       playerLevel: this.state.level,
