@@ -46,12 +46,47 @@ export const ISLANDS = {
       { x: 8, y: 6, characterId: "bretteur" },
       { x: 39, y: 25, characterId: "charpentier" },
     ],
+    npcs: [
+      {
+        id: "vieux-marin",
+        x: 27,
+        y: 4,
+        name: "Vieux Marin",
+        dialogue: [
+          "Hé, pirate ! La route vers la Brume est dangereuse.",
+          "Explore l'île et prépare ton équipage avant d'affronter le chef de la Marine.",
+        ],
+        setFlag: "quest_depart_started",
+      },
+      {
+        id: "gardien-depart",
+        x: 42,
+        y: 25,
+        name: "Gardien du port",
+        dialogue: [
+          "Le passage vers l'Île de la Brume est fermé.",
+          "Bats le chef de la Marine pour prouver ta valeur !",
+        ],
+      },
+    ],
+    chests: [
+      { id: "depart-chest-1", x: 16, y: 14, itemId: "potion", amount: 2 },
+      { id: "depart-chest-2", x: 34, y: 27, itemId: "superPotion", amount: 1 },
+    ],
+    boss: {
+      x: 44,
+      y: 25,
+      enemyId: "officierMarine",
+      level: 15,
+      name: "Capitaine Morgan",
+      unlockFlag: "boss_ile-depart",
+    },
     wildZones: [
       { x1: 18, y1: 10, x2: 30, y2: 22, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue", "pirateRival"] },
       { x1: 4, y1: 4, x2: 16, y2: 14, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
       { x1: 32, y1: 18, x2: 45, y2: 29, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
     ],
-    warps: [{ x: 45, y: 16, toIsland: "ile-brume", toX: 3, toY: 16 }],
+    warps: [{ x: 45, y: 16, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" }],
   },
 
   "ile-brume": {
@@ -96,6 +131,40 @@ export const ISLANDS = {
       { x: 30, y: 24, characterId: "tireur" },
       { x: 50, y: 7, characterId: "musicien" },
     ],
+    npcs: [
+      {
+        id: "guide-brume",
+        x: 22,
+        y: 4,
+        name: "Guide de la Brume",
+        dialogue: [
+          "La brume cache de nombreux dangers.",
+          "Plus tu avances vers l'est, plus les ennemis deviennent puissants.",
+        ],
+      },
+      {
+        id: "marin-brume",
+        x: 43,
+        y: 28,
+        name: "Marin blessé",
+        dialogue: [
+          "Le chef de la Marine contrôle la sortie de l'île.",
+          "Trouve-le à l'est et bats-le pour poursuivre ton voyage.",
+        ],
+      },
+    ],
+    chests: [
+      { id: "brume-chest-1", x: 21, y: 17, itemId: "potion", amount: 2 },
+      { id: "brume-chest-2", x: 56, y: 26, itemId: "superPotion", amount: 2 },
+    ],
+    boss: {
+      x: 56,
+      y: 25,
+      enemyId: "officierMarine",
+      level: 40,
+      name: "Commandant Brume",
+      unlockFlag: "boss_ile-brume",
+    },
     wildZones: [
       { x1: 4, y1: 6, x2: 20, y2: 26, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue", "pirateRival"] },
       { x1: 22, y1: 4, x2: 42, y2: 28, level: 2, encounterRate: 0.045, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
@@ -103,7 +172,7 @@ export const ISLANDS = {
     ],
     warps: [
       { x: 2, y: 16, toIsland: "ile-depart", toX: 44, toY: 16 },
-      { x: 61, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16 },
+      { x: 61, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume" },
     ],
   },
 
@@ -149,6 +218,30 @@ export const ISLANDS = {
       { x: 50, y: 24, characterId: "cuisinier" },
       { x: 32, y: 26, characterId: "archeologue" },
     ],
+    npcs: [
+      {
+        id: "ermite-hiver",
+        x: 27,
+        y: 4,
+        name: "Ermite des neiges",
+        dialogue: [
+          "Bienvenue sur l'Île d'Hiver.",
+          "Ici, seuls les pirates les plus solides atteignent le sommet.",
+        ],
+      },
+    ],
+    chests: [
+      { id: "hiver-chest-1", x: 23, y: 26, itemId: "superPotion", amount: 2 },
+      { id: "hiver-chest-2", x: 55, y: 25, itemId: "potion", amount: 3 },
+    ],
+    boss: {
+      x: 56,
+      y: 26,
+      enemyId: "officierMarine",
+      level: 80,
+      name: "Amiral des Glaces",
+      unlockFlag: "boss_ile-hiver",
+    },
     wildZones: [
       { x1: 4, y1: 4, x2: 22, y2: 28, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
       { x1: 24, y1: 4, x2: 44, y2: 28, level: 3, encounterRate: 0.05, enemyPool: ["chasseurDePrimes", "officierMarine"] },

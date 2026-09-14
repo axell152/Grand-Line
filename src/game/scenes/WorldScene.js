@@ -70,6 +70,9 @@ export default class WorldScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
+    this.input.keyboard.on("keydown-E", () => this.interact());
+    this.input.keyboard.on("keydown-SPACE", () => this.interact());
+
     this.input.keyboard.on("keydown-T", () => {
       this.scene.launch("CrewScene", { state: this.state });
       this.scene.pause();
@@ -120,6 +123,11 @@ export default class WorldScene extends Phaser.Scene {
       this.persist();
     }
 
+    if (this.incoming.bossVictory && this.incoming.bossUnlockFlag) {
+      this.state.progressFlags[this.incoming.bossUnlockFlag] = true;
+      this.persist();
+    }
+
   if (this.incoming.battleVictory) {
   const xp = Number(this.incoming.expGained) || 0;
   const berrys = Number(this.incoming.berrysGained) || 0;
@@ -166,6 +174,8 @@ export default class WorldScene extends Phaser.Scene {
         ppData: {},
         crewDetails: {},
         items: { ...STARTING_ITEMS },
+        progressFlags: {},
+        openedChests: {},
       });
 
       loadGame().then((save) => {
@@ -192,6 +202,8 @@ export default class WorldScene extends Phaser.Scene {
             ppData: save.ppData || {},
             crewDetails: save.crewDetails || {},
             items: save.items || { ...STARTING_ITEMS },
+            progressFlags: save.progressFlags || {},
+            openedChests: save.openedChests || {},
           });
 
           if (this.scene.isActive("World")) {
@@ -222,6 +234,8 @@ export default class WorldScene extends Phaser.Scene {
     if (this.state.ppData === undefined) this.state.ppData = {};
     if (this.state.crewDetails === undefined) this.state.crewDetails = {};
     if (this.state.items === undefined) this.state.items = { ...STARTING_ITEMS };
+    if (this.state.progressFlags === undefined) this.state.progressFlags = {};
+    if (this.state.openedChests === undefined) this.state.openedChests = {};
 
     Object.keys(this.state.crewDetails).forEach((id) => {
       const base = CHARACTERS[id];
@@ -723,12 +737,66 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     island.warps.forEach((warp) => {
-      this.add.image(
+      const locked = warp.lockedBy && !this.state.progressFlags?.[warp.lockedBy];
+      const marker = this.add.image(
         warp.x * TILE_SIZE + TILE_SIZE / 2,
         warp.y * TILE_SIZE + TILE_SIZE / 2,
         "warp-marker"
       ).setDepth(warp.y);
+
+      if (locked) {
+        marker.setTint(0x7f8c8d);
+        marker.setAlpha(0.8);
+      }
     });
+
+    // PNJ de dialogue.
+    this.talkNpcSprites = {};
+    (island.npcs || []).forEach((npc) => {
+      const sprite = this.add.sprite(
+        npc.x * TILE_SIZE + TILE_SIZE / 2,
+        npc.y * TILE_SIZE + TILE_SIZE / 2,
+        spriteKey(npc.characterId || "captain"),
+        0
+      );
+
+      sprite.setScale(2.5);
+      sprite.setOrigin(0.5, 0.78);
+      sprite.setDepth(npc.y + 0.5);
+      this.talkNpcSprites[`${npc.x},${npc.y}`] = npc;
+    });
+
+    // Coffres.
+    this.chestSprites = {};
+    (island.chests || []).forEach((chest) => {
+      if (this.state.openedChests?.[chest.id]) return;
+
+      const g = this.add.graphics().setDepth(chest.y + 0.4);
+      const px = chest.x * TILE_SIZE + TILE_SIZE / 2;
+      const py = chest.y * TILE_SIZE + TILE_SIZE / 2;
+      g.fillStyle(0x8b5a2b, 1);
+      g.fillRect(px - 11, py - 7, 22, 14);
+      g.fillStyle(0xd4a24c, 1);
+      g.fillRect(px - 11, py - 7, 22, 4);
+      g.lineStyle(2, 0x3b2414, 1);
+      g.strokeRect(px - 11, py - 7, 22, 14);
+      this.chestSprites[`${chest.x},${chest.y}`] = chest;
+    });
+
+    // Boss d'île.
+    this.bossSprite = null;
+    if (island.boss && !this.state.progressFlags?.[island.boss.unlockFlag]) {
+      const boss = island.boss;
+      this.bossSprite = this.add.sprite(
+        boss.x * TILE_SIZE + TILE_SIZE / 2,
+        boss.y * TILE_SIZE + TILE_SIZE / 2,
+        spriteKey(boss.enemyId),
+        0
+      );
+      this.bossSprite.setScale(2.5);
+      this.bossSprite.setOrigin(0.5, 0.78);
+      this.bossSprite.setDepth(boss.y + 0.5);
+    }
 
     island.recruitNpcs
       .filter((npc) => !this.state.crew.includes(npc.characterId))
@@ -932,6 +1000,25 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
+    const talkNpc = this.talkNpcSprites?.[key];
+    if (talkNpc) {
+      this.showNpcDialog(talkNpc);
+      return;
+    }
+
+    const lockedWarp = this.island.warps.find(
+      (warp) =>
+        warp.x === targetX &&
+        warp.y === targetY &&
+        warp.lockedBy &&
+        !this.state.progressFlags?.[warp.lockedBy]
+    );
+
+    if (lockedWarp) {
+      this.showMessage("PASSAGE BLOQUÉ", "Bats le boss de cette île pour continuer.");
+      return;
+    }
+
     if (this.tileAt(targetX, targetY) === "#") return;
 
     this.isMoving = true;
@@ -958,6 +1045,32 @@ showVictoryReward(winner, xp, berrys) {
   checkTileEvents(x, y) {
     const island = this.island;
 
+    const chest = (island.chests || []).find(
+      (c) => c.x === x && c.y === y && !this.state.openedChests?.[c.id]
+    );
+
+    if (chest) {
+      this.openChest(chest);
+      return;
+    }
+
+    if (
+      island.boss &&
+      x === island.boss.x &&
+      y === island.boss.y &&
+      !this.state.progressFlags?.[island.boss.unlockFlag]
+    ) {
+      this.startBattle({
+        mode: "wild",
+        characterId: island.boss.enemyId,
+        enemyLevel: island.boss.level,
+        boss: true,
+        bossName: island.boss.name,
+        bossUnlockFlag: island.boss.unlockFlag,
+      });
+      return;
+    }
+
     if (island.tavern && island.tavern.x === x && island.tavern.y === y) {
       this.state.respawnIsland = this.state.islandId;
       this.state.respawnX = x;
@@ -979,6 +1092,11 @@ showVictoryReward(winner, xp, berrys) {
 
     const warp = island.warps.find((w) => w.x === x && w.y === y);
     if (warp) {
+      if (warp.lockedBy && !this.state.progressFlags?.[warp.lockedBy]) {
+        this.showMessage("PASSAGE BLOQUÉ", "Bats le boss de cette île pour continuer.");
+        return;
+      }
+
       this.scene.restart({ islandId: warp.toIsland, x: warp.toX, y: warp.toY });
       return;
     }
@@ -1004,11 +1122,196 @@ showVictoryReward(winner, xp, berrys) {
     this.updateHud();
   }
 
-  startBattle({ mode, characterId, enemyLevel }) {
+  showMessage(title, message) {
+    if (this.messageGroup) this.messageGroup.destroy(true);
+
+    const width = this.scale.width;
+    const height = this.scale.height;
+    this.messageGroup = this.add.group();
+
+    const bg = this.add.rectangle(
+      width / 2,
+      height / 2,
+      520,
+      180,
+      0x071a2d,
+      0.97
+    ).setStrokeStyle(3, 0xe8c96b).setScrollFactor(0).setDepth(12000);
+
+    const titleText = this.add.text(width / 2, height / 2 - 55, title, {
+      fontFamily: "monospace",
+      fontSize: "24px",
+      fontStyle: "bold",
+      color: "#f1c40f",
+      align: "center",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+
+    const body = this.add.text(width / 2, height / 2 + 5, message, {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#ffffff",
+      align: "center",
+      wordWrap: { width: 450 },
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+
+    const hint = this.add.text(width / 2, height / 2 + 62, "E / ESPACE / CLIC", {
+      fontFamily: "monospace",
+      fontSize: "12px",
+      color: "#aaaaaa",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+
+    this.messageGroup.addMultiple([bg, titleText, body, hint]);
+
+    const close = () => {
+      this.messageGroup?.destroy(true);
+      this.messageGroup = null;
+      this.input.keyboard?.off("keydown-E", close);
+      this.input.keyboard?.off("keydown-SPACE", close);
+      this.input.off("pointerdown", close);
+    };
+
+    this.time.delayedCall(100, () => {
+      this.input.keyboard?.on("keydown-E", close);
+      this.input.keyboard?.on("keydown-SPACE", close);
+      this.input.on("pointerdown", close);
+    });
+  }
+
+  showNpcDialog(npc) {
+    if (this.dialogGroup) {
+      this.dialogGroup.destroy(true);
+      this.dialogGroup = null;
+      return;
+    }
+
+    const lines = Array.isArray(npc.dialogue) ? npc.dialogue : [String(npc.dialogue || "")];
+    if (npc.setFlag) {
+      this.state.progressFlags[npc.setFlag] = true;
+      this.persist();
+    }
+
+    let page = 0;
+    const drawPage = () => {
+      this.dialogGroup?.destroy(true);
+      this.dialogGroup = this.add.group();
+
+      const width = this.scale.width;
+      const height = this.scale.height;
+      const bg = this.add.rectangle(width / 2, height - 105, 820, 150, 0x071522, 0.97)
+        .setStrokeStyle(3, 0xe8c96b)
+        .setScrollFactor(0)
+        .setDepth(11000);
+
+      const name = this.add.text(125, height - 165, npc.name || "PNJ", {
+        fontFamily: "monospace",
+        fontSize: "18px",
+        fontStyle: "bold",
+        color: "#f1c40f",
+      }).setScrollFactor(0).setDepth(11001);
+
+      const text = this.add.text(125, height - 130, lines[page], {
+        fontFamily: "monospace",
+        fontSize: "16px",
+        color: "#ffffff",
+        wordWrap: { width: 690 },
+      }).setScrollFactor(0).setDepth(11001);
+
+      const hint = this.add.text(760, height - 72, page < lines.length - 1 ? "E ▶" : "E ✕", {
+        fontFamily: "monospace",
+        fontSize: "14px",
+        color: "#aaaaaa",
+      }).setScrollFactor(0).setDepth(11001);
+
+      this.dialogGroup.addMultiple([bg, name, text, hint]);
+    };
+
+    const next = () => {
+      if (!this.dialogGroup) return;
+      if (page < lines.length - 1) {
+        page += 1;
+        drawPage();
+      } else {
+        this.dialogGroup.destroy(true);
+        this.dialogGroup = null;
+        this.input.keyboard?.off("keydown-E", next);
+        this.input.keyboard?.off("keydown-SPACE", next);
+      }
+    };
+
+    this.time.delayedCall(100, () => {
+      this.input.keyboard?.on("keydown-E", next);
+      this.input.keyboard?.on("keydown-SPACE", next);
+      this.input.once("pointerdown", next);
+    });
+
+    drawPage();
+  }
+
+  openChest(chest) {
+    this.state.openedChests ||= {};
+    this.state.items ||= { ...STARTING_ITEMS };
+
+    this.state.openedChests[chest.id] = true;
+    this.state.items[chest.itemId] = (this.state.items[chest.itemId] || 0) + (chest.amount || 1);
+    this.persist();
+
+    const key = `${chest.x},${chest.y}`;
+    this.chestSprites?.[key]?.destroy();
+    delete this.chestSprites?.[key];
+
+    const item = chest.itemId === "superPotion" ? "Super Potion" : "Potion";
+    this.showMessage(
+      "COFFRE OUVERT !",
+      `Tu trouves ${chest.amount || 1} ${item}${(chest.amount || 1) > 1 ? "s" : ""}.`
+    );
+  }
+
+  interact() {
+    if (this.isMoving || this.learningObjects.length || this.dialogGroup || this.messageGroup) return;
+
+    const { dx, dy } = DIRECTIONS[this.playerDirection] || DIRECTIONS.down;
+    const x = this.state.x + dx;
+    const y = this.state.y + dy;
+    const key = `${x},${y}`;
+
+    const npc = this.talkNpcSprites?.[key];
+    if (npc) {
+      this.showNpcDialog(npc);
+      return;
+    }
+
+    const chest = this.chestSprites?.[key];
+    if (chest) {
+      this.openChest(chest);
+      return;
+    }
+
+    const boss = this.island.boss;
+    if (
+      boss &&
+      boss.x === x &&
+      boss.y === y &&
+      !this.state.progressFlags?.[boss.unlockFlag]
+    ) {
+      this.startBattle({
+        mode: "wild",
+        characterId: boss.enemyId,
+        enemyLevel: boss.level,
+        boss: true,
+        bossName: boss.name,
+        bossUnlockFlag: boss.unlockFlag,
+      });
+    }
+  }
+
+  startBattle({ mode, characterId, enemyLevel, boss = false, bossName, bossUnlockFlag }) {
     this.scene.start("Battle", {
       mode,
       characterId,
       enemyLevel,
+      boss,
+      bossName,
+      bossUnlockFlag,
       crew: this.state.crew,
       teamOrder: this.state.teamOrder,
       playerLevel: this.state.level,
