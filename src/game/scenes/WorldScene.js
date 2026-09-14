@@ -120,6 +120,14 @@ export default class WorldScene extends Phaser.Scene {
       this.persist();
     }
 
+  if (this.incoming.battleVictory) {
+  const xp = Number(this.incoming.expGained) || 0;
+  const berrys = Number(this.incoming.berrysGained) || 0;
+  const winner = this.incoming.battleWinnerName || "Le combattant";
+
+  this.showVictoryReward(winner, xp, berrys);
+}
+    
     this.drawIsland();
     this.drawHud();
   }
@@ -246,95 +254,189 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   applyExperience(memberId, amount) {
-    const xp = Math.max(0, Number(amount) || 0);
-    if (!xp) return { learnQueue: [], levelsGained: 0 };
+  const xp = Math.max(0, Number(amount) || 0);
 
-    const learnQueue = [];
-    let levelsGained = 0;
-
-    const applyLevel = (target, base) => {
-      target.level += 1;
-      target.maxExp = Math.round(target.maxExp * 1.4);
-      target.maxHp += 8;
-      target.atk += 2;
-      target.def += 1;
-      target.spd += 1;
-      target.hp = Math.min(target.maxHp, target.hp + 8);
-      levelsGained += 1;
-
-      const learnset = base?.learnset || [];
-      learnset
-        .filter((entry) => entry.level === target.level)
-        .forEach((entry) => {
-          if (!entry.move || target.moves.includes(entry.move)) return;
-          learnQueue.push({
-            memberId,
-            memberName: target.name || base.name,
-            moveKey: entry.move,
-          });
-        });
+  if (!xp) {
+    return {
+      learnQueue: [],
+      levelsGained: 0,
     };
+  }
 
-    if (memberId === "captain") {
-      const target = this.state;
-      const base = PLAYER_CHARACTER;
+  const learnQueue = [];
+  let levelsGained = 0;
 
-      target.level ||= 1;
-      target.exp ||= 0;
-      target.maxExp ||= 100;
-      target.maxHp ||= base.maxHp;
-      target.atk ??= base.atk + (target.level - 1) * 2;
-      target.def ??= base.def + (target.level - 1);
-      target.spd ??= base.spd + (target.level - 1);
-      target.moves = Array.isArray(target.moves) ? target.moves.slice(0, 4) : [...base.moves].slice(0, 4);
-      target.exp += xp;
+  const applyLevelUp = (target, base) => {
+    target.level += 1;
 
-      while (target.exp >= target.maxExp) {
-        target.exp -= target.maxExp;
-        applyLevel(target, base);
-      }
+    // XP nécessaire pour le prochain niveau.
+    target.maxExp = Math.round(target.maxExp * 1.4);
 
-      return { learnQueue, levelsGained };
+    // Progression des statistiques.
+    target.maxHp += 8;
+    target.atk += 2;
+    target.def += 1;
+    target.spd += 1;
+
+    // Lors d'un niveau gagné, on récupère quelques PV.
+    target.hp = Math.min(
+      target.maxHp,
+      target.hp + 8
+    );
+
+    levelsGained += 1;
+
+    // Vérifie si une nouvelle attaque est apprise.
+    const learnset = base?.learnset || [];
+
+    learnset
+      .filter((entry) => entry.level === target.level)
+      .forEach((entry) => {
+        if (!entry.move) return;
+
+        if (!Array.isArray(target.moves)) {
+          target.moves = [];
+        }
+
+        // Déjà connue : rien à faire.
+        if (target.moves.includes(entry.move)) {
+          return;
+        }
+
+        learnQueue.push({
+          memberId,
+          memberName: target.name || base.name,
+          moveKey: entry.move,
+        });
+      });
+  };
+
+  // ============================================================
+  // CAPITAINE
+  // ============================================================
+
+  if (memberId === "captain") {
+    const target = this.state;
+    const base = PLAYER_CHARACTER;
+
+    target.level ||= 1;
+    target.exp ||= 0;
+    target.maxExp ||= 100;
+
+    target.maxHp ||= base.maxHp;
+
+    target.atk ??=
+      base.atk + (target.level - 1) * 2;
+
+    target.def ??=
+      base.def + (target.level - 1);
+
+    target.spd ??=
+      base.spd + (target.level - 1);
+
+    target.moves = Array.isArray(target.moves)
+      ? target.moves.slice(0, 4)
+      : [...base.moves].slice(0, 4);
+
+    // Ajout de l'XP.
+    target.exp += xp;
+
+    // Gestion de plusieurs niveaux d'un coup
+    // si le joueur gagne beaucoup d'XP.
+    while (target.exp >= target.maxExp) {
+      target.exp -= target.maxExp;
+
+      applyLevelUp(
+        target,
+        base
+      );
     }
 
-    const base = CHARACTERS[memberId];
-    if (!base) return { learnQueue: [], levelsGained: 0 };
+    return {
+      learnQueue,
+      levelsGained,
+    };
+  }
 
-    this.state.crewDetails ||= {};
-    const detail = this.state.crewDetails[memberId] || {
+  // ============================================================
+  // MEMBRE DE L'ÉQUIPAGE
+  // ============================================================
+
+  const base = CHARACTERS[memberId];
+
+  if (!base) {
+    return {
+      learnQueue: [],
+      levelsGained: 0,
+    };
+  }
+
+  this.state.crewDetails ||= {};
+
+  const detail =
+    this.state.crewDetails[memberId] || {
       level: 1,
       exp: 0,
       maxExp: 100,
+
       hp: base.maxHp,
       maxHp: base.maxHp,
+
       atk: base.atk,
       def: base.def,
       spd: base.spd,
+
       moves: [...base.moves].slice(0, 4),
+
       ppData: {},
     };
 
-    detail.name = base.name;
-    detail.level ||= 1;
-    detail.exp ||= 0;
-    detail.maxExp ||= 100;
-    detail.maxHp ||= base.maxHp + (detail.level - 1) * 8;
-    detail.atk ??= base.atk + (detail.level - 1) * 2;
-    detail.def ??= base.def + (detail.level - 1);
-    detail.spd ??= base.spd + (detail.level - 1);
-    detail.hp ??= detail.maxHp;
-    detail.moves = Array.isArray(detail.moves) ? detail.moves.slice(0, 4) : [...base.moves].slice(0, 4);
-    detail.ppData ||= {};
-    detail.exp += xp;
+  detail.name = base.name;
 
-    while (detail.exp >= detail.maxExp) {
-      detail.exp -= detail.maxExp;
-      applyLevel(detail, base);
-    }
+  detail.level ||= 1;
+  detail.exp ||= 0;
+  detail.maxExp ||= 100;
 
-    this.state.crewDetails[memberId] = detail;
-    return { learnQueue, levelsGained };
+  detail.maxHp ||=
+    base.maxHp + (detail.level - 1) * 8;
+
+  detail.atk ??=
+    base.atk + (detail.level - 1) * 2;
+
+  detail.def ??=
+    base.def + (detail.level - 1);
+
+  detail.spd ??=
+    base.spd + (detail.level - 1);
+
+  detail.hp ??= detail.maxHp;
+
+  detail.moves = Array.isArray(detail.moves)
+    ? detail.moves.slice(0, 4)
+    : [...base.moves].slice(0, 4);
+
+  detail.ppData ||= {};
+
+  // Ajout de l'XP au bon personnage.
+  detail.exp += xp;
+
+  // Gestion d'un ou plusieurs niveaux.
+  while (detail.exp >= detail.maxExp) {
+    detail.exp -= detail.maxExp;
+
+    applyLevelUp(
+      detail,
+      base
+    );
   }
+
+  this.state.crewDetails[memberId] = detail;
+
+  return {
+    learnQueue,
+    levelsGained,
+  };
+}
 
   clearLearningUI() {
     this.learningObjects.forEach((obj) => obj?.destroy?.());
@@ -666,6 +768,108 @@ export default class WorldScene extends Phaser.Scene {
 this.cameras.main.startFollow(this.player, true);
   }
 
+showVictoryReward(winner, xp, berrys) {
+  const width = this.scale.width;
+  const height = this.scale.height;
+
+  const objects = [];
+
+  const overlay = this.add.rectangle(
+    width / 2,
+    height / 2,
+    520,
+    220,
+    0x071a2d,
+    0.96
+  )
+    .setStrokeStyle(3, 0xe8c96b)
+    .setScrollFactor(0)
+    .setDepth(10000);
+
+  const title = this.add.text(
+    width / 2,
+    height / 2 - 75,
+    "🏆 VICTOIRE !",
+    {
+      fontFamily: "monospace",
+      fontSize: "30px",
+      fontStyle: "bold",
+      color: "#f1c40f",
+      align: "center",
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
+
+  const reward = this.add.text(
+    width / 2,
+    height / 2 - 15,
+    `${winner}\ngagne ${xp} XP`,
+    {
+      fontFamily: "monospace",
+      fontSize: "20px",
+      color: "#ffffff",
+      align: "center",
+      lineSpacing: 8,
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
+
+  const money = this.add.text(
+    width / 2,
+    height / 2 + 55,
+    `💰 +${berrys} Berrys`,
+    {
+      fontFamily: "monospace",
+      fontSize: "22px",
+      fontStyle: "bold",
+      color: "#f1c40f",
+      align: "center",
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
+
+  const hint = this.add.text(
+    width / 2,
+    height / 2 + 95,
+    "APPUYEZ SUR UNE TOUCHE OU CLIQUEZ",
+    {
+      fontFamily: "monospace",
+      fontSize: "12px",
+      color: "#aaaaaa",
+      align: "center",
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
+
+  objects.push(overlay, title, reward, money, hint);
+
+  let closed = false;
+
+  const closePanel = () => {
+    if (closed) return;
+    closed = true;
+
+    objects.forEach((obj) => obj.destroy());
+
+    this.input.keyboard?.off("keydown", closePanel);
+    this.input.off("pointerdown", closePanel);
+  };
+
+  // Touche clavier
+  this.input.keyboard?.once("keydown", closePanel);
+
+  // Clic souris
+  this.input.once("pointerdown", closePanel);
+}
+  
   drawHud() {
     this.hudText = this.add.text(6, 6, "", {
       fontFamily: "monospace",

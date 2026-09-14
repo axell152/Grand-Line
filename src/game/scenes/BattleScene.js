@@ -511,7 +511,11 @@ export default class BattleScene extends Phaser.Scene {
     const { returnIsland, returnX, returnY } = this.battleData;
 
     if (playerWon) {
-      const exp = (this.battleMode === "recruit" ? 40 : 20) * (this.enemy.level || 1);
+      const enemyLevel = this.enemy.level || 1;
+
+const exp = this.battleMode === "recruit"
+  ? 40 * enemyLevel
+  : 20 * enemyLevel;
 
       // L'XP va au personnage qui a réellement vaincu l'ennemi.
       const id = expRecipient?.isCaptain
@@ -535,10 +539,20 @@ export default class BattleScene extends Phaser.Scene {
   islandId: returnIsland || "start",
   x: returnX || 20,
   y: returnY || 5,
-  berrysGained: 0,
+
+  // Récompenses de victoire
+  berrysGained: loot,
   expGained: exp,
   expRecipientId: id,
-  recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
+
+  // Permet à WorldScene d'afficher le récapitulatif
+  battleVictory: true,
+  battleWinnerName: expRecipient?.name || "Le combattant",
+
+  recruitedId:
+    this.battleMode === "recruit"
+      ? this.targetCharacterId
+      : undefined,
 });
     } else {
       this.setLog("Toute votre équipe est K.O... Réveil d'urgence à la taverne !");
