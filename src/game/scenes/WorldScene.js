@@ -788,6 +788,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // Coffres.
     this.chestSprites = {};
+    this.chestGraphics = {};
     (island.chests || []).forEach((chest) => {
       if (this.state.openedChests?.[chest.id]) return;
 
@@ -800,7 +801,9 @@ export default class WorldScene extends Phaser.Scene {
       g.fillRect(px - 11, py - 7, 22, 4);
       g.lineStyle(2, 0x3b2414, 1);
       g.strokeRect(px - 11, py - 7, 22, 14);
-      this.chestSprites[`${chest.x},${chest.y}`] = chest;
+      const key = `${chest.x},${chest.y}`;
+      this.chestSprites[key] = chest;
+      this.chestGraphics[key] = g;
     });
 
     // Boss d'île.
@@ -1070,7 +1073,7 @@ showVictoryReward(winner, xp, berrys) {
     );
 
     if (chest) {
-      this.openChest(chest);
+      this.openChest(`${chest.x},${chest.y}`, chest);
       return;
     }
 
@@ -1120,7 +1123,12 @@ showVictoryReward(winner, xp, berrys) {
         return;
       }
 
-      this.scene.restart({ islandId: warp.toIsland, x: warp.toX, y: warp.toY });
+      this.scene.start("Sailing", {
+        fromIsland: this.state.islandId,
+        toIsland: warp.toIsland,
+        toX: warp.toX,
+        toY: warp.toY,
+      });
       return;
     }
 
@@ -1302,7 +1310,7 @@ showVictoryReward(winner, xp, berrys) {
 
   // Sauvegarde le coffre comme ouvert
   this.state.openedChests = this.state.openedChests || {};
-  this.state.openedChests[key] = true;
+  this.state.openedChests[chest.id || key] = true;
 
   this.persist();
 
@@ -1336,7 +1344,7 @@ showVictoryReward(winner, xp, berrys) {
 
     const chest = this.chestSprites?.[key];
     if (chest) {
-      this.openChest(chest);
+      this.openChest(key, chest);
       return;
     }
 
