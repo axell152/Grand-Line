@@ -459,6 +459,50 @@ export default class BattleScene extends Phaser.Scene {
     });
   }
 
+
+  applyImmediateExperience(memberId, amount) {
+    const xp = Math.max(0, Number(amount) || 0);
+    if (!xp) return;
+
+    const target = this.teamList.find((m) =>
+      memberId === "captain" ? m.isCaptain : m.crewId === memberId
+    );
+    if (!target) return;
+
+    const base = memberId === "captain"
+      ? PLAYER_CHARACTER
+      : CHARACTERS[memberId];
+
+    if (!base) return;
+
+    target.level ||= 1;
+    target.exp ||= 0;
+    target.maxExp ||= 100;
+    target.maxHp ||= base.maxHp + (target.level - 1) * 8;
+    target.atk ??= base.atk + (target.level - 1) * 2;
+    target.def ??= base.def + (target.level - 1);
+    target.spd ??= base.spd + (target.level - 1);
+    target.moves = Array.isArray(target.moves)
+      ? target.moves.slice(0, 4)
+      : [...(base.moves || [])].slice(0, 4);
+    target.ppData ||= {};
+
+    target.exp += xp;
+
+    while (target.exp >= target.maxExp) {
+      target.exp -= target.maxExp;
+      target.level += 1;
+      target.maxExp = Math.round(target.maxExp * 1.4);
+      target.maxHp += 8;
+      target.atk += 2;
+      target.def += 1;
+      target.spd += 1;
+      target.hp = Math.min(target.maxHp, target.hp + 8);
+    }
+
+    this.saveTeamState();
+  }
+
   handleEnemyDefeated(attacker) {
     if (this.battleOver) return false;
 
@@ -468,11 +512,16 @@ export default class BattleScene extends Phaser.Scene {
     const recipientId = attacker?.isCaptain ? "captain" : (attacker?.crewId || "captain");
 
     if (this.isBossBattle) {
+      // Pour un boss, l'XP est attribuée immédiatement au vainqueur.
+      // Ainsi elle reste acquise même si l'équipe est K.O. avant le boss final.
+      this.applyImmediateExperience(recipientId, xp);
+
       this.bossExpRewards.push({
         recipientId,
         xp,
         winnerName: attacker?.name || this.battleData.playerName || "Capitaine",
         enemyName: enemy.name,
+        alreadyApplied: true,
       });
     }
 

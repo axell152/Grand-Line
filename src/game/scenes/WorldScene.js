@@ -87,6 +87,10 @@ export default class WorldScene extends Phaser.Scene {
     if (expRewards.length) {
       const allLearnQueue = [];
       expRewards.forEach((reward) => {
+        // L'XP des combats de boss peut déjà avoir été attribuée immédiatement
+        // après chaque K.O. dans BattleScene.
+        if (reward.alreadyApplied) return;
+
         const result = this.applyExperience(reward.recipientId || "captain", reward.xp);
         if (result?.learnQueue?.length) allLearnQueue.push(...result.learnQueue);
       });
@@ -146,7 +150,7 @@ export default class WorldScene extends Phaser.Scene {
     ? this.incoming.expRewards.reduce((sum, reward) => sum + (Number(reward.xp) || 0), 0)
     : (Number(this.incoming.expGained) || 0);
   const berrys = Number(this.incoming.berrysGained) || 0;
-  const winner = this.incoming.battleWinnerName || this.state.playerName || "Capitaine";
+  const winner = this.incoming.battleWinnerName || "Le combattant";
 
   this.showVictoryReward(winner, xp, berrys);
 }
@@ -174,7 +178,6 @@ export default class WorldScene extends Phaser.Scene {
         respawnIsland: STARTING_ISLAND,
         respawnX: defaultX,
         respawnY: defaultY,
-        playerName: this.incoming.playerName || "Capitaine",
         crew: [],
         teamOrder: ["captain"],
         berrys: 0,
@@ -192,7 +195,6 @@ export default class WorldScene extends Phaser.Scene {
         items: { ...STARTING_ITEMS },
         progressFlags: {},
         openedChests: {},
-        bossRespawns: {},
       });
 
       loadGame().then((save) => {
@@ -204,7 +206,6 @@ export default class WorldScene extends Phaser.Scene {
             respawnIsland: save.respawnIsland || save.islandId,
             respawnX: save.respawnX !== undefined ? save.respawnX : save.x,
             respawnY: save.respawnY !== undefined ? save.respawnY : save.y,
-            playerName: save.playerName || "Capitaine",
             crew: save.crew || [],
             teamOrder: save.teamOrder || ["captain", ...(save.crew || [])],
             berrys: save.berrys || 0,
@@ -222,7 +223,6 @@ export default class WorldScene extends Phaser.Scene {
             items: save.items || { ...STARTING_ITEMS },
             progressFlags: save.progressFlags || {},
             openedChests: save.openedChests || {},
-            bossRespawns: save.bossRespawns || {},
           });
 
           if (this.scene.isActive("World")) {
@@ -234,7 +234,6 @@ export default class WorldScene extends Phaser.Scene {
 
     this.state = registry.get("gameState");
 
-    if (!this.state.playerName) this.state.playerName = "Capitaine";
     if (this.state.level === undefined) this.state.level = 1;
     if (this.state.exp === undefined) this.state.exp = 0;
     if (this.state.maxExp === undefined) this.state.maxExp = 100;
@@ -974,7 +973,7 @@ showVictoryReward(winner, xp, berrys) {
   updateHud() {
     const island = this.island;
     this.hudText?.setText(
-      `${this.state.playerName}\n${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
+      `${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
     );
   }
 
@@ -1379,7 +1378,6 @@ showVictoryReward(winner, xp, berrys) {
       bossRespawnMinutes,
       bossName,
       bossUnlockFlag,
-      playerName: this.state.playerName,
       crew: this.state.crew,
       teamOrder: this.state.teamOrder,
       playerLevel: this.state.level,
