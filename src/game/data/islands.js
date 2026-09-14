@@ -61,7 +61,7 @@ export const ISLANDS = {
       {
         id: "gardien-depart",
         x: 42,
-        y: 25,
+        y: 15,
         name: "Gardien du port",
         dialogue: [
           "Le passage vers l'Île de la Brume est fermé.",
