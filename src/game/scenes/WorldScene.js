@@ -3,7 +3,7 @@ import { ISLANDS, STARTING_ISLAND, TILE_SIZE } from "@/game/data/islands";
 import { CHARACTERS, ENEMY_CHARACTERS, PLAYER_CHARACTER } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
 import { STARTING_ITEMS } from "@/game/data/items";
-import { saveGame, loadGame } from "@/game/systems/SaveManager";
+import { saveGame, loadGame, downloadSaveFile } from "@/game/systems/SaveManager";
 
 const DIRECTIONS = {
   up: { dx: 0, dy: -1 },
@@ -78,8 +78,12 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.pause();
     });
 
+    this.input.keyboard.on("keydown-F", () => this.exportSaveFile());
+
+    // Carte du monde : Y ouvre la carte sans quitter la partie.
     this.input.keyboard.on("keydown-Y", () => {
       if (this.messageGroup || this.dialogGroup || this.learningQueue?.length) return;
+      if (this.scene.isActive("Map")) return;
       this.scene.launch("Map", { state: this.state });
       this.scene.pause();
     });
@@ -794,8 +798,10 @@ export default class WorldScene extends Phaser.Scene {
 
     // Coffres.
     this.chestSprites = {};
+    this.chestGraphics = {};
     (island.chests || []).forEach((chest) => {
-      if (this.state.openedChests?.[chest.id]) return;
+      const key = `${chest.x},${chest.y}`;
+      if (this.state.openedChests?.[chest.id] || this.state.openedChests?.[key]) return;
 
       const g = this.add.graphics().setDepth(chest.y + 0.4);
       const px = chest.x * TILE_SIZE + TILE_SIZE / 2;
@@ -806,7 +812,8 @@ export default class WorldScene extends Phaser.Scene {
       g.fillRect(px - 11, py - 7, 22, 4);
       g.lineStyle(2, 0x3b2414, 1);
       g.strokeRect(px - 11, py - 7, 22, 14);
-      this.chestSprites[`${chest.x},${chest.y}`] = chest;
+      this.chestSprites[key] = chest;
+      this.chestGraphics[key] = g;
     });
 
     // Boss d'île.
@@ -973,7 +980,44 @@ showVictoryReward(winner, xp, berrys) {
       padding: { x: 6, y: 4 },
     }).setScrollFactor(0).setDepth(1000);
 
+    const saveBg = this.add.rectangle(915, 27, 190, 42, 0x0b2545, 0.96)
+      .setStrokeStyle(2, 0xe8c96b, 1)
+      .setScrollFactor(0)
+      .setDepth(1000)
+      .setInteractive({ useHandCursor: true });
+
+    const saveText = this.add.text(915, 27, "💾 SAUVEGARDER", {
+      fontFamily: "monospace",
+      fontSize: "13px",
+      fontStyle: "bold",
+      color: "#ead9b8",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+
+    saveBg.on("pointerover", () => {
+      saveBg.setFillStyle(0x173b5c, 1);
+      saveText.setColor("#ffffff");
+    });
+    saveBg.on("pointerout", () => {
+      saveBg.setFillStyle(0x0b2545, 0.96);
+      saveText.setColor("#ead9b8");
+    });
+    saveBg.on("pointerdown", () => this.exportSaveFile());
+
+    this.saveButtonObjects = [saveBg, saveText];
     this.updateHud();
+  }
+
+  exportSaveFile() {
+    if (!this.state) return;
+
+    // Le fichier est créé immédiatement, même si Vercel Blob est hors quota.
+    downloadSaveFile(this.state);
+    saveGame(this.state);
+
+    this.showMessage(
+      "SAUVEGARDE CRÉÉE",
+      "Le fichier de sauvegarde a été téléchargé.\nConserve-le pour pouvoir restaurer ta partie plus tard."
+    );
   }
 
   updateHud() {
@@ -1076,7 +1120,7 @@ showVictoryReward(winner, xp, berrys) {
     );
 
     if (chest) {
-      this.openChest(chest);
+      this.openChest(`${x},${y}`, chest);
       return;
     }
 
@@ -1126,7 +1170,13 @@ showVictoryReward(winner, xp, berrys) {
         return;
       }
 
-      this.scene.restart({ islandId: warp.toIsland, x: warp.toX, y: warp.toY });
+      this.scene.start("Sailing", {
+        fromIsland: this.state.islandId,
+        toIsland: warp.toIsland,
+        islandId: warp.toIsland,
+        x: warp.toX,
+        y: warp.toY,
+      });
       return;
     }
 
@@ -1308,7 +1358,7 @@ showVictoryReward(winner, xp, berrys) {
 
   // Sauvegarde le coffre comme ouvert
   this.state.openedChests = this.state.openedChests || {};
-  this.state.openedChests[key] = true;
+  this.state.openedChests[chest.id || key] = true;
 
   this.persist();
 
@@ -1342,7 +1392,7 @@ showVictoryReward(winner, xp, berrys) {
 
     const chest = this.chestSprites?.[key];
     if (chest) {
-      this.openChest(chest);
+      this.openChest(key, chest);
       return;
     }
 
