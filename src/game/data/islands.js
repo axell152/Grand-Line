@@ -77,7 +77,7 @@ export const ISLANDS = {
       x: 44,
       y: 25,
       enemyId: "officierMarine",
-      level: 15,
+      level: 1,
       name: "Capitaine Morgan",
       unlockFlag: "boss_ile-depart",
     },
