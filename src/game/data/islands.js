@@ -85,7 +85,7 @@ export const ISLANDS = {
       team: [
         { characterId: "marineRecrue", level: 1 },
         { characterId: "marineRecrue", level: 1 },
-        { characterId: "officierMarine", level: 15, isBoss: true },
+        { characterId: "officierMarine", level: 1, isBoss: true },
       ],
     },
     wildZones: [
