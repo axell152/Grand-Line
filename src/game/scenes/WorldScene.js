@@ -246,95 +246,189 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   applyExperience(memberId, amount) {
-    const xp = Math.max(0, Number(amount) || 0);
-    if (!xp) return { learnQueue: [], levelsGained: 0 };
+  const xp = Math.max(0, Number(amount) || 0);
 
-    const learnQueue = [];
-    let levelsGained = 0;
-
-    const applyLevel = (target, base) => {
-      target.level += 1;
-      target.maxExp = Math.round(target.maxExp * 1.4);
-      target.maxHp += 8;
-      target.atk += 2;
-      target.def += 1;
-      target.spd += 1;
-      target.hp = Math.min(target.maxHp, target.hp + 8);
-      levelsGained += 1;
-
-      const learnset = base?.learnset || [];
-      learnset
-        .filter((entry) => entry.level === target.level)
-        .forEach((entry) => {
-          if (!entry.move || target.moves.includes(entry.move)) return;
-          learnQueue.push({
-            memberId,
-            memberName: target.name || base.name,
-            moveKey: entry.move,
-          });
-        });
+  if (!xp) {
+    return {
+      learnQueue: [],
+      levelsGained: 0,
     };
+  }
 
-    if (memberId === "captain") {
-      const target = this.state;
-      const base = PLAYER_CHARACTER;
+  const learnQueue = [];
+  let levelsGained = 0;
 
-      target.level ||= 1;
-      target.exp ||= 0;
-      target.maxExp ||= 100;
-      target.maxHp ||= base.maxHp;
-      target.atk ??= base.atk + (target.level - 1) * 2;
-      target.def ??= base.def + (target.level - 1);
-      target.spd ??= base.spd + (target.level - 1);
-      target.moves = Array.isArray(target.moves) ? target.moves.slice(0, 4) : [...base.moves].slice(0, 4);
-      target.exp += xp;
+  const applyLevelUp = (target, base) => {
+    target.level += 1;
 
-      while (target.exp >= target.maxExp) {
-        target.exp -= target.maxExp;
-        applyLevel(target, base);
-      }
+    // XP nécessaire pour le prochain niveau.
+    target.maxExp = Math.round(target.maxExp * 1.4);
 
-      return { learnQueue, levelsGained };
+    // Progression des statistiques.
+    target.maxHp += 8;
+    target.atk += 2;
+    target.def += 1;
+    target.spd += 1;
+
+    // Lors d'un niveau gagné, on récupère quelques PV.
+    target.hp = Math.min(
+      target.maxHp,
+      target.hp + 8
+    );
+
+    levelsGained += 1;
+
+    // Vérifie si une nouvelle attaque est apprise.
+    const learnset = base?.learnset || [];
+
+    learnset
+      .filter((entry) => entry.level === target.level)
+      .forEach((entry) => {
+        if (!entry.move) return;
+
+        if (!Array.isArray(target.moves)) {
+          target.moves = [];
+        }
+
+        // Déjà connue : rien à faire.
+        if (target.moves.includes(entry.move)) {
+          return;
+        }
+
+        learnQueue.push({
+          memberId,
+          memberName: target.name || base.name,
+          moveKey: entry.move,
+        });
+      });
+  };
+
+  // ============================================================
+  // CAPITAINE
+  // ============================================================
+
+  if (memberId === "captain") {
+    const target = this.state;
+    const base = PLAYER_CHARACTER;
+
+    target.level ||= 1;
+    target.exp ||= 0;
+    target.maxExp ||= 100;
+
+    target.maxHp ||= base.maxHp;
+
+    target.atk ??=
+      base.atk + (target.level - 1) * 2;
+
+    target.def ??=
+      base.def + (target.level - 1);
+
+    target.spd ??=
+      base.spd + (target.level - 1);
+
+    target.moves = Array.isArray(target.moves)
+      ? target.moves.slice(0, 4)
+      : [...base.moves].slice(0, 4);
+
+    // Ajout de l'XP.
+    target.exp += xp;
+
+    // Gestion de plusieurs niveaux d'un coup
+    // si le joueur gagne beaucoup d'XP.
+    while (target.exp >= target.maxExp) {
+      target.exp -= target.maxExp;
+
+      applyLevelUp(
+        target,
+        base
+      );
     }
 
-    const base = CHARACTERS[memberId];
-    if (!base) return { learnQueue: [], levelsGained: 0 };
+    return {
+      learnQueue,
+      levelsGained,
+    };
+  }
 
-    this.state.crewDetails ||= {};
-    const detail = this.state.crewDetails[memberId] || {
+  // ============================================================
+  // MEMBRE DE L'ÉQUIPAGE
+  // ============================================================
+
+  const base = CHARACTERS[memberId];
+
+  if (!base) {
+    return {
+      learnQueue: [],
+      levelsGained: 0,
+    };
+  }
+
+  this.state.crewDetails ||= {};
+
+  const detail =
+    this.state.crewDetails[memberId] || {
       level: 1,
       exp: 0,
       maxExp: 100,
+
       hp: base.maxHp,
       maxHp: base.maxHp,
+
       atk: base.atk,
       def: base.def,
       spd: base.spd,
+
       moves: [...base.moves].slice(0, 4),
+
       ppData: {},
     };
 
-    detail.name = base.name;
-    detail.level ||= 1;
-    detail.exp ||= 0;
-    detail.maxExp ||= 100;
-    detail.maxHp ||= base.maxHp + (detail.level - 1) * 8;
-    detail.atk ??= base.atk + (detail.level - 1) * 2;
-    detail.def ??= base.def + (detail.level - 1);
-    detail.spd ??= base.spd + (detail.level - 1);
-    detail.hp ??= detail.maxHp;
-    detail.moves = Array.isArray(detail.moves) ? detail.moves.slice(0, 4) : [...base.moves].slice(0, 4);
-    detail.ppData ||= {};
-    detail.exp += xp;
+  detail.name = base.name;
 
-    while (detail.exp >= detail.maxExp) {
-      detail.exp -= detail.maxExp;
-      applyLevel(detail, base);
-    }
+  detail.level ||= 1;
+  detail.exp ||= 0;
+  detail.maxExp ||= 100;
 
-    this.state.crewDetails[memberId] = detail;
-    return { learnQueue, levelsGained };
+  detail.maxHp ||=
+    base.maxHp + (detail.level - 1) * 8;
+
+  detail.atk ??=
+    base.atk + (detail.level - 1) * 2;
+
+  detail.def ??=
+    base.def + (detail.level - 1);
+
+  detail.spd ??=
+    base.spd + (detail.level - 1);
+
+  detail.hp ??= detail.maxHp;
+
+  detail.moves = Array.isArray(detail.moves)
+    ? detail.moves.slice(0, 4)
+    : [...base.moves].slice(0, 4);
+
+  detail.ppData ||= {};
+
+  // Ajout de l'XP au bon personnage.
+  detail.exp += xp;
+
+  // Gestion d'un ou plusieurs niveaux.
+  while (detail.exp >= detail.maxExp) {
+    detail.exp -= detail.maxExp;
+
+    applyLevelUp(
+      detail,
+      base
+    );
   }
+
+  this.state.crewDetails[memberId] = detail;
+
+  return {
+    learnQueue,
+    levelsGained,
+  };
+}
 
   clearLearningUI() {
     this.learningObjects.forEach((obj) => obj?.destroy?.());
