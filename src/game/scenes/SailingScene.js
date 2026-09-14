@@ -2,7 +2,7 @@ import Phaser from "phaser";
 
 export default class SailingScene extends Phaser.Scene {
   constructor() {
-    super("SailingScene");
+    super("Sailing");
   }
 
   init(data) {
