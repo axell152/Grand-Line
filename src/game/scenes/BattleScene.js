@@ -161,6 +161,30 @@ export default class BattleScene extends Phaser.Scene {
 
   setLog(text) { this.logText?.setText(text); }
 
+  waitForContinue(callback) {
+    if (this.continueCleanup) this.continueCleanup();
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      this.continueCleanup?.();
+      this.continueCleanup = null;
+      callback?.();
+    };
+
+    const onPointerDown = () => finish();
+    const onKeyDown = () => finish();
+
+    this.input.on("pointerdown", onPointerDown);
+    this.input.keyboard?.on("keydown", onKeyDown);
+
+    this.continueCleanup = () => {
+      this.input.off("pointerdown", onPointerDown);
+      this.input.keyboard?.off("keydown", onKeyDown);
+    };
+  }
+
   clearInterfaceElements() {
     this.menuGroup?.destroy(true);
     this.menuGroup = this.add.group();
@@ -453,11 +477,11 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     this.locked = true;
-    this.setLog(`💀 ${enemy.name} est K.O. !\n⭐ ${attacker?.name || "Capitaine"} gagne ${xp} XP !`);
+    this.setLog(`💀 ${enemy.name} est K.O. !\n⭐ ${attacker?.name || "Capitaine"} gagne ${xp} XP !\n\n▶ CLIQUEZ OU APPUYEZ SUR UNE TOUCHE POUR CONTINUER`);
     this.showFloatingText(`+${xp} XP`, this.playerSprite.x, this.playerSprite.y - 95, "#f1c40f");
     this.showFloatingText("K.O. !", this.enemySprite.x, this.enemySprite.y - 90, "#e74c3c");
 
-    this.time.delayedCall(1800, () => {
+    this.waitForContinue(() => {
       if (this.battleOver) return;
 
       if (this.isBossBattle && this.bossEnemyIndex < this.enemyTeam.length - 1) {
@@ -470,11 +494,8 @@ export default class BattleScene extends Phaser.Scene {
         this.tweens.add({ targets: this.enemySprite, alpha: 1, duration: 350 });
         this.refreshBars();
         this.setLog(`${this.enemy.name} entre dans le combat !`);
-        this.time.delayedCall(750, () => {
-          if (this.battleOver) return;
-          this.locked = false;
-          this.showMainMenu();
-        });
+        this.locked = false;
+        this.showMainMenu();
         return;
       }
 
@@ -496,9 +517,9 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     this.locked = true;
-    this.setLog(`${this.player.name} est K.O. ! Choisissez un autre membre de l'équipage.`);
+    this.setLog(`${this.player.name} est K.O. ! Choisissez un autre membre de l'équipage.\n\n▶ CLIQUEZ OU APPUYEZ SUR UNE TOUCHE`);
 
-    this.time.delayedCall(650, () => {
+    this.waitForContinue(() => {
       if (!this.battleOver) this.showTeamMenu(true);
     });
 
@@ -603,10 +624,10 @@ export default class BattleScene extends Phaser.Scene {
 
       this.showFloatingText(`+${totalXp} XP`, 510, 385, "#f1c40f");
       this.setLog(completeBossVictory
-        ? `🏆 Victoire !\n${lastWinner} et l'équipage remportent ${totalXp} XP au total !`
-        : `🏆 Victoire !\n${lastWinner} gagne ${totalXp} XP${loot ? ` et ${loot} berrys` : ""}.`);
+        ? `🏆 Victoire !\n${lastWinner} et l'équipage remportent ${totalXp} XP au total !\n\n▶ CLIQUEZ OU APPUYEZ SUR UNE TOUCHE POUR CONTINUER`
+        : `🏆 Victoire !\n${lastWinner} gagne ${totalXp} XP${loot ? ` et ${loot} berrys` : ""}.\n\n▶ CLIQUEZ OU APPUYEZ SUR UNE TOUCHE POUR CONTINUER`);
 
-      this.time.delayedCall(2200, () => this.scene.start("World", {
+      this.waitForContinue(() => this.scene.start("World", {
         islandId: returnIsland || "ile-depart",
         x: returnX ?? 20,
         y: returnY ?? 5,
@@ -625,10 +646,10 @@ export default class BattleScene extends Phaser.Scene {
         recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
       }));
     } else {
-      this.setLog(`💀 Toute l'équipe est K.O. !\nRetour à la taverne dans quelques secondes...`);
+      this.setLog(`💀 Toute l'équipe est K.O. !\nRetour à la taverne.\n\n▶ CLIQUEZ OU APPUYEZ SUR UNE TOUCHE POUR CONTINUER`);
       this.showFloatingText("ÉQUIPE K.O. !", 510, 385, "#e74c3c");
 
-      this.time.delayedCall(2600, () => {
+      this.waitForContinue(() => {
         state.hp = state.maxHp || PLAYER_CHARACTER.maxHp;
         state.ppData = {};
 
