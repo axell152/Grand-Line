@@ -24,6 +24,10 @@ export default class BattleScene extends Phaser.Scene {
     this.targetCharacterId = d.characterId;
     this.crewDetails = d.crewDetails || {};
     this.items = { potion: 0, superPotion: 0, ...(d.items || {}) };
+    this.isBossBattle = d.boss === true && Array.isArray(d.bossTeam) && d.bossTeam.length > 0;
+    this.bossId = d.bossId;
+    this.bossEnemyIndex = 0;
+    this.bossExpRewards = [];
 
     const enemySource = this.battleMode === "recruit"
       ? CHARACTERS[d.characterId]
@@ -46,9 +50,24 @@ export default class BattleScene extends Phaser.Scene {
     if (d.playerCurrentHp !== undefined) captain.hp = Math.min(d.playerCurrentHp, captain.maxHp);
     captain.ppData = { ...(d.playerPpData || {}) };
 
-    this.enemy = createBattler(enemySource);
-    if (d.bossName) this.enemy.name = d.bossName;
-    this.enemy.type = this.enemy.type || "tranchant";
+    if (this.isBossBattle) {
+      this.enemyTeam = d.bossTeam.map((entry) => {
+        const base = ENEMY_CHARACTERS[entry.characterId];
+        const scaled = scaleEnemyForLevel(base, entry.level || 1);
+        const enemy = createBattler(scaled);
+        enemy.type = enemy.type || "tranchant";
+        enemy.isBossMember = entry.isBoss === true;
+        if (entry.name) enemy.name = entry.name;
+        return enemy;
+      });
+      this.enemy = this.enemyTeam[0];
+      this.targetCharacterId = d.bossTeam[0].characterId;
+      this.bossEnemyIndex = 0;
+    } else {
+      this.enemy = createBattler(enemySource);
+      if (d.bossName) this.enemy.name = d.bossName;
+      this.enemy.type = this.enemy.type || "tranchant";
+    }
 
     const order = d.teamOrder?.length ? d.teamOrder : ["captain", ...(d.crew || [])];
     this.teamList = order.map((entry) => {
@@ -107,7 +126,7 @@ export default class BattleScene extends Phaser.Scene {
   }
 
   drawCombatants() {
-    const enemyId = this.targetCharacterId || "marineRecrue";
+    const enemyId = this.targetCharacterId || this.battleData.characterId || "marineRecrue";
     this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 0).setScale(7).setOrigin(0.5, 0.82).setDepth(10);
     this.enemyNameText = this.add.text(480, 72, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
     this.enemyHpBarBg = this.add.rectangle(480, 110, 300, 20, 0x161616).setOrigin(0, 0.5);
@@ -366,8 +385,7 @@ export default class BattleScene extends Phaser.Scene {
 
     if (isDefeated(defender)) {
       if (defender === this.enemy) {
-        // Le combattant qui porte le dernier coup est explicitement transmis.
-        this.endBattle(true, attacker);
+        this.handleEnemyDefeated(attacker);
       } else {
         this.handlePlayerDefeated();
       }
@@ -414,6 +432,54 @@ export default class BattleScene extends Phaser.Scene {
       duration: 800,
       onComplete: () => t.destroy(),
     });
+  }
+
+  handleEnemyDefeated(attacker) {
+    if (this.battleOver) return false;
+
+    const enemy = this.enemy;
+    const enemyLevel = enemy.level || 1;
+    const xp = this.battleMode === "recruit" ? 40 * enemyLevel : 20 * enemyLevel;
+    const recipientId = attacker?.isCaptain ? "captain" : (attacker?.crewId || "captain");
+
+    if (this.isBossBattle) {
+      this.bossExpRewards.push({
+        recipientId,
+        xp,
+        winnerName: attacker?.name || "Le combattant",
+        enemyName: enemy.name,
+      });
+    }
+
+    this.locked = true;
+    this.setLog(`💀 ${enemy.name} est K.O. !`);
+    this.showFloatingText("K.O. !", this.enemySprite.x, this.enemySprite.y - 90, "#e74c3c");
+
+    this.time.delayedCall(1100, () => {
+      if (this.battleOver) return;
+
+      if (this.isBossBattle && this.bossEnemyIndex < this.enemyTeam.length - 1) {
+        this.bossEnemyIndex += 1;
+        this.enemy = this.enemyTeam[this.bossEnemyIndex];
+        this.targetCharacterId = this.battleData.bossTeam[this.bossEnemyIndex].characterId;
+        this.enemySprite.setTexture(spriteKey(this.targetCharacterId), 0);
+        this.enemySprite.setAlpha(0);
+        this.enemySprite.setScale(7);
+        this.tweens.add({ targets: this.enemySprite, alpha: 1, duration: 350 });
+        this.refreshBars();
+        this.setLog(`${this.enemy.name} entre dans le combat !`);
+        this.time.delayedCall(750, () => {
+          if (this.battleOver) return;
+          this.locked = false;
+          this.showMainMenu();
+        });
+        return;
+      }
+
+      this.endBattle(true, attacker);
+    });
+
+    return false;
   }
 
   handlePlayerDefeated() {
@@ -512,47 +578,50 @@ export default class BattleScene extends Phaser.Scene {
     const { returnIsland, returnX, returnY } = this.battleData;
 
     if (playerWon) {
-      const enemyLevel = this.enemy.level || 1;
+      let expRewards = this.bossExpRewards || [];
 
-const exp = this.battleMode === "recruit"
-  ? 40 * enemyLevel
-  : 20 * enemyLevel;
+      if (!this.isBossBattle && !expRewards.length) {
+        const enemyLevel = this.enemy.level || 1;
+        const exp = this.battleMode === "recruit" ? 40 * enemyLevel : 20 * enemyLevel;
+        const id = expRecipient?.isCaptain ? "captain" : (expRecipient?.crewId || "captain");
+        expRewards = [{
+          recipientId: id,
+          xp: exp,
+          winnerName: expRecipient?.name || "Le combattant",
+          enemyName: this.enemy.name,
+        }];
+      }
 
-      // L'XP va au personnage qui a réellement vaincu l'ennemi.
-      const id = expRecipient?.isCaptain
-        ? "captain"
-        : (expRecipient?.crewId || "captain");
+      const totalXp = expRewards.reduce((sum, reward) => sum + (Number(reward.xp) || 0), 0);
+      const loot = this.battleMode === "recruit" ? 0 : (this.isBossBattle ? 1000 : 20 + Math.floor(Math.random() * 30));
+      const lastWinner = expRecipient?.name || expRewards[expRewards.length - 1]?.winnerName || "Le combattant";
+      const completeBossVictory = this.isBossBattle;
+      const respawnMinutes = Number(this.battleData.bossRespawnMinutes) || 15;
+      const bossRespawnAt = completeBossVictory ? Date.now() + respawnMinutes * 60 * 1000 : undefined;
 
-      const loot = this.battleMode === "recruit"
-        ? 0
-        : 20 + Math.floor(Math.random() * 30);
-
-      this.showFloatingText(`+${exp} XP`, 510, 385, "#f1c40f");
-      this.setLog(
-        `Victoire ! ${expRecipient?.name || "Le combattant"} gagne ${exp} XP${loot ? ` et ${loot} berrys` : ""}.`
-      );
+      this.showFloatingText(`+${totalXp} XP`, 510, 385, "#f1c40f");
+      this.setLog(completeBossVictory
+        ? `🏆 Victoire ! Toute l'équipe de ${this.battleData.bossName || "boss"} est vaincue !`
+        : `Victoire ! ${lastWinner} gagne ${totalXp} XP${loot ? ` et ${loot} berrys` : ""}.`);
 
       this.scene.start("World", {
-  islandId: returnIsland || "start",
-  x: returnX || 20,
-  y: returnY || 5,
-
-  // Récompenses de victoire
-  berrysGained: loot,
-  expGained: exp,
-  expRecipientId: id,
-
-  // Permet à WorldScene d'afficher le récapitulatif
-  battleVictory: true,
-  battleWinnerName: expRecipient?.name || "Le combattant",
-  bossVictory: this.battleData.boss === true,
-  bossUnlockFlag: this.battleData.bossUnlockFlag,
-
-  recruitedId:
-    this.battleMode === "recruit"
-      ? this.targetCharacterId
-      : undefined,
-});
+        islandId: returnIsland || "ile-depart",
+        x: returnX ?? 20,
+        y: returnY ?? 5,
+        berrysGained: loot,
+        expGained: this.isBossBattle ? undefined : totalXp,
+        expRecipientId: this.isBossBattle ? undefined : expRewards[0]?.recipientId,
+        expRewards,
+        battleVictory: true,
+        battleWinnerName: lastWinner,
+        bossVictory: completeBossVictory,
+        bossId: this.battleData.bossId,
+        bossUnlockFlag: this.battleData.bossUnlockFlag,
+        bossRespawnAt,
+        bossComplete: completeBossVictory,
+        bossName: this.battleData.bossName,
+        recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
+      });
     } else {
       this.setLog("Toute votre équipe est K.O... Réveil d'urgence à la taverne !");
 

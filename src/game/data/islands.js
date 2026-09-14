@@ -61,7 +61,7 @@ export const ISLANDS = {
       {
         id: "gardien-depart",
         x: 42,
-        y: 15,
+        y: 25,
         name: "Gardien du port",
         dialogue: [
           "Le passage vers l'Île de la Brume est fermé.",
@@ -74,12 +74,19 @@ export const ISLANDS = {
       { id: "depart-chest-2", x: 34, y: 27, itemId: "superPotion", amount: 1 },
     ],
     boss: {
+      id: "morgan",
       x: 44,
       y: 25,
       enemyId: "officierMarine",
       level: 15,
       name: "Capitaine Morgan",
       unlockFlag: "boss_ile-depart",
+      respawnMinutes: 15,
+      team: [
+        { characterId: "marineRecrue", level: 10 },
+        { characterId: "marineRecrue", level: 10 },
+        { characterId: "officierMarine", level: 15, isBoss: true },
+      ],
     },
     wildZones: [
       { x1: 18, y1: 10, x2: 30, y2: 22, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue", "pirateRival"] },
@@ -158,12 +165,19 @@ export const ISLANDS = {
       { id: "brume-chest-2", x: 56, y: 26, itemId: "superPotion", amount: 2 },
     ],
     boss: {
+      id: "brume",
       x: 56,
       y: 25,
       enemyId: "officierMarine",
       level: 40,
       name: "Commandant Brume",
       unlockFlag: "boss_ile-brume",
+      respawnMinutes: 15,
+      team: [
+        { characterId: "pirateRival", level: 30 },
+        { characterId: "chasseurDePrimes", level: 35 },
+        { characterId: "officierMarine", level: 40, isBoss: true },
+      ],
     },
     wildZones: [
       { x1: 4, y1: 6, x2: 20, y2: 26, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue", "pirateRival"] },
@@ -235,12 +249,19 @@ export const ISLANDS = {
       { id: "hiver-chest-2", x: 55, y: 25, itemId: "potion", amount: 3 },
     ],
     boss: {
+      id: "amiral-glaces",
       x: 56,
       y: 26,
       enemyId: "officierMarine",
       level: 80,
       name: "Amiral des Glaces",
       unlockFlag: "boss_ile-hiver",
+      respawnMinutes: 15,
+      team: [
+        { characterId: "officierMarine", level: 65 },
+        { characterId: "chasseurDePrimes", level: 70 },
+        { characterId: "officierMarine", level: 80, isBoss: true },
+      ],
     },
     wildZones: [
       { x1: 4, y1: 4, x2: 22, y2: 28, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
