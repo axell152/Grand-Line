@@ -539,10 +539,20 @@ const exp = this.battleMode === "recruit"
   islandId: returnIsland || "start",
   x: returnX || 20,
   y: returnY || 5,
-  berrysGained: 0,
+
+  // Récompenses de victoire
+  berrysGained: loot,
   expGained: exp,
   expRecipientId: id,
-  recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
+
+  // Permet à WorldScene d'afficher le récapitulatif
+  battleVictory: true,
+  battleWinnerName: expRecipient?.name || "Le combattant",
+
+  recruitedId:
+    this.battleMode === "recruit"
+      ? this.targetCharacterId
+      : undefined,
 });
     } else {
       this.setLog("Toute votre équipe est K.O... Réveil d'urgence à la taverne !");
