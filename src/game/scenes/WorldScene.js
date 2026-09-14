@@ -834,17 +834,40 @@ showVictoryReward(winner, xp, berrys) {
     .setScrollFactor(0)
     .setDepth(10001);
 
-  objects.push(overlay, title, reward, money);
+  const hint = this.add.text(
+    width / 2,
+    height / 2 + 95,
+    "APPUYEZ SUR UNE TOUCHE OU CLIQUEZ",
+    {
+      fontFamily: "monospace",
+      fontSize: "12px",
+      color: "#aaaaaa",
+      align: "center",
+    }
+  )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(10001);
 
-  this.tweens.add({
-    targets: objects,
-    alpha: 0,
-    delay: 2300,
-    duration: 500,
-    onComplete: () => {
-      objects.forEach((obj) => obj.destroy());
-    },
-  });
+  objects.push(overlay, title, reward, money, hint);
+
+  let closed = false;
+
+  const closePanel = () => {
+    if (closed) return;
+    closed = true;
+
+    objects.forEach((obj) => obj.destroy());
+
+    this.input.keyboard?.off("keydown", closePanel);
+    this.input.off("pointerdown", closePanel);
+  };
+
+  // Touche clavier
+  this.input.keyboard?.once("keydown", closePanel);
+
+  // Clic souris
+  this.input.once("pointerdown", closePanel);
 }
   
   drawHud() {
