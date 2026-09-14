@@ -78,16 +78,22 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.pause();
     });
 
-    if (typeof this.incoming.expGained === "number") {
-      const result = this.applyExperience(
-        this.incoming.expRecipientId || "captain",
-        this.incoming.expGained
-      );
+    const expRewards = Array.isArray(this.incoming.expRewards)
+      ? this.incoming.expRewards
+      : (typeof this.incoming.expGained === "number"
+        ? [{ recipientId: this.incoming.expRecipientId || "captain", xp: this.incoming.expGained }]
+        : []);
 
+    if (expRewards.length) {
+      const allLearnQueue = [];
+      expRewards.forEach((reward) => {
+        const result = this.applyExperience(reward.recipientId || "captain", reward.xp);
+        if (result?.learnQueue?.length) allLearnQueue.push(...result.learnQueue);
+      });
       this.persist();
 
-      if (result?.learnQueue?.length) {
-        this.learningQueue = [...result.learnQueue];
+      if (allLearnQueue.length) {
+        this.learningQueue = [...allLearnQueue];
         this.time.delayedCall(250, () => this.showNextLearningPrompt());
       }
     }
@@ -123,13 +129,22 @@ export default class WorldScene extends Phaser.Scene {
       this.persist();
     }
 
-    if (this.incoming.bossVictory && this.incoming.bossUnlockFlag) {
-      this.state.progressFlags[this.incoming.bossUnlockFlag] = true;
+    if (this.incoming.bossVictory) {
+      if (this.incoming.bossUnlockFlag) {
+        this.state.progressFlags[this.incoming.bossUnlockFlag] = true;
+      }
+
+      if (this.incoming.bossId && this.incoming.bossRespawnAt) {
+        this.state.bossRespawns[this.incoming.bossId] = this.incoming.bossRespawnAt;
+      }
+
       this.persist();
     }
 
   if (this.incoming.battleVictory) {
-  const xp = Number(this.incoming.expGained) || 0;
+  const xp = Array.isArray(this.incoming.expRewards)
+    ? this.incoming.expRewards.reduce((sum, reward) => sum + (Number(reward.xp) || 0), 0)
+    : (Number(this.incoming.expGained) || 0);
   const berrys = Number(this.incoming.berrysGained) || 0;
   const winner = this.incoming.battleWinnerName || "Le combattant";
 
@@ -236,6 +251,7 @@ export default class WorldScene extends Phaser.Scene {
     if (this.state.items === undefined) this.state.items = { ...STARTING_ITEMS };
     if (this.state.progressFlags === undefined) this.state.progressFlags = {};
     if (this.state.openedChests === undefined) this.state.openedChests = {};
+    if (this.state.bossRespawns === undefined) this.state.bossRespawns = {};
 
     Object.keys(this.state.crewDetails).forEach((id) => {
       const base = CHARACTERS[id];
@@ -767,33 +783,21 @@ export default class WorldScene extends Phaser.Scene {
     });
 
     // Coffres.
-this.chestSprites = {};
-this.chestGraphics = {};
+    this.chestSprites = {};
+    (island.chests || []).forEach((chest) => {
+      if (this.state.openedChests?.[chest.id]) return;
 
-(island.chests || []).forEach((chest) => {
-  if (this.state.openedChests?.[chest.id]) return;
-
-  const key = `${chest.x},${chest.y}`;
-
-  const g = this.add.graphics().setDepth(chest.y + 0.4);
-  const px = chest.x * TILE_SIZE + TILE_SIZE / 2;
-  const py = chest.y * TILE_SIZE + TILE_SIZE / 2;
-
-  g.fillStyle(0x8b5a2b, 1);
-  g.fillRect(px - 11, py - 7, 22, 14);
-
-  g.fillStyle(0xd4a24c, 1);
-  g.fillRect(px - 11, py - 7, 22, 4);
-
-  g.lineStyle(2, 0x3b2414, 1);
-  g.strokeRect(px - 11, py - 7, 22, 14);
-
-  // Données du coffre
-  this.chestSprites[key] = chest;
-
-  // Véritable objet graphique Phaser
-  this.chestGraphics[key] = g;
-});
+      const g = this.add.graphics().setDepth(chest.y + 0.4);
+      const px = chest.x * TILE_SIZE + TILE_SIZE / 2;
+      const py = chest.y * TILE_SIZE + TILE_SIZE / 2;
+      g.fillStyle(0x8b5a2b, 1);
+      g.fillRect(px - 11, py - 7, 22, 14);
+      g.fillStyle(0xd4a24c, 1);
+      g.fillRect(px - 11, py - 7, 22, 4);
+      g.lineStyle(2, 0x3b2414, 1);
+      g.strokeRect(px - 11, py - 7, 22, 14);
+      this.chestSprites[`${chest.x},${chest.y}`] = chest;
+    });
 
     // Boss d'île.
     this.bossSprite = null;
@@ -1062,21 +1066,24 @@ showVictoryReward(winner, xp, berrys) {
     );
 
     if (chest) {
-  this.openChest(`${chest.x},${chest.y}`, chest);
-  return;
-}
+      this.openChest(chest);
+      return;
+    }
 
     if (
       island.boss &&
       x === island.boss.x &&
       y === island.boss.y &&
-      !this.state.progressFlags?.[island.boss.unlockFlag]
+      !this.isBossOnCooldown(island.boss)
     ) {
       this.startBattle({
         mode: "wild",
         characterId: island.boss.enemyId,
         enemyLevel: island.boss.level,
         boss: true,
+        bossId: island.boss.id,
+        bossTeam: island.boss.team,
+        bossRespawnMinutes: island.boss.respawnMinutes || 15,
         bossName: island.boss.name,
         bossUnlockFlag: island.boss.unlockFlag,
       });
@@ -1324,35 +1331,47 @@ showVictoryReward(winner, xp, berrys) {
     }
 
     const chest = this.chestSprites?.[key];
-if (chest) {
-  this.openChest(key, chest);
-  return;
-}
+    if (chest) {
+      this.openChest(chest);
+      return;
+    }
 
     const boss = this.island.boss;
     if (
       boss &&
       boss.x === x &&
       boss.y === y &&
-      !this.state.progressFlags?.[boss.unlockFlag]
+      !this.isBossOnCooldown(boss)
     ) {
       this.startBattle({
         mode: "wild",
         characterId: boss.enemyId,
         enemyLevel: boss.level,
         boss: true,
+        bossId: boss.id,
+        bossTeam: boss.team,
+        bossRespawnMinutes: boss.respawnMinutes || 15,
         bossName: boss.name,
         bossUnlockFlag: boss.unlockFlag,
       });
     }
   }
 
-  startBattle({ mode, characterId, enemyLevel, boss = false, bossName, bossUnlockFlag }) {
+  isBossOnCooldown(boss) {
+    if (!boss?.id) return false;
+    const respawnAt = Number(this.state.bossRespawns?.[boss.id] || 0);
+    return respawnAt > Date.now();
+  }
+
+  startBattle({ mode, characterId, enemyLevel, boss = false, bossId, bossTeam, bossRespawnMinutes, bossName, bossUnlockFlag }) {
     this.scene.start("Battle", {
       mode,
       characterId,
       enemyLevel,
       boss,
+      bossId,
+      bossTeam,
+      bossRespawnMinutes,
       bossName,
       bossUnlockFlag,
       crew: this.state.crew,
