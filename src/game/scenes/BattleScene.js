@@ -453,10 +453,11 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     this.locked = true;
-    this.setLog(`💀 ${enemy.name} est K.O. !`);
+    this.setLog(`💀 ${enemy.name} est K.O. !\n⭐ ${attacker?.name || "Capitaine"} gagne ${xp} XP !`);
+    this.showFloatingText(`+${xp} XP`, this.playerSprite.x, this.playerSprite.y - 95, "#f1c40f");
     this.showFloatingText("K.O. !", this.enemySprite.x, this.enemySprite.y - 90, "#e74c3c");
 
-    this.time.delayedCall(1100, () => {
+    this.time.delayedCall(1800, () => {
       if (this.battleOver) return;
 
       if (this.isBossBattle && this.bossEnemyIndex < this.enemyTeam.length - 1) {
@@ -602,10 +603,10 @@ export default class BattleScene extends Phaser.Scene {
 
       this.showFloatingText(`+${totalXp} XP`, 510, 385, "#f1c40f");
       this.setLog(completeBossVictory
-        ? `🏆 Victoire ! Toute l'équipe de ${this.battleData.bossName || "boss"} est vaincue !`
-        : `Victoire ! ${lastWinner} gagne ${totalXp} XP${loot ? ` et ${loot} berrys` : ""}.`);
+        ? `🏆 Victoire !\n${lastWinner} et l'équipage remportent ${totalXp} XP au total !`
+        : `🏆 Victoire !\n${lastWinner} gagne ${totalXp} XP${loot ? ` et ${loot} berrys` : ""}.`);
 
-      this.scene.start("World", {
+      this.time.delayedCall(2200, () => this.scene.start("World", {
         islandId: returnIsland || "ile-depart",
         x: returnX ?? 20,
         y: returnY ?? 5,
@@ -622,11 +623,12 @@ export default class BattleScene extends Phaser.Scene {
         bossComplete: completeBossVictory,
         bossName: this.battleData.bossName,
         recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
-      });
+      }));
     } else {
-      this.setLog("Toute votre équipe est K.O... Réveil d'urgence à la taverne !");
+      this.setLog(`💀 Toute l'équipe est K.O. !\nRetour à la taverne dans quelques secondes...`);
+      this.showFloatingText("ÉQUIPE K.O. !", 510, 385, "#e74c3c");
 
-      this.time.delayedCall(1700, () => {
+      this.time.delayedCall(2600, () => {
         state.hp = state.maxHp || PLAYER_CHARACTER.maxHp;
         state.ppData = {};
 

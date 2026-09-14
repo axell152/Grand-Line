@@ -192,6 +192,7 @@ export default class WorldScene extends Phaser.Scene {
         items: { ...STARTING_ITEMS },
         progressFlags: {},
         openedChests: {},
+        bossRespawns: {},
       });
 
       loadGame().then((save) => {
@@ -221,6 +222,7 @@ export default class WorldScene extends Phaser.Scene {
             items: save.items || { ...STARTING_ITEMS },
             progressFlags: save.progressFlags || {},
             openedChests: save.openedChests || {},
+            bossRespawns: save.bossRespawns || {},
           });
 
           if (this.scene.isActive("World")) {
@@ -1119,19 +1121,7 @@ showVictoryReward(winner, xp, berrys) {
         return;
       }
 
-      // Voyage de 5 secondes entre les îles avant d'arriver à destination.
-      this.state.islandId = warp.toIsland;
-      this.state.x = warp.toX;
-      this.state.y = warp.toY;
-      this.persist();
-
-      this.scene.start("SailingScene", {
-        fromIsland: island.name,
-        toIsland: ISLANDS[warp.toIsland]?.name || "Nouvelle île",
-        islandId: warp.toIsland,
-        x: warp.toX,
-        y: warp.toY,
-      });
+      this.scene.restart({ islandId: warp.toIsland, x: warp.toX, y: warp.toY });
       return;
     }
 
