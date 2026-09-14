@@ -18,7 +18,9 @@ export default class TitleScene extends Phaser.Scene {
   drawBackground() {
     this.add.rectangle(512, 384, 1024, 768, 0x071522, 1);
 
-    this.add.circle(512, 300, 175, 0x0b2545, 1).setStrokeStyle(4, 0xd4a24c, 0.9);
+    // Cadre large pour éviter que le titre déborde comme dans l'ancien cercle.
+    this.add.rectangle(512, 300, 700, 250, 0x0b2545, 1)
+      .setStrokeStyle(4, 0xd4a24c, 0.9);
     this.add.text(512, 235, "GRAND", {
       fontFamily: "monospace",
       fontSize: "48px",
