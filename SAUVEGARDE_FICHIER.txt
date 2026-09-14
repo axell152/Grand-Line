@@ -1,0 +1,7 @@
+SAUVEGARDE PAR FICHIER
+
+- Dans le monde, clique sur « SAUVEGARDER » ou appuie sur F.
+- Le jeu télécharge un fichier JSON nommé grand-line-sauvegarde-....json.
+- Pour restaurer : menu « CHARGER LA SAUVEGARDE » puis sélectionne ce fichier.
+- Le fichier est autonome et ne dépend pas de Vercel Blob.
+- Les sauvegardes automatiques localStorage/Blob restent présentes en parallèle.

@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { ISLANDS, STARTING_ISLAND } from "@/game/data/islands";
 import { PLAYER_CHARACTER } from "@/game/data/characters";
 import { STARTING_ITEMS } from "@/game/data/items";
-import { saveGame, loadGame } from "@/game/systems/SaveManager";
+import { saveGame, loadGame, importSaveFile } from "@/game/systems/SaveManager";
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -77,7 +77,7 @@ export default class TitleScene extends Phaser.Scene {
 
     this.addUiText("BIENVENUE DANS GRAND LINE", 445, 18, "#ead9b8");
     this.makeButton("▶ NOUVELLE AVENTURE", 515, () => this.showNewGameConfirmation());
-    this.makeButton("▶ CHARGER LA SAUVEGARDE", 585, () => this.loadSavedGame());
+    this.makeButton("▶ CHARGER LA SAUVEGARDE", 585, () => this.loadSavedGameFromFile());
   }
 
   addUiText(text, y, fontSize = 18, color = "#ffffff") {
@@ -209,20 +209,67 @@ export default class TitleScene extends Phaser.Scene {
     this.scene.start("World");
   }
 
+  loadSavedGameFromFile() {
+    if (this.loading) return;
+
+    this.loading = true;
+    this.clearUi();
+    this.addUiText("SÉLECTIONNE TON FICHIER DE SAUVEGARDE", 500, 21, "#d4a24c");
+    this.addUiText("Choisis un fichier .json téléchargé depuis Grand Line.", 540, 15, "#ead9b8");
+    this.addUiText("Tu peux annuler la sélection pour revenir au menu.", 570, 13, "#9fb4c7");
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.style.display = "none";
+    document.body.appendChild(input);
+
+    const cleanup = () => {
+      input.remove();
+      this.loading = false;
+    };
+
+    input.addEventListener("change", async () => {
+      const file = input.files?.[0];
+
+      if (!file) {
+        cleanup();
+        this.showMainMenu();
+        return;
+      }
+
+      try {
+        const save = await importSaveFile(file);
+        this.game.registry.set("gameState", save);
+        cleanup();
+        this.scene.start("World");
+      } catch (error) {
+        cleanup();
+        this.screen = "file-error";
+        this.clearUi();
+        this.addUiText("SAUVEGARDE INVALIDE", 490, 24, "#e67e22");
+        this.addUiText(error?.message || "Impossible de charger ce fichier.", 545, 15, "#ead9b8");
+        this.makeButton("▶ RÉESSAYER", 615, () => this.loadSavedGameFromFile(), 260);
+        this.makeButton("▶ RETOUR", 680, () => this.showMainMenu(), 220);
+      }
+    }, { once: true });
+
+    input.click();
+  }
+
+  // Ancien chargement en ligne conservé pour compatibilité interne.
   async loadSavedGame() {
     if (this.loading) return;
     this.loading = true;
-    this.clearUi();
-    this.addUiText("CHARGEMENT...", 525, 22, "#d4a24c");
 
     const save = await loadGame();
+    this.loading = false;
 
     if (!save) {
-      this.loading = false;
       this.screen = "no-save";
       this.clearUi();
       this.addUiText("AUCUNE SAUVEGARDE TROUVÉE", 500, 22, "#e67e22");
-      this.addUiText("Commence une nouvelle aventure pour créer une sauvegarde.", 545, 15, "#ead9b8");
+      this.addUiText("Utilise un fichier de sauvegarde .json.", 545, 15, "#ead9b8");
       this.makeButton("▶ RETOUR", 620, () => this.showMainMenu(), 220);
       return;
     }
