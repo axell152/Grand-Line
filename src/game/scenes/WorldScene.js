@@ -122,15 +122,16 @@ export default class WorldScene extends Phaser.Scene {
       }
       if (!this.state.crewDetails[recruitedId]) {
         const base = CHARACTERS[recruitedId];
+        const recruitedLevel = Math.max(1, Number(this.incoming.recruitedLevel) || 1);
         this.state.crewDetails[recruitedId] = {
-          level: 1,
+          level: recruitedLevel,
           exp: 0,
           maxExp: 100,
-          hp: base?.maxHp || 1,
-          maxHp: base?.maxHp || 1,
-          atk: base?.atk || 1,
-          def: base?.def || 1,
-          spd: base?.spd || 1,
+          hp: (base?.maxHp || 1) + (recruitedLevel - 1) * 8,
+          maxHp: (base?.maxHp || 1) + (recruitedLevel - 1) * 8,
+          atk: (base?.atk || 1) + (recruitedLevel - 1) * 2,
+          def: (base?.def || 1) + (recruitedLevel - 1),
+          spd: (base?.spd || 1) + (recruitedLevel - 1),
           moves: [...(base?.moves || [])].slice(0, 4),
           ppData: {},
         };
@@ -726,31 +727,82 @@ export default class WorldScene extends Phaser.Scene {
     return ISLANDS[this.state.islandId];
   }
 
+  getShellsTownTile(x, y, tile, zone) {
+    // Shells Town utilise maintenant une couche de terrain indépendante de la collision.
+    // islands.js contient donc exactement ce qui est affiché case par case.
+    const terrain = this.island.terrain;
+    const terrainRow = terrain?.[y];
+    const type = terrainRow?.[x] || (tile === "#" ? "w" : "t");
+
+    const terrainKeys = {
+      t: "tile-village-floor",
+      c: "tile-village-path",
+      p: "tile-military-floor",
+      w: "tile-prison-wall",
+      b: this.state.progressFlags?.["boss_ile-depart"]
+        ? "tile-military-floor"
+        : "tile-prison-bars",
+      d: "tile-dock",
+      s: "tile-sea",
+    };
+
+    return terrainKeys[type] || "tile-village-floor";
+  }
+
   drawIsland() {
     const island = this.island;
     this.tileLayer = this.add.group();
     this.npcSprites = {};
+    this.recruitNpcData = {};
 
     const zoneColors = { 1: 0xffffff, 2: 0xf3c46a, 3: 0xe8895f, 4: 0xb07cd6 };
     const zoneAt = (x, y) =>
       island.wildZones.find((z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2);
 
-    for (let y = 0; y < island.grid.length; y++) {
-      const row = island.grid[y];
+    const mapRows = island.terrain || island.grid;
+    for (let y = 0; y < mapRows.length; y++) {
+      const row = mapRows[y];
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
+        const collisionTile = island.grid?.[y]?.[x] ?? ".";
+        const zone = collisionTile === "." ? zoneAt(x, y) : null;
         let key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
 
-        const zone = tile === "." ? zoneAt(x, y) : null;
-        if (zone) key = "tile-wild";
+        if (this.state.islandId === "ile-depart") {
+          // Le terrain visuel est entièrement piloté par islands.js.
+          // Une zone sauvage ne change jamais l'apparence de la case.
+          key = this.getShellsTownTile(x, y, tile, zone);
+        } else if (zone) {
+          key = "tile-wild";
+        }
 
-        const img = this.add.image(
-          x * TILE_SIZE + TILE_SIZE / 2,
-          y * TILE_SIZE + TILE_SIZE / 2,
-          key
-        ).setDepth(0);
+        const customKeys = new Set([
+          "tile-village-floor", "tile-village-path", "tile-military-floor",
+          "tile-marine-wall", "tile-prison-wall", "tile-prison-bars",
+          "tile-sea", "tile-dock",
+        ]);
 
-        if (zone) img.setTint(zoneColors[zone.level] || 0xe8895f);
+        let img;
+        if (customKeys.has(key)) {
+          // Atlas 8x8 : on choisit une vraie case 32x32 de façon déterministe.
+          const frame = ((y % 8) * 8 + (x % 8));
+          img = this.add.sprite(
+            x * TILE_SIZE + TILE_SIZE / 2,
+            y * TILE_SIZE + TILE_SIZE / 2,
+            key,
+            frame
+          ).setDepth(0);
+        } else {
+          img = this.add.image(
+            x * TILE_SIZE + TILE_SIZE / 2,
+            y * TILE_SIZE + TILE_SIZE / 2,
+            key
+          ).setDepth(0);
+        }
+
+        if (zone && this.state.islandId !== "ile-depart") {
+          img.setTint(zoneColors[zone.level] || 0xe8895f);
+        }
       }
     }
 
@@ -779,6 +831,8 @@ export default class WorldScene extends Phaser.Scene {
         marker.setAlpha(0.8);
       }
     });
+
+    // L’accès à Cocoyasi est au bout du quai, directement contre la bordure est.
 
     // PNJ de dialogue.
     this.talkNpcSprites = {};
@@ -833,6 +887,7 @@ export default class WorldScene extends Phaser.Scene {
 
     island.recruitNpcs
       .filter((npc) => !this.state.crew.includes(npc.characterId))
+      .filter((npc) => !npc.requiredFlag || !!this.state.progressFlags?.[npc.requiredFlag])
       .forEach((npc) => {
         const sprite = this.add.sprite(
           npc.x * TILE_SIZE + TILE_SIZE / 2,
@@ -845,6 +900,8 @@ export default class WorldScene extends Phaser.Scene {
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
+         this.recruitNpcData ||= {};
+         this.recruitNpcData[`${npc.x},${npc.y}`] = npc;
       });
 
     this.player = this.add.sprite(
@@ -1029,6 +1086,22 @@ showVictoryReward(winner, xp, berrys) {
 
   tileAt(x, y) {
     const island = this.island;
+
+    // Shells Town est pilotée par terrain[] : on peut donc dessiner et structurer
+    // l'île sans modifier une deuxième grille de collision.
+    if (this.state.islandId === "ile-depart" && island.terrain) {
+      if (y < 0 || y >= island.terrain.length) return "#";
+      const row = island.terrain[y];
+      if (x < 0 || x >= row.length) return "#";
+
+      const terrain = row[x];
+      // Mer et murs de prison sont infranchissables.
+      if (terrain === "s" || terrain === "w") return "#";
+      // L'entrée de la prison est bloquée tant que Morgan est présent.
+      if (terrain === "b" && !this.state.progressFlags?.["boss_ile-depart"]) return "#";
+      return ".";
+    }
+
     if (y < 0 || y >= island.grid.length) return "#";
     const row = island.grid[y];
     if (x < 0 || x >= row.length) return "#";
@@ -1066,7 +1139,13 @@ showVictoryReward(winner, xp, berrys) {
     const key = `${targetX},${targetY}`;
 
     if (this.npcSprites[key]) {
-      this.startBattle({ mode: "recruit", characterId: this.npcSprites[key] });
+      const recruitNpc = this.recruitNpcData?.[key];
+      this.startBattle({
+        mode: "recruit",
+        characterId: this.npcSprites[key],
+        enemyLevel: recruitNpc?.level || 1,
+        recruitedLevel: recruitNpc?.level || 1,
+      });
       return;
     }
 
@@ -1089,7 +1168,13 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    if (this.tileAt(targetX, targetY) === "#") return;
+    const targetIsBoss =
+      this.island.boss &&
+      targetX === this.island.boss.x &&
+      targetY === this.island.boss.y &&
+      !this.isBossOnCooldown(this.island.boss);
+
+    if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
 
     this.isMoving = true;
     this.state.x = targetX;
@@ -1180,9 +1265,15 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    const zone = island.wildZones.find(
-      (z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2
-    );
+    const inPrisonInterior =
+      this.state.islandId === "ile-depart" &&
+      x >= 21 && x <= 30 && y >= 8 && y <= 11;
+
+    const zone = inPrisonInterior
+      ? null
+      : island.wildZones.find(
+          (z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2
+        );
 
     if (zone && Math.random() < zone.encounterRate) {
       const pool = zone.enemyPool && zone.enemyPool.length
@@ -1423,7 +1514,7 @@ showVictoryReward(winner, xp, berrys) {
     return respawnAt > Date.now();
   }
 
-  startBattle({ mode, characterId, enemyLevel, boss = false, bossId, bossTeam, bossRespawnMinutes, bossName, bossUnlockFlag }) {
+  startBattle({ mode, characterId, enemyLevel, recruitedLevel, boss = false, bossId, bossTeam, bossRespawnMinutes, bossName, bossUnlockFlag }) {
     this.scene.start("Battle", {
       mode,
       characterId,
