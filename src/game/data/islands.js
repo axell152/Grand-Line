@@ -12,9 +12,9 @@ export const ISLANDS = {
       "##....##########..................##############",
       "##....##########..................##############",
       "##....##########....############..##############",
-      "##....##########....#..........#..##############",
-      "##....##########....#..........#..##############",
-      "##..................#....ZORO..#...............##",
+      "##....##########....#..........#...............##",
+      "##....##########....#..........#...............##",
+      "##..................#..........#...............##",
       "##..................#..........#...............##",
       "##..................############...............##",
       "##............................................##",
@@ -43,8 +43,9 @@ export const ISLANDS = {
       { x: 8, y: 24, key: "taverne" }
     ],
     recruitNpcs: [
-      // Zoro n'apparaît dans la prison qu'après la victoire contre Morgan.
-      { x: 24, y: 10, characterId: "bretteur", level: 10, requiredFlag: "boss_ile-depart" },
+      // Zoro est visible dans la cellule dès le début, mais Morgan bloque l'entrée.
+      // Après la victoire contre Morgan, son emplacement devient accessible.
+      { x: 24, y: 10, characterId: "bretteur", level: 10 },
     ],
     npcs: [
       {
@@ -95,8 +96,8 @@ export const ISLANDS = {
     ],
     boss: {
       id: "morgan",
-      x: 35,
-      y: 10,
+      x: 24,
+      y: 13,
       enemyId: "officierMarine",
       level: 8,
       name: "Colonel Morgan",
@@ -109,8 +110,14 @@ export const ISLANDS = {
       ],
     },
     wildZones: [
+      // Grande zone de rencontres autour de la prison et de Morgan.
+      { x1: 16, y1: 4, x2: 34, y2: 6, level: 1, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
+      { x1: 16, y1: 7, x2: 20, y2: 16, level: 1, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
+      { x1: 29, y1: 7, x2: 34, y2: 16, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
+      { x1: 16, y1: 17, x2: 34, y2: 20, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
+      // Le reste de la ville conserve des rencontres plus espacées.
       { x1: 3, y1: 3, x2: 18, y2: 20, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue"] },
-      { x1: 27, y1: 14, x2: 44, y2: 28, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "officierMarine"] },
+      { x1: 35, y1: 14, x2: 44, y2: 28, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
     warps: [
       { x: 46, y: 16, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" },

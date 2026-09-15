@@ -727,10 +727,54 @@ export default class WorldScene extends Phaser.Scene {
     return ISLANDS[this.state.islandId];
   }
 
+  getShellsTownTile(x, y, tile, zone) {
+    // Bordure extérieure : mer, avec un quai sur la partie basse centrale.
+    if (y <= 1) return "tile-sea";
+    if (y >= 30) return "tile-sea";
+    if (y === 29) return "tile-dock";
+    if (x <= 1 || x >= 46) return "tile-sea";
+
+    // Prison : murs en pierre sombre, barreaux sur le côté de l'entrée.
+    const inPrisonBoundary =
+      x >= 21 && x <= 28 && y >= 7 && y <= 12 &&
+      (x === 21 || x === 28 || y === 7 || y === 12);
+    if (inPrisonBoundary) {
+      // Pas de porte : les barreaux constituent le seul accès visuel.
+      if (y === 12) {
+        return this.state.progressFlags?.["boss_ile-depart"]
+          ? "tile-military-floor"
+          : "tile-prison-bars";
+      }
+      return "tile-prison-wall";
+    }
+
+    // Intérieur de la prison : Zoro est visible derrière les barreaux.
+    if (x >= 22 && x <= 27 && y >= 8 && y <= 11) {
+      return "tile-military-floor";
+    }
+
+    // Chemin principal du village jusqu'à l'entrée de la prison.
+    if ((y === 26 && x >= 3 && x <= 24) || (x === 24 && y >= 13 && y <= 26)) {
+      return "tile-village-path";
+    }
+
+    // Base de la Marine à l'est.
+    if (x >= 29 && x <= 45 && y >= 7 && y <= 13) {
+      return tile === "#" ? "tile-marine-wall" : "tile-military-floor";
+    }
+
+    // Quartier du village à l'ouest et autour de la prison.
+    if (tile === "P") return "tile-village-path";
+    if (zone) return "tile-wild";
+    if (tile === "#") return "tile-marine-wall";
+    return "tile-village-floor";
+  }
+
   drawIsland() {
     const island = this.island;
     this.tileLayer = this.add.group();
     this.npcSprites = {};
+    this.recruitNpcData = {};
 
     const zoneColors = { 1: 0xffffff, 2: 0xf3c46a, 3: 0xe8895f, 4: 0xb07cd6 };
     const zoneAt = (x, y) =>
@@ -740,10 +784,14 @@ export default class WorldScene extends Phaser.Scene {
       const row = island.grid[y];
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
+        const zone = tile === "." ? zoneAt(x, y) : null;
         let key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
 
-        const zone = tile === "." ? zoneAt(x, y) : null;
-        if (zone) key = "tile-wild";
+        if (this.state.islandId === "ile-depart") {
+          key = this.getShellsTownTile(x, y, tile, zone);
+        } else if (zone) {
+          key = "tile-wild";
+        }
 
         const img = this.add.image(
           x * TILE_SIZE + TILE_SIZE / 2,
@@ -1036,6 +1084,16 @@ showVictoryReward(winner, xp, berrys) {
     if (y < 0 || y >= island.grid.length) return "#";
     const row = island.grid[y];
     if (x < 0 || x >= row.length) return "#";
+
+    // Une fois Morgan vaincu, l'entrée de la prison s'ouvre.
+    if (
+      this.state.islandId === "ile-depart" &&
+      this.state.progressFlags?.["boss_ile-depart"] &&
+      x >= 22 && x <= 27 && y === 12
+    ) {
+      return ".";
+    }
+
     return row[x];
   }
 
@@ -1070,7 +1128,13 @@ showVictoryReward(winner, xp, berrys) {
     const key = `${targetX},${targetY}`;
 
     if (this.npcSprites[key]) {
-      this.startBattle({ mode: "recruit", characterId: this.npcSprites[key] });
+      const recruitNpc = this.recruitNpcData?.[key];
+      this.startBattle({
+        mode: "recruit",
+        characterId: this.npcSprites[key],
+        enemyLevel: recruitNpc?.level || 1,
+        recruitedLevel: recruitNpc?.level || 1,
+      });
       return;
     }
 

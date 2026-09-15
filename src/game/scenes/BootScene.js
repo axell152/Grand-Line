@@ -19,6 +19,16 @@ export default class BootScene extends Phaser.Scene {
     this.load.image("tile-path", "/tiles/path.png");
     this.load.image("tile-wild", "/tiles/wild.png");
 
+    // Tiles spécifiques à Shells Town.
+    this.load.image("tile-village-floor", "/tiles/custom/village_floor.png");
+    this.load.image("tile-village-path", "/tiles/custom/village_path.png");
+    this.load.image("tile-military-floor", "/tiles/custom/military_floor.png");
+    this.load.image("tile-marine-wall", "/tiles/custom/marine_wall.png");
+    this.load.image("tile-prison-wall", "/tiles/custom/prison_wall.png");
+    this.load.image("tile-prison-bars", "/tiles/custom/prison_bars.png");
+    this.load.image("tile-sea", "/tiles/custom/sea.png");
+    this.load.image("tile-dock", "/tiles/custom/dock.png");
+
     // La majorité des personnages utilisent 10 frames de 16x16.
     // Le bretteur utilise une spritesheet plus détaillée en 10 frames de 64x64.
     SPRITES.forEach((key) => {
