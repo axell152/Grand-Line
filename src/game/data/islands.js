@@ -55,7 +55,7 @@ export const ISLANDS = {
     playerStart: { x: 5, y: 25 },
     tavern: { x: 8, y: 23 },
     buildings: [{ x: 8, y: 23, key: "taverne" }],
-    recruitNpcs: [{ x: 23, y: 5, characterId: "bretteur", level: 10 }],
+    recruitNpcs: [{ x: 22, y: 5, characterId: "bretteur", level: 10 }],
     npcs: [
       { id: "citoyen-shells", x: 15, y: 23, name: "Habitant de Shells Town", dialogue: ["La Marine contrôle toute la ville.", "Un chasseur de pirates est retenu prisonnier dans la base."] },
       { id: "marin-shells", x: 34, y: 21, name: "Marine", dialogue: ["Circulez ! La base de la Marine est interdite aux civils.", "Le Colonel Morgan ne tolère aucune intrusion."] },
@@ -64,8 +64,8 @@ export const ISLANDS = {
     ],
     chests: [
       { id: "shells-chest-1", x: 20, y: 4, itemId: "potion", amount: 2 },
-      { id: "shells-chest-2", x: 23, y: 4, itemId: "potion", amount: 2 },
-      { id: "shells-chest-3", x: 26, y: 4, itemId: "superPotion", amount: 1 },
+      { id: "shells-chest-2", x: 22, y: 4, itemId: "potion", amount: 2 },
+      { id: "shells-chest-3", x: 24, y: 4, itemId: "superPotion", amount: 1 },
     ],
     boss: {
       id: "morgan", x: 22, y: 8, enemyId: "officierMarine", level: 8,
@@ -77,10 +77,10 @@ export const ISLANDS = {
       ],
     },
     wildZones: [
-      { x1: 4, y1: 19, x2: 44, y2: 17, level: 1, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
-      { x1: 4, y1: 15, x2: 44, y2: 13, level: 2, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
-      { x1: 4, y1: 11, x2: 44, y2: 4, level: 3, encounterRate: 0.05, enemyPool: ["marineRecrue", "officierMarine"] },
-      { x1: 4, y1: 11, x2: 44, y2: 4, level: 5, encounterRate: 0.05, enemyPool: ["marineRecrue", "officierMarine"] },
+      { x1: 4, y1: 19, x2: 44, y2: 17, level: 1, encounterRate: 0.1, enemyPool: ["marineRecrue"] },
+      { x1: 4, y1: 15, x2: 44, y2: 13, level: 2, encounterRate: 0.1, enemyPool: ["marineRecrue"] },
+      { x1: 4, y1: 11, x2: 44, y2: 4, level: 3, encounterRate: 0.1, enemyPool: ["marineRecrue", "officierMarine"] },
+      { x1: 4, y1: 11, x2: 44, y2: 4, level: 5, encounterRate: 0.07, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
     warps: [{ x: 1, y: 3, toIsland: "ile-cocoyasi", toX: 3, toY: 16, lockedBy: "boss_ile-depart" }],
   },
