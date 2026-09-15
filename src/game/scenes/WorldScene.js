@@ -850,6 +850,18 @@ export default class WorldScene extends Phaser.Scene {
       }
     });
 
+    // Port de départ de Shells Town : repère lisible sans modifier le sol.
+    if (this.state.islandId === "ile-depart") {
+      const portLocked = !this.state.progressFlags?.["boss_ile-depart"];
+      const portText = this.add.text(
+        9 * TILE_SIZE,
+        27.2 * TILE_SIZE,
+        portLocked ? "PORT → COCOYASI" : "PORT → COCOYASI",
+        { fontFamily: "Arial", fontSize: "12px", color: "#ffffff", stroke: "#000000", strokeThickness: 4 }
+      ).setOrigin(0.5).setDepth(1000);
+      if (portLocked) portText.setAlpha(0.65);
+    }
+
     // PNJ de dialogue.
     this.talkNpcSprites = {};
     (island.npcs || []).forEach((npc) => {

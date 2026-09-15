@@ -119,7 +119,7 @@ export const ISLANDS = {
       { x1: 20, y1: 19, x2: 44, y2: 28, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
     warps: [
-      { x: 46, y: 16, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" },
+      { x: 14, y: 29, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" },
     ],
   },
 
