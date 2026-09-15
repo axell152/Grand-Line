@@ -728,47 +728,25 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   getShellsTownTile(x, y, tile, zone) {
-    // Shells Town : grande île ouverte. Terre partout, sauf mer/quai,
-    // chemin et ensemble de la prison à l'extrémité est.
-    if (y <= 1) return "tile-sea";
-    if (y >= 30) return "tile-sea";
-    if (y === 29 && x >= 3 && x <= 14) return "tile-dock";
-    if (x <= 1 || x >= 46) return "tile-sea";
+    // Shells Town utilise maintenant une couche de terrain indépendante de la collision.
+    // islands.js contient donc exactement ce qui est affiché case par case.
+    const terrain = this.island.terrain;
+    const terrainRow = terrain?.[y];
+    const type = terrainRow?.[x] || (tile === "#" ? "w" : "t");
 
-    // Chemin principal : de la taverne vers la prison.
-    if ((y === 24 && x >= 3 && x <= 39) || (x === 39 && y >= 19 && y <= 24)) {
-      return "tile-village-path";
-    }
+    const terrainKeys = {
+      t: "tile-village-floor",
+      c: "tile-village-path",
+      p: "tile-military-floor",
+      w: "tile-prison-wall",
+      b: this.state.progressFlags?.["boss_ile-depart"]
+        ? "tile-military-floor"
+        : "tile-prison-bars",
+      d: "tile-dock",
+      s: "tile-sea",
+    };
 
-    // Grande prison tout au bout de la zone, à l'opposé de la taverne.
-    const prisonLeft = 35;
-    const prisonRight = 44;
-    const prisonTop = 8;
-    const prisonBottom = 18;
-    const onPrisonBoundary =
-      x >= prisonLeft && x <= prisonRight &&
-      y >= prisonTop && y <= prisonBottom &&
-      (x === prisonLeft || x === prisonRight || y === prisonTop || y === prisonBottom);
-
-    if (onPrisonBoundary) {
-      // L'unique ouverture est l'entrée au sud. Avant Morgan, les barreaux
-      // et Morgan la bloquent. Après sa défaite, elle devient du sol.
-      if (y === prisonBottom && x === 39) {
-        return this.state.progressFlags?.["boss_ile-depart"]
-          ? "tile-military-floor"
-          : "tile-prison-bars";
-      }
-      return "tile-prison-wall";
-    }
-
-    // Intérieur de la prison : sol militaire, Zoro visible derrière les murs.
-    if (x > prisonLeft && x < prisonRight && y > prisonTop && y < prisonBottom) {
-      return "tile-military-floor";
-    }
-
-    // Toute la ville restante est de la terre, sans distinction visuelle
-    // entre zone normale et zone de rencontres.
-    return "tile-village-floor";
+    return terrainKeys[type] || "tile-village-floor";
   }
 
   drawIsland() {
@@ -781,14 +759,18 @@ export default class WorldScene extends Phaser.Scene {
     const zoneAt = (x, y) =>
       island.wildZones.find((z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2);
 
-    for (let y = 0; y < island.grid.length; y++) {
-      const row = island.grid[y];
+    const mapRows = island.terrain || island.grid;
+    for (let y = 0; y < mapRows.length; y++) {
+      const row = mapRows[y];
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
-        const zone = tile === "." ? zoneAt(x, y) : null;
+        const collisionTile = island.grid?.[y]?.[x] ?? ".";
+        const zone = collisionTile === "." ? zoneAt(x, y) : null;
         let key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
 
         if (this.state.islandId === "ile-depart") {
+          // Le terrain visuel est entièrement piloté par islands.js.
+          // Une zone sauvage ne change jamais l'apparence de la case.
           key = this.getShellsTownTile(x, y, tile, zone);
         } else if (zone) {
           key = "tile-wild";
@@ -850,17 +832,7 @@ export default class WorldScene extends Phaser.Scene {
       }
     });
 
-    // Port de départ de Shells Town : repère lisible sans modifier le sol.
-    if (this.state.islandId === "ile-depart") {
-      const portLocked = !this.state.progressFlags?.["boss_ile-depart"];
-      const portText = this.add.text(
-        9 * TILE_SIZE,
-        27.2 * TILE_SIZE,
-        portLocked ? "PORT → COCOYASI" : "PORT → COCOYASI",
-        { fontFamily: "Arial", fontSize: "12px", color: "#ffffff", stroke: "#000000", strokeThickness: 4 }
-      ).setOrigin(0.5).setDepth(1000);
-      if (portLocked) portText.setAlpha(0.65);
-    }
+    // L’accès à Cocoyasi est au bout du quai, directement contre la bordure est.
 
     // PNJ de dialogue.
     this.talkNpcSprites = {};
@@ -1114,19 +1086,25 @@ showVictoryReward(winner, xp, berrys) {
 
   tileAt(x, y) {
     const island = this.island;
-    if (y < 0 || y >= island.grid.length) return "#";
-    const row = island.grid[y];
-    if (x < 0 || x >= row.length) return "#";
 
-    // Une fois Morgan vaincu, l'entrée de la prison s'ouvre.
-    if (
-      this.state.islandId === "ile-depart" &&
-      this.state.progressFlags?.["boss_ile-depart"] &&
-      x === 39 && y === 18
-    ) {
+    // Shells Town est pilotée par terrain[] : on peut donc dessiner et structurer
+    // l'île sans modifier une deuxième grille de collision.
+    if (this.state.islandId === "ile-depart" && island.terrain) {
+      if (y < 0 || y >= island.terrain.length) return "#";
+      const row = island.terrain[y];
+      if (x < 0 || x >= row.length) return "#";
+
+      const terrain = row[x];
+      // Mer et murs de prison sont infranchissables.
+      if (terrain === "s" || terrain === "w") return "#";
+      // L'entrée de la prison est bloquée tant que Morgan est présent.
+      if (terrain === "b" && !this.state.progressFlags?.["boss_ile-depart"]) return "#";
       return ".";
     }
 
+    if (y < 0 || y >= island.grid.length) return "#";
+    const row = island.grid[y];
+    if (x < 0 || x >= row.length) return "#";
     return row[x];
   }
 
