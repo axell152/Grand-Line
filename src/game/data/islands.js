@@ -55,7 +55,7 @@ export const ISLANDS = {
     playerStart: { x: 5, y: 25 },
     tavern: { x: 8, y: 23 },
     buildings: [{ x: 8, y: 23, key: "taverne" }],
-    recruitNpcs: [{ x: 23, y: 6, characterId: "bretteur", level: 10 }],
+    recruitNpcs: [{ x: 23, y: 5, characterId: "bretteur", level: 10 }],
     npcs: [
       { id: "citoyen-shells", x: 15, y: 23, name: "Habitant de Shells Town", dialogue: ["La Marine contrôle toute la ville.", "Un chasseur de pirates est retenu prisonnier dans la base."] },
       { id: "marin-shells", x: 34, y: 21, name: "Marine", dialogue: ["Circulez ! La base de la Marine est interdite aux civils.", "Le Colonel Morgan ne tolère aucune intrusion."] },
@@ -63,12 +63,12 @@ export const ISLANDS = {
       { id: "gardien-port-shells", x: 17, y: 29, name: "Garde du port", dialogue: ["Le départ vers Cocoyasi Village est interdit pour le moment.", "Bats le Colonel Morgan et la route sera ouverte."] },
     ],
     chests: [
-      { id: "shells-chest-1", x: 21, y: 4, itemId: "potion", amount: 2 },
-      { id: "shells-chest-2", x: 24, y: 4, itemId: "potion", amount: 2 },
-      { id: "shells-chest-3", x: 27, y: 4, itemId: "superPotion", amount: 1 },
+      { id: "shells-chest-1", x: 20, y: 4, itemId: "potion", amount: 2 },
+      { id: "shells-chest-2", x: 23, y: 4, itemId: "potion", amount: 2 },
+      { id: "shells-chest-3", x: 26, y: 4, itemId: "superPotion", amount: 1 },
     ],
     boss: {
-      id: "morgan", x: 23, y: 8, enemyId: "officierMarine", level: 8,
+      id: "morgan", x: 22, y: 8, enemyId: "officierMarine", level: 8,
       name: "Colonel Morgan", unlockFlag: "boss_ile-depart", respawnMinutes: 15,
       team: [
         { characterId: "marineRecrue", level: 4 },
