@@ -793,11 +793,29 @@ export default class WorldScene extends Phaser.Scene {
           key = "tile-wild";
         }
 
-        const img = this.add.image(
-          x * TILE_SIZE + TILE_SIZE / 2,
-          y * TILE_SIZE + TILE_SIZE / 2,
-          key
-        ).setDepth(0);
+        const customKeys = new Set([
+          "tile-village-floor", "tile-village-path", "tile-military-floor",
+          "tile-marine-wall", "tile-prison-wall", "tile-prison-bars",
+          "tile-sea", "tile-dock",
+        ]);
+
+        let img;
+        if (customKeys.has(key)) {
+          // Atlas 8x8 : on choisit une vraie case 32x32 de façon déterministe.
+          const frame = ((y % 8) * 8 + (x % 8));
+          img = this.add.sprite(
+            x * TILE_SIZE + TILE_SIZE / 2,
+            y * TILE_SIZE + TILE_SIZE / 2,
+            key,
+            frame
+          ).setDepth(0);
+        } else {
+          img = this.add.image(
+            x * TILE_SIZE + TILE_SIZE / 2,
+            y * TILE_SIZE + TILE_SIZE / 2,
+            key
+          ).setDepth(0);
+        }
 
         if (zone) img.setTint(zoneColors[zone.level] || 0xe8895f);
       }
