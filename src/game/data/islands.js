@@ -53,7 +53,7 @@ export const ISLANDS = {
       "ssssssssssssssssssssssssssssssssssssssssssssssss",
     ],
     playerStart: { x: 5, y: 25 },
-    tavern: { x: 8, y: 25 },
+    tavern: { x: 8, y: 23 },
     buildings: [{ x: 8, y: 23, key: "taverne" }],
     recruitNpcs: [{ x: 23, y: 6, characterId: "bretteur", level: 10 }],
     npcs: [
