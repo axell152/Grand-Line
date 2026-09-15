@@ -727,26 +727,22 @@ export default class WorldScene extends Phaser.Scene {
     return ISLANDS[this.state.islandId];
   }
 
-  getShellsTownTile(x, y, tile, zone) {
-    // Shells Town utilise maintenant une couche de terrain indépendante de la collision.
-    // islands.js contient donc exactement ce qui est affiché case par case.
-    const terrain = this.island.terrain;
-    const terrainRow = terrain?.[y];
-    const type = terrainRow?.[x] || (tile === "#" ? "w" : "t");
+  getTerrainTileKey(tile) {
+    const bossFlag = this.island?.boss?.unlockFlag;
 
     const terrainKeys = {
       t: "tile-village-floor",
       c: "tile-village-path",
       p: "tile-military-floor",
       w: "tile-prison-wall",
-      b: this.state.progressFlags?.["boss_ile-depart"]
+      b: bossFlag && this.state.progressFlags?.[bossFlag]
         ? "tile-military-floor"
         : "tile-prison-bars",
       d: "tile-dock",
       s: "tile-sea",
     };
 
-    return terrainKeys[type] || "tile-village-floor";
+    return terrainKeys[tile] || "tile-village-floor";
   }
 
   drawIsland() {
@@ -755,35 +751,24 @@ export default class WorldScene extends Phaser.Scene {
     this.npcSprites = {};
     this.recruitNpcData = {};
 
-    const zoneColors = { 1: 0xffffff, 2: 0xf3c46a, 3: 0xe8895f, 4: 0xb07cd6 };
-    const zoneAt = (x, y) =>
-      island.wildZones.find((z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2);
+    // Terrain est l'unique source de vérité : il contrôle à la fois
+    // l'apparence et la structure de la carte. Les wildZones restent invisibles.
+    const mapRows = island.terrain || [];
+    const customKeys = new Set([
+      "tile-village-floor", "tile-village-path", "tile-military-floor",
+      "tile-marine-wall", "tile-prison-wall", "tile-prison-bars",
+      "tile-sea", "tile-dock",
+    ]);
 
-    const mapRows = island.terrain;
     for (let y = 0; y < mapRows.length; y++) {
       const row = mapRows[y];
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
-        const zone = !["w", "s"].includes(tile) ? zoneAt(x, y) : null;
-        let key = tile === "w" ? "tile-wall" : tile === "c" ? "tile-path" : "tile-floor";
-
-        if (this.state.islandId === "ile-depart") {
-          // Le terrain visuel est entièrement piloté par islands.js.
-          // Une zone sauvage ne change jamais l'apparence de la case.
-          key = this.getShellsTownTile(x, y, tile, zone);
-        } else if (zone) {
-          key = "tile-wild";
-        }
-
-        const customKeys = new Set([
-          "tile-village-floor", "tile-village-path", "tile-military-floor",
-          "tile-marine-wall", "tile-prison-wall", "tile-prison-bars",
-          "tile-sea", "tile-dock",
-        ]);
+        const key = this.getTerrainTileKey(tile);
 
         let img;
         if (customKeys.has(key)) {
-          // Atlas 8x8 : on choisit une vraie case 32x32 de façon déterministe.
+          // Atlas 8x8 : sélection déterministe d'une case 32x32.
           const frame = ((y % 8) * 8 + (x % 8));
           img = this.add.sprite(
             x * TILE_SIZE + TILE_SIZE / 2,
@@ -797,10 +782,6 @@ export default class WorldScene extends Phaser.Scene {
             y * TILE_SIZE + TILE_SIZE / 2,
             key
           ).setDepth(0);
-        }
-
-        if (zone && this.state.islandId !== "ile-depart") {
-          img.setTint(zoneColors[zone.level] || 0xe8895f);
         }
       }
     }
@@ -1094,8 +1075,11 @@ showVictoryReward(winner, xp, berrys) {
     const terrain = row[x];
     // Mer et murs de prison sont infranchissables.
     if (terrain === "s" || terrain === "w") return "#";
-    // L'entrée de la prison est bloquée tant que Morgan est présent.
-    if (terrain === "b" && !this.state.progressFlags?.["boss_ile-depart"]) return "#";
+    // Un passage "b" reste bloqué jusqu'à la victoire du boss de l'île.
+    if (terrain === "b") {
+      const unlockFlag = island.boss?.unlockFlag;
+      if (unlockFlag && !this.state.progressFlags?.[unlockFlag]) return "#";
+    }
     return ".";
   }
 

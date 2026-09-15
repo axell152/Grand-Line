@@ -1,14 +1,23 @@
 export const TILE_SIZE = 32;
 
+// Terrain :
+// t = terre / sol naturel
+// c = chemin
+// p = sol intérieur / zone bâtie
+// w = mur / obstacle
+// b = passage bloqué par un boss (devient p après victoire)
+// d = quai
+// s = mer
+//
+// IMPORTANT : terrain est maintenant l'unique grille des cartes.
+// Les wildZones servent uniquement aux rencontres et ne modifient jamais l'apparence.
+
 export const ISLANDS = {
+  // ============================================================
+  // 1 — SHELLS TOWN
+  // ============================================================
   "ile-depart": {
     name: "Shells Town",
-    // Shells Town est volontairement très ouverte : presque toute la surface
-    // accessible est de la terre. Les seuls vrais murs sont ceux de la prison.
-    // Terrain visuel ET structurel : on modèle l'île ici, case par case.
-    // t = terre, c = chemin, p = sol intérieur, w = mur, b = entrée de prison,
-    // d = quai, s = mer.
-    // Les zones sauvages ne modifient jamais ce terrain.
     terrain: [
       "ssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssss",
@@ -29,11 +38,11 @@ export const ISLANDS = {
       "sstttttttttttttttttttttttttttttttttwppppppppwtss",
       "sstttttttttttttttttttttttttttttttttwppppppppwtss",
       "sstttttttttttttttttttttttttttttttttwwwwbwwwwwtss",
-      "sstttttttttttttttttttttttttttttttttttttcttttttss",
-      "sstttttttttttttttttttttttttttttttttttttcttttttss",
-      "sstttttttttttttttttttttttttttttttttttttcttttttss",
-      "sstttttttttttttttttttttttttttttttttttttcttttttss",
-      "sstttttttttttttttttttttttttttttttttttttcttttttss",
+      "sstttttttttttttttttttttttttttttttttttcttttttttss",
+      "sstttttttttttttttttttttttttttttttttttcttttttttss",
+      "sstttttttttttttttttttttttttttttttttttcttttttttss",
+      "sstttttttttttttttttttttttttttttttttttcttttttttss",
+      "sstttttttttttttttttttttttttttttttttttcttttttttss",
       "sstcccccccccccccccccccccccccccccccccccccttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttss",
@@ -43,57 +52,15 @@ export const ISLANDS = {
       "ssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssss",
     ],
-
     playerStart: { x: 5, y: 25 },
     tavern: { x: 8, y: 23 },
-    buildings: [
-      { x: 8, y: 23, key: "taverne" }
-    ],
-    recruitNpcs: [
-      // Zoro est visible dans la prison dès le début. Morgan bloque l'entrée.
-      { x: 39, y: 13, characterId: "bretteur", level: 10 },
-    ],
+    buildings: [{ x: 8, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 39, y: 13, characterId: "bretteur", level: 10 }],
     npcs: [
-      {
-        id: "citoyen-shells",
-        x: 15,
-        y: 23,
-        name: "Habitant de Shells Town",
-        dialogue: [
-          "La Marine contrôle toute la ville.",
-          "Un chasseur de pirates est retenu prisonnier dans la base.",
-        ],
-      },
-      {
-        id: "marin-shells",
-        x: 41,
-        y: 21,
-        name: "Marine",
-        dialogue: [
-          "Circulez ! La base de la Marine est interdite aux civils.",
-          "Le Colonel Morgan ne tolère aucune intrusion.",
-        ],
-      },
-      {
-        id: "prisonnier-shells",
-        x: 18,
-        y: 23,
-        name: "Prisonnier",
-        dialogue: [
-          "Le sabreur enfermé dans la prison s'appelle Roronoa Zoro.",
-          "Si tu veux l'approcher, commence par vaincre la Marine.",
-        ],
-      },
-      {
-        id: "gardien-port-shells",
-        x: 8,
-        y: 29,
-        name: "Garde du port",
-        dialogue: [
-          "Le départ vers Cocoyasi Village est interdit pour le moment.",
-          "Bats le Colonel Morgan et la route sera ouverte.",
-        ],
-      },
+      { id: "citoyen-shells", x: 15, y: 23, name: "Habitant de Shells Town", dialogue: ["La Marine contrôle toute la ville.", "Un chasseur de pirates est retenu prisonnier dans la base."] },
+      { id: "marin-shells", x: 41, y: 21, name: "Marine", dialogue: ["Circulez ! La base de la Marine est interdite aux civils.", "Le Colonel Morgan ne tolère aucune intrusion."] },
+      { id: "prisonnier-shells", x: 18, y: 23, name: "Prisonnier", dialogue: ["Le sabreur enfermé dans la prison s'appelle Roronoa Zoro.", "Si tu veux l'approcher, commence par vaincre la Marine."] },
+      { id: "gardien-port-shells", x: 8, y: 29, name: "Garde du port", dialogue: ["Le départ vers Cocoyasi Village est interdit pour le moment.", "Bats le Colonel Morgan et la route sera ouverte."] },
     ],
     chests: [
       { id: "shells-chest-1", x: 38, y: 10, itemId: "potion", amount: 2 },
@@ -101,273 +68,594 @@ export const ISLANDS = {
       { id: "shells-chest-3", x: 42, y: 10, itemId: "superPotion", amount: 1 },
     ],
     boss: {
-      id: "morgan",
-      x: 39,
-      y: 18,
-      enemyId: "officierMarine",
-      level: 8,
-      name: "Colonel Morgan",
-      unlockFlag: "boss_ile-depart",
-      respawnMinutes: 15,
+      id: "morgan", x: 39, y: 18, enemyId: "officierMarine", level: 8,
+      name: "Colonel Morgan", unlockFlag: "boss_ile-depart", respawnMinutes: 15,
       team: [
         { characterId: "marineRecrue", level: 4 },
         { characterId: "marineRecrue", level: 5 },
         { characterId: "officierMarine", level: 8, isBoss: true },
       ],
     },
-    // Zone sauvage discrète : aucun revêtement spécial n'est affiché.
-    // Les rencontres sont concentrées dans la moitié est, autour de la prison.
     wildZones: [
       { x1: 20, y1: 4, x2: 44, y2: 7, level: 1, encounterRate: 0.045, enemyPool: ["marineRecrue"] },
       { x1: 20, y1: 8, x2: 34, y2: 18, level: 1, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
       { x1: 45, y1: 8, x2: 45, y2: 18, level: 2, encounterRate: 0.05, enemyPool: ["marineRecrue", "officierMarine"] },
       { x1: 20, y1: 19, x2: 44, y2: 28, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
-    warps: [
-      { x: 1, y: 3, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" },
-    ],
+    warps: [{ x: 1, y: 3, toIsland: "ile-cocoyasi", toX: 3, toY: 16, lockedBy: "boss_ile-depart" }],
   },
 
-  "ile-brume": {
-    name: "Île de la Brume",
+  // ============================================================
+  // 2 — COCOYASI VILLAGE
+  // ============================================================
+  "ile-cocoyasi": {
+    name: "Cocoyasi Village",
     terrain: [
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
-      "wwttttttttttwwwwwtttttttttttttttttttttwwwwwtttttttttttttttttttww",
-
-      "wwttttttttttwwwwwtttttttttttttwwwwttttwwwwwtttttttttttttttttttww",
-
-      "wwtttttwwwwwwwwwwtttttttttttttwwwwttttttttttttttwwwwwttttwwwwtww",
-
-      "wwwwwttwwwwwtttttttttttwwwwtttwwwwttttttttttttwwwwwwwtttwwwwwtww",
-
-      "wwwwwttwwwwwtttttttttttwwwwtttttttttttttttttttwwwwwwwtwwwwwwwtww",
-
-      "wwtttttttttttttttttttttttttttttttttttttttttttttttttwwtwwwwwwwtww",
-
-      "wwtwwwwwwwwwttttttttttttttttwwwwttttttttwwwtttttwwwwwttwwwwwwtww",
-
-      "wwtwwwwwwtttttttttttttttttttwwwwttttttttwwwttttttttttttwwwwwttww",
-
-      "wwttttttttttttttwwwwttttttttwwwwttttttttwwwtttwwwtttttwwwtttttww",
-
-      "wwttttttttttttttwwwwtttttttwwwwwtttttttwwwwwttwwwtttttwwwtttttww",
-
-      "wwtttwwwtttttwwwwwtttttttttwwwwttttttttwwwwwttwwwtttttwwwtttttww",
-
-      "wwtttwwwtttttwwwwwtttttttttwwwwtttttttwwwwwwttwwwtttttwwwtttttww",
-
-      "wwtttwwwtttttwwwwwwwttttttttttttttttttwwwwwtttwwwtttttttttttttww",
-
-      "wwtttwwwwwwwwwwwwwwwttttttttttttttttttwwwwwtttttttttttttttttttww",
-
-      "wwtttwwwwwwwwtttttttttttttttttttttttttwwwtttttttttttttttttttttww",
-
-      "wwttttttwwwwwtttttttttttttttttttttttttttttttttttttttttttttttttww",
-
-      "wwttttttwwwwwtttttwwtttttttttttttttttttwwwttttttttttttttttttttww",
-
-      "wwtttttttttttttwwwwwtttttttttttttttttttwwwttttttttttttttttttttww",
-
-      "wwtttttttttttttwwwwwtwwwwwttttttttttttttttttttttttttttttttttttww",
-
-      "wwtwwwttttttttttttwwtwwwwwttttttttttttttttttttttttttttttttttttww",
-
-      "wwtwwwttttttttttttwwttttttttttttttttttttttttttttttttttttttttttww",
-
-      "wwtwwwtttttttttttttttttttttwwwwtttttttttttttttttttttttttttttttww",
-
-      "wwtttttttttttttttttttttttttwwwttttttttttttttttttttttttttttttttww",
-
-      "wwtttttttwwwwwtttttttttttttwwwwtttttttttttttttttttttttttttttttww",
-
-      "wwtttttttwwwwwtwwttwwwtttttwwwwtttttttttttttttttttttwwttttttttww",
-
-      "wwtttttttwwwwwtwwttwwwtttttwwwwtttttttttttttttttttttwwwwwwttttww",
-
-      "wwtttttttwwwwwtwwtttttttttttttttttttttttttttttttttttwwwwwwttttww",
-
-      "wwttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttww",
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     ],
     playerStart: { x: 3, y: 16 },
-    recruitNpcs: [
-      { x: 12, y: 8, characterId: "navigatrice" },
-      { x: 30, y: 24, characterId: "tireur" },
-      { x: 50, y: 7, characterId: "musicien" },
-    ],
+    tavern: { x: 12, y: 23 },
+    buildings: [{ x: 12, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 27, y: 12, characterId: "navigatrice", level: 14 }],
     npcs: [
-      {
-        id: "guide-brume",
-        x: 22,
-        y: 4,
-        name: "Guide de la Brume",
-        dialogue: [
-          "La brume cache de nombreux dangers.",
-          "Plus tu avances vers l'est, plus les ennemis deviennent puissants.",
-        ],
-      },
-      {
-        id: "marin-brume",
-        x: 43,
-        y: 28,
-        name: "Marin blessé",
-        dialogue: [
-          "Le chef de la Marine contrôle la sortie de l'île.",
-          "Trouve-le à l'est et bats-le pour poursuivre ton voyage.",
-        ],
-      },
+      { id: "cocoyasi-villageois", x: 18, y: 21, name: "Villageois de Cocoyasi", dialogue: ["Les hommes-poissons terrorisent la côte.", "Une jeune navigatrice connaît tous les courants de l'île."] },
+      { id: "cocoyasi-pecheur", x: 42, y: 25, name: "Pêcheur", dialogue: ["Le repaire des hommes-poissons est plus à l'est.", "Prépare-toi avant d'aller les provoquer."] },
     ],
     chests: [
-      { id: "brume-chest-1", x: 21, y: 17, itemId: "potion", amount: 2 },
-      { id: "brume-chest-2", x: 56, y: 26, itemId: "superPotion", amount: 2 },
+      { id: "cocoyasi-chest-1", x: 21, y: 8, itemId: "potion", amount: 3 },
+      { id: "cocoyasi-chest-2", x: 48, y: 18, itemId: "superPotion", amount: 1 },
     ],
     boss: {
-      id: "brume",
-      x: 56,
-      y: 25,
-      enemyId: "officierMarine",
-      level: 40,
-      name: "Commandant Brume",
-      unlockFlag: "boss_ile-brume",
-      respawnMinutes: 15,
+      id: "arlong", x: 56, y: 15, enemyId: "chasseurDePrimes", level: 18,
+      name: "Chef des hommes-poissons", unlockFlag: "boss_ile-cocoyasi", respawnMinutes: 15,
       team: [
-        { characterId: "pirateRival", level: 30 },
-        { characterId: "chasseurDePrimes", level: 35 },
-        { characterId: "officierMarine", level: 40, isBoss: true },
+        { characterId: "pirateRival", level: 12 },
+        { characterId: "chasseurDePrimes", level: 15 },
+        { characterId: "chasseurDePrimes", level: 18, isBoss: true },
       ],
     },
     wildZones: [
-      { x1: 4, y1: 6, x2: 20, y2: 26, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue", "pirateRival"] },
-      { x1: 22, y1: 4, x2: 42, y2: 28, level: 2, encounterRate: 0.045, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
-      { x1: 44, y1: 4, x2: 61, y2: 28, level: 3, encounterRate: 0.05, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 4, encounterRate: 0.045, enemyPool: ["pirateRival", "chasseurDePrimes"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 5, encounterRate: 0.05, enemyPool: ["chasseurDePrimes", "pirateRival"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 6, encounterRate: 0.055, enemyPool: ["chasseurDePrimes"] },
     ],
     warps: [
-      { x: 2, y: 16, toIsland: "ile-depart", toX: 44, toY: 16 },
-      { x: 61, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume" },
+      { x: 2, y: 16, toIsland: "ile-depart", toX: 46, toY: 16 },
+      { x: 63, y: 16, toIsland: "ile-syrup", toX: 3, toY: 16, lockedBy: "boss_ile-cocoyasi" },
     ],
   },
 
-  "ile-hiver": {
-    name: "Île d'Hiver",
+  // ============================================================
+  // 3 — SYRUP VILLAGE
+  // ============================================================
+  "ile-syrup": {
+    name: "Syrup Village",
     terrain: [
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
-      "wwttwwwtttttttttttttttwwwtttttttttttttttttttttttttttttttttttttww",
-
-      "wwwwwwwtttttttttttttttwwwttttttttttttttttttttttttttttttttwwwttww",
-
-      "wwwwwwwttttwwttwwwwtttwwwttttttttwwwwwttttttttwwwwwttttttwwwttww",
-
-      "wwwwwwwttttwwwwwwwwtttwwwttttttttwwwwwtttttttwwwwwwtttttttttttww",
-
-      "wwwwwwwtttttwwwwwwwttttttttttttttwwwwwtttttttwwwwwttttttwwwwttww",
-
-      "wwtttttttttttttwwwwttttttttttttttwwwwwtttttttwwwwwttttttwwwwttww",
-
-      "wwttttttttttwwwwttttttttwwwwwtttttttttttttttttttttttttttttttttww",
-
-      "wwttttttttttttwwttttttttwwwwwtttttttttttttttwwwwttttttttttttttww",
-
-      "wwttttttttttttttttttttttwwwwwtttttttttttttttwwwwttttttwwwtttttww",
-
-      "wwttttttttttttttttttttttwwwwwwwwwwtttttttwwwttttttttttwwwtttttww",
-
-      "wwttttttttttttttttttttttttttwwwwwwtttttttwwwwwwtwwttttwwwtttttww",
-
-      "wwttttttttttttttttttttttttttwwwwwwtttttttwwwwwwwwwttttttttttttww",
-
-      "wwttttttttttttttttttttttttwwwwwwwwtttwwwwwwwwwwwwwttttttttttttww",
-
-      "wwtttttttttttttttttwwwwtttwwttwwwwtttwwwwttwwwwwwwtttttwwwttttww",
-
-      "wwtttttttttttttttttwwwwtttwwtttttttttwwwwttwwwwwwwtttttwwwttttww",
-
-      "wwttttttttttttttwwtwwwwtttwwtttttttttwwwwttttttttttttttwwwttttww",
-
-      "wwttttttttttttttwwtwwwwtttwwtttttttttttttttttttttttttttwwwttttww",
-
-      "wwtttttttttttttttttwwwwwwwwttttttttttttwwwwwttttttttttttttttttww",
-
-      "wwttttttttttttttttttttwwwwwttttttttttttwwwwwttttttttttttwwttttww",
-
-      "wwttttttttttttttttttttwwwwwttttwwwwwwttwwwwwwwwwwwwwwwttwwttttww",
-
-      "wwttttttttttttttttttttwwwwwttttwwwwwwttwwwwwwwwwwwwwwwttwwwtttww",
-
-      "wwttttwwwttttttttttttttttttttttwwwwwwttttttwwwwwwwwtttttwwwtttww",
-
-      "wwttttwwwttttttttttttttttttttttwwwwwwtttttttttttwwtttttttwwtttww",
-
-      "wwtttttttttttttttttttttttttttttwwwtwwtttttttttttwwwttttttwwtttww",
-
-      "wwtttttttttttttttttttttttttttttttttwwtttttttttttttttttttttttttww",
-
-      "wwtttttttttttttttttttttttttttttttttwwtttttttttttttttttttttttttww",
-
-      "wwtttttwwwwwttttttttttttttttttttttttttttttttttttttttttttttttttww",
-
-      "wwtttttwwwwwttttttttttttttttttttttttttttttttttttttttttttttttttww",
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
-      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     ],
     playerStart: { x: 3, y: 16 },
-    recruitNpcs: [
-      { x: 14, y: 7, characterId: "medecin" },
-      { x: 50, y: 24, characterId: "cuisinier" },
-      { x: 32, y: 26, characterId: "archeologue" },
-    ],
+    tavern: { x: 10, y: 23 },
+    buildings: [{ x: 10, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 32, y: 10, characterId: "tireur", level: 22 }],
     npcs: [
-      {
-        id: "ermite-hiver",
-        x: 27,
-        y: 4,
-        name: "Ermite des neiges",
-        dialogue: [
-          "Bienvenue sur l'Île d'Hiver.",
-          "Ici, seuls les pirates les plus solides atteignent le sommet.",
-        ],
-      },
+      { id: "syrup-maire", x: 16, y: 12, name: "Habitant de Syrup Village", dialogue: ["Des pirates rivaux rôdent autour du village.", "Un tireur d'élite du coin rêve de prendre la mer."] },
+      { id: "syrup-garde", x: 46, y: 22, name: "Garde du village", dialogue: ["La vieille forêt à l'est est infestée de pirates.", "Le chef ennemi garde la sortie de l'île."] },
     ],
     chests: [
-      { id: "hiver-chest-1", x: 23, y: 26, itemId: "superPotion", amount: 2 },
-      { id: "hiver-chest-2", x: 55, y: 25, itemId: "potion", amount: 3 },
+      { id: "syrup-chest-1", x: 20, y: 7, itemId: "potion", amount: 3 },
+      { id: "syrup-chest-2", x: 42, y: 9, itemId: "superPotion", amount: 2 },
     ],
     boss: {
-      id: "amiral-glaces",
-      x: 56,
-      y: 26,
-      enemyId: "officierMarine",
-      level: 80,
-      name: "Amiral des Glaces",
-      unlockFlag: "boss_ile-hiver",
-      respawnMinutes: 15,
+      id: "kuro", x: 56, y: 15, enemyId: "pirateRival", level: 27,
+      name: "Capitaine Pirate Rival", unlockFlag: "boss_ile-syrup", respawnMinutes: 15,
       team: [
-        { characterId: "officierMarine", level: 65 },
-        { characterId: "chasseurDePrimes", level: 70 },
-        { characterId: "officierMarine", level: 80, isBoss: true },
+        { characterId: "pirateRival", level: 20 },
+        { characterId: "chasseurDePrimes", level: 23 },
+        { characterId: "pirateRival", level: 27, isBoss: true },
       ],
     },
     wildZones: [
-      { x1: 4, y1: 4, x2: 22, y2: 28, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "pirateRival", "chasseurDePrimes"] },
-      { x1: 24, y1: 4, x2: 44, y2: 28, level: 3, encounterRate: 0.05, enemyPool: ["chasseurDePrimes", "officierMarine"] },
-      { x1: 46, y1: 4, x2: 61, y2: 28, level: 4, encounterRate: 0.055, enemyPool: ["officierMarine", "chasseurDePrimes"] },
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 7, encounterRate: 0.045, enemyPool: ["pirateRival"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 8, encounterRate: 0.05, enemyPool: ["pirateRival", "chasseurDePrimes"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 9, encounterRate: 0.055, enemyPool: ["chasseurDePrimes", "pirateRival"] },
     ],
-    warps: [{ x: 2, y: 16, toIsland: "ile-brume", toX: 60, toY: 16 }],
+    warps: [
+      { x: 2, y: 16, toIsland: "ile-cocoyasi", toX: 61, toY: 16 },
+      { x: 63, y: 16, toIsland: "ile-baratie", toX: 3, toY: 16, lockedBy: "boss_ile-syrup" },
+    ],
+  },
+
+  // ============================================================
+  // 4 — BARATIE
+  // ============================================================
+  "ile-baratie": {
+    name: "Baratie",
+    terrain: [
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    ],
+    playerStart: { x: 3, y: 16 },
+    tavern: { x: 12, y: 23 },
+    buildings: [{ x: 12, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 31, y: 13, characterId: "cuisinier", level: 32 }],
+    npcs: [
+      { id: "baratie-chef", x: 17, y: 12, name: "Chef du Baratie", dialogue: ["Bienvenue au Baratie ! Ici, on sert les pirates comme les Marines.", "Un cuisinier hors pair cherche un équipage capable de tenir la mer."] },
+      { id: "baratie-marin", x: 48, y: 22, name: "Marine", dialogue: ["Des pirates rivaux se battent encore près du restaurant.", "Ne reste pas sur le quai quand les Marines arrivent."] },
+    ],
+    chests: [
+      { id: "baratie-chest-1", x: 21, y: 8, itemId: "potion", amount: 4 },
+      { id: "baratie-chest-2", x: 43, y: 8, itemId: "superPotion", amount: 2 },
+    ],
+    boss: {
+      id: "baratie-amiral", x: 56, y: 15, enemyId: "officierMarine", level: 36,
+      name: "Officier du Baratie", unlockFlag: "boss_ile-baratie", respawnMinutes: 15,
+      team: [
+        { characterId: "pirateRival", level: 28 },
+        { characterId: "officierMarine", level: 32 },
+        { characterId: "officierMarine", level: 36, isBoss: true },
+      ],
+    },
+    wildZones: [
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 10, encounterRate: 0.045, enemyPool: ["pirateRival", "marineRecrue"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 11, encounterRate: 0.05, enemyPool: ["pirateRival", "officierMarine"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 12, encounterRate: 0.055, enemyPool: ["officierMarine", "pirateRival"] },
+    ],
+    warps: [
+      { x: 2, y: 16, toIsland: "ile-syrup", toX: 61, toY: 16 },
+      { x: 63, y: 16, toIsland: "ile-drum", toX: 3, toY: 16, lockedBy: "boss_ile-baratie" },
+    ],
+  },
+
+  // ============================================================
+  // 5 — DRUM ISLAND
+  // ============================================================
+  "ile-drum": {
+    name: "Drum Island",
+    terrain: [
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    ],
+    playerStart: { x: 3, y: 16 },
+    tavern: { x: 11, y: 23 },
+    buildings: [{ x: 11, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 30, y: 10, characterId: "medecin", level: 43 }],
+    npcs: [
+      { id: "drum-villageois", x: 16, y: 21, name: "Habitant de Drum", dialogue: ["La neige ne pardonne aucune faiblesse.", "Un médecin remarquable vit quelque part sur cette île."] },
+      { id: "drum-chasseur", x: 47, y: 9, name: "Chasseur de montagne", dialogue: ["Les montagnes sont pleines de créatures sauvages.", "Des pirates ont aussi débarqué plus haut."] },
+    ],
+    chests: [
+      { id: "drum-chest-1", x: 20, y: 8, itemId: "superPotion", amount: 2 },
+      { id: "drum-chest-2", x: 45, y: 23, itemId: "potion", amount: 5 },
+    ],
+    boss: {
+      id: "drum-boss", x: 56, y: 15, enemyId: "chasseurDePrimes", level: 47,
+      name: "Seigneur de la Montagne", unlockFlag: "boss_ile-drum", respawnMinutes: 15,
+      team: [
+        { characterId: "chasseurDePrimes", level: 38 },
+        { characterId: "pirateRival", level: 42 },
+        { characterId: "chasseurDePrimes", level: 47, isBoss: true },
+      ],
+    },
+    wildZones: [
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 13, encounterRate: 0.05, enemyPool: ["chasseurDePrimes", "pirateRival"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 14, encounterRate: 0.055, enemyPool: ["chasseurDePrimes", "pirateRival"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 15, encounterRate: 0.06, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+    ],
+    warps: [
+      { x: 2, y: 16, toIsland: "ile-baratie", toX: 61, toY: 16 },
+      { x: 63, y: 16, toIsland: "ile-alabasta", toX: 3, toY: 16, lockedBy: "boss_ile-drum" },
+    ],
+  },
+
+  // ============================================================
+  // 6 — ALABASTA
+  // ============================================================
+  "ile-alabasta": {
+    name: "Alabasta",
+    terrain: [
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    ],
+    playerStart: { x: 3, y: 16 },
+    tavern: { x: 10, y: 23 },
+    buildings: [{ x: 10, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 32, y: 11, characterId: "archeologue", level: 58 }],
+    npcs: [
+      { id: "alabasta-citoyen", x: 15, y: 21, name: "Habitant d'Alabasta", dialogue: ["Le désert semble sans fin.", "Les ruines anciennes cachent peut-être des réponses sur le monde."] },
+      { id: "alabasta-marine", x: 48, y: 22, name: "Marine du désert", dialogue: ["Pirates et agents se disputent le contrôle des routes.", "La sortie vers Water 7 est gardée."] },
+    ],
+    chests: [
+      { id: "alabasta-chest-1", x: 22, y: 8, itemId: "potion", amount: 5 },
+      { id: "alabasta-chest-2", x: 44, y: 9, itemId: "superPotion", amount: 3 },
+    ],
+    boss: {
+      id: "alabasta-boss", x: 56, y: 15, enemyId: "chasseurDePrimes", level: 62,
+      name: "Chef des Agents", unlockFlag: "boss_ile-alabasta", respawnMinutes: 15,
+      team: [
+        { characterId: "chasseurDePrimes", level: 52 },
+        { characterId: "officierMarine", level: 57 },
+        { characterId: "chasseurDePrimes", level: 62, isBoss: true },
+      ],
+    },
+    wildZones: [
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 17, encounterRate: 0.05, enemyPool: ["pirateRival", "chasseurDePrimes"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 18, encounterRate: 0.055, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 19, encounterRate: 0.06, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+    ],
+    warps: [
+      { x: 2, y: 16, toIsland: "ile-drum", toX: 61, toY: 16 },
+      { x: 63, y: 16, toIsland: "ile-water7", toX: 3, toY: 16, lockedBy: "boss_ile-alabasta" },
+    ],
+  },
+
+  // ============================================================
+  // 7 — WATER 7
+  // ============================================================
+  "ile-water7": {
+    name: "Water 7",
+    terrain: [
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    ],
+    playerStart: { x: 3, y: 16 },
+    tavern: { x: 11, y: 23 },
+    buildings: [{ x: 11, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 34, y: 13, characterId: "charpentier", level: 72 }],
+    npcs: [
+      { id: "water7-ouvrier", x: 17, y: 21, name: "Ouvrier de Water 7", dialogue: ["Cette ville flotte entre canaux, ponts et grands chantiers.", "Un charpentier exceptionnel travaille quelque part dans les docks."] },
+      { id: "water7-agent", x: 48, y: 9, name: "Agent mystérieux", dialogue: ["Les agents spéciaux sont partout.", "Méfie-toi des silhouettes qui surveillent les quais."] },
+    ],
+    chests: [
+      { id: "water7-chest-1", x: 20, y: 8, itemId: "superPotion", amount: 3 },
+      { id: "water7-chest-2", x: 45, y: 23, itemId: "potion", amount: 6 },
+    ],
+    boss: {
+      id: "water7-boss", x: 56, y: 15, enemyId: "officierMarine", level: 76,
+      name: "Chef des Agents", unlockFlag: "boss_ile-water7", respawnMinutes: 15,
+      team: [
+        { characterId: "chasseurDePrimes", level: 65 },
+        { characterId: "officierMarine", level: 70 },
+        { characterId: "officierMarine", level: 76, isBoss: true },
+      ],
+    },
+    wildZones: [
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 20, encounterRate: 0.05, enemyPool: ["pirateRival", "chasseurDePrimes"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 21, encounterRate: 0.055, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 22, encounterRate: 0.06, enemyPool: ["officierMarine", "chasseurDePrimes"] },
+    ],
+    warps: [
+      { x: 2, y: 16, toIsland: "ile-alabasta", toX: 61, toY: 16 },
+      { x: 63, y: 16, toIsland: "ile-thriller-bark", toX: 3, toY: 16, lockedBy: "boss_ile-water7" },
+    ],
+  },
+
+  // ============================================================
+  // 8 — THRILLER BARK
+  // ============================================================
+  "ile-thriller-bark": {
+    name: "Thriller Bark",
+    terrain: [
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    ],
+    playerStart: { x: 3, y: 16 },
+    tavern: { x: 11, y: 23 },
+    buildings: [{ x: 11, y: 23, key: "taverne" }],
+    recruitNpcs: [{ x: 34, y: 12, characterId: "musicien", level: 88 }],
+    npcs: [
+      { id: "thriller-villageois", x: 16, y: 22, name: "Fantôme errant", dialogue: ["Cette île n'a rien de normal.", "Les morts se relèvent dans le brouillard."] },
+      { id: "thriller-cimetiere", x: 48, y: 10, name: "Gardien du cimetière", dialogue: ["Ne t'approche pas des tombes après minuit.", "Quelqu'un contrôle les zombies depuis le manoir."] },
+    ],
+    chests: [
+      { id: "thriller-chest-1", x: 21, y: 8, itemId: "superPotion", amount: 4 },
+      { id: "thriller-chest-2", x: 45, y: 23, itemId: "potion", amount: 7 },
+    ],
+    boss: {
+      id: "thriller-boss", x: 56, y: 15, enemyId: "chasseurDePrimes", level: 92,
+      name: "Maître des Zombies", unlockFlag: "boss_ile-thriller-bark", respawnMinutes: 15,
+      team: [
+        { characterId: "pirateRival", level: 80 },
+        { characterId: "chasseurDePrimes", level: 86 },
+        { characterId: "chasseurDePrimes", level: 92, isBoss: true },
+      ],
+    },
+    wildZones: [
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 23, encounterRate: 0.055, enemyPool: ["pirateRival", "chasseurDePrimes"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 24, encounterRate: 0.06, enemyPool: ["chasseurDePrimes", "pirateRival"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 25, encounterRate: 0.065, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+    ],
+    warps: [
+      { x: 2, y: 16, toIsland: "ile-water7", toX: 61, toY: 16 },
+      { x: 63, y: 16, toIsland: "ile-finale", toX: 3, toY: 16, lockedBy: "boss_ile-thriller-bark" },
+    ],
+  },
+
+  // ============================================================
+  // 9 — ÎLE FINALE
+  // ============================================================
+  "ile-finale": {
+    name: "Île Finale",
+    terrain: [
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
+      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    ],
+    playerStart: { x: 3, y: 16 },
+    tavern: { x: 10, y: 23 },
+    buildings: [{ x: 10, y: 23, key: "taverne" }],
+    recruitNpcs: [],
+    npcs: [
+      { id: "final-guide", x: 18, y: 12, name: "Gardien de l'île", dialogue: ["Tu as traversé toute la Grand Line.", "Le dernier adversaire t'attend au bout du chemin."] },
+      { id: "final-old", x: 43, y: 22, name: "Vieil aventurier", dialogue: ["Ici se termine ton voyage... ou commence ta légende."] },
+    ],
+    chests: [
+      { id: "final-chest-1", x: 22, y: 8, itemId: "superPotion", amount: 5 },
+      { id: "final-chest-2", x: 44, y: 8, itemId: "superPotion", amount: 5 },
+      { id: "final-chest-3", x: 52, y: 23, itemId: "potion", amount: 10 },
+    ],
+    boss: {
+      id: "final-boss", x: 56, y: 15, enemyId: "officierMarine", level: 110,
+      name: "Gardien de la Grand Line", unlockFlag: "boss_ile-finale", respawnMinutes: 15,
+      team: [
+        { characterId: "chasseurDePrimes", level: 95 },
+        { characterId: "officierMarine", level: 102 },
+        { characterId: "officierMarine", level: 110, isBoss: true },
+      ],
+    },
+    wildZones: [
+      { x1: 8, y1: 5, x2: 24, y2: 28, level: 26, encounterRate: 0.06, enemyPool: ["chasseurDePrimes", "pirateRival"] },
+      { x1: 26, y1: 5, x2: 44, y2: 28, level: 27, encounterRate: 0.065, enemyPool: ["chasseurDePrimes", "officierMarine"] },
+      { x1: 46, y1: 5, x2: 60, y2: 28, level: 28, encounterRate: 0.07, enemyPool: ["officierMarine", "chasseurDePrimes"] },
+    ],
+    warps: [{ x: 2, y: 16, toIsland: "ile-thriller-bark", toX: 61, toY: 16 }],
   },
 };
+
+// Compatibilité avec les anciennes sauvegardes :
+// ile-brume correspond désormais à Cocoyasi Village,
+// ile-hiver correspond désormais à Syrup Village.
+ISLANDS["ile-brume"] = ISLANDS["ile-cocoyasi"];
+ISLANDS["ile-hiver"] = ISLANDS["ile-syrup"];
 
 export const STARTING_ISLAND = "ile-depart";
