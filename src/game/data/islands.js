@@ -72,16 +72,16 @@ export const ISLANDS = {
       "ssttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttss",
-      "ssddddddddddddddddddddddddddddddddddddddddddddss",
-      "ssddddddddddddddddddddddddddddddddddddddddddddss",
+      "dddddddddddddddddddddddsssssssssssssssssssssssss",
+      "dddddddddddddddddddddddsssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssss",
     ],
 
-    playerStart: { x: 5, y: 26 },
-    tavern: { x: 8, y: 24 },
+    playerStart: { x: 5, y: 25 },
+    tavern: { x: 8, y: 23 },
     buildings: [
-      { x: 8, y: 24, key: "taverne" }
+      { x: 8, y: 23, key: "taverne" }
     ],
     recruitNpcs: [
       // Zoro est visible dans la prison dès le début. Morgan bloque l'entrée.
@@ -90,8 +90,8 @@ export const ISLANDS = {
     npcs: [
       {
         id: "citoyen-shells",
-        x: 12,
-        y: 21,
+        x: 15,
+        y: 23,
         name: "Habitant de Shells Town",
         dialogue: [
           "La Marine contrôle toute la ville.",
@@ -100,8 +100,8 @@ export const ISLANDS = {
       },
       {
         id: "marin-shells",
-        x: 32,
-        y: 6,
+        x: 41,
+        y: 21,
         name: "Marine",
         dialogue: [
           "Circulez ! La base de la Marine est interdite aux civils.",
@@ -110,8 +110,8 @@ export const ISLANDS = {
       },
       {
         id: "prisonnier-shells",
-        x: 26,
-        y: 15,
+        x: 18,
+        y: 23,
         name: "Prisonnier",
         dialogue: [
           "Le sabreur enfermé dans la prison s'appelle Roronoa Zoro.",
@@ -120,8 +120,8 @@ export const ISLANDS = {
       },
       {
         id: "gardien-port-shells",
-        x: 41,
-        y: 27,
+        x: 8,
+        y: 29,
         name: "Garde du port",
         dialogue: [
           "Le départ vers Cocoyasi Village est interdit pour le moment.",
@@ -130,9 +130,9 @@ export const ISLANDS = {
       },
     ],
     chests: [
-      { id: "shells-chest-1", x: 14, y: 18, itemId: "potion", amount: 2 },
-      { id: "shells-chest-2", x: 30, y: 25, itemId: "potion", amount: 2 },
-      { id: "shells-chest-3", x: 33, y: 10, itemId: "superPotion", amount: 1 },
+      { id: "shells-chest-1", x: 38, y: 23, itemId: "potion", amount: 2 },
+      { id: "shells-chest-2", x: 40, y: 23, itemId: "potion", amount: 2 },
+      { id: "shells-chest-3", x: 42, y: 23, itemId: "superPotion", amount: 1 },
     ],
     boss: {
       id: "morgan",
@@ -158,7 +158,7 @@ export const ISLANDS = {
       { x1: 20, y1: 19, x2: 44, y2: 28, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
     warps: [
-      { x: 45, y: 29, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" },
+      { x: 1, y: 3, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" },
     ],
   },
 
