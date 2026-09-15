@@ -130,9 +130,9 @@ export const ISLANDS = {
       },
     ],
     chests: [
-      { id: "shells-chest-1", x: 38, y: 23, itemId: "potion", amount: 2 },
-      { id: "shells-chest-2", x: 40, y: 23, itemId: "potion", amount: 2 },
-      { id: "shells-chest-3", x: 42, y: 23, itemId: "superPotion", amount: 1 },
+      { id: "shells-chest-1", x: 38, y: 10, itemId: "potion", amount: 2 },
+      { id: "shells-chest-2", x: 40, y: 10, itemId: "potion", amount: 2 },
+      { id: "shells-chest-3", x: 42, y: 10, itemId: "superPotion", amount: 1 },
     ],
     boss: {
       id: "morgan",
