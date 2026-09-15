@@ -736,8 +736,8 @@ export default class WorldScene extends Phaser.Scene {
 
     // Prison : murs en pierre sombre, barreaux sur le côté de l'entrée.
     const inPrisonBoundary =
-      x >= 21 && x <= 28 && y >= 7 && y <= 12 &&
-      (x === 21 || x === 28 || y === 7 || y === 12);
+      x >= 20 && x <= 31 && y >= 7 && y <= 12 &&
+      (x === 20 || x === 31 || y === 7 || y === 12);
     if (inPrisonBoundary) {
       // Pas de porte : les barreaux constituent le seul accès visuel.
       if (y === 12) {
@@ -749,7 +749,7 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     // Intérieur de la prison : Zoro est visible derrière les barreaux.
-    if (x >= 22 && x <= 27 && y >= 8 && y <= 11) {
+    if (x >= 21 && x <= 30 && y >= 8 && y <= 11) {
       return "tile-military-floor";
     }
 
@@ -1107,7 +1107,7 @@ showVictoryReward(winner, xp, berrys) {
     if (
       this.state.islandId === "ile-depart" &&
       this.state.progressFlags?.["boss_ile-depart"] &&
-      x >= 22 && x <= 27 && y === 12
+      x >= 21 && x <= 30 && y === 12
     ) {
       return ".";
     }
@@ -1175,7 +1175,13 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    if (this.tileAt(targetX, targetY) === "#") return;
+    const targetIsBoss =
+      this.island.boss &&
+      targetX === this.island.boss.x &&
+      targetY === this.island.boss.y &&
+      !this.isBossOnCooldown(this.island.boss);
+
+    if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
 
     this.isMoving = true;
     this.state.x = targetX;
@@ -1266,9 +1272,15 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    const zone = island.wildZones.find(
-      (z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2
-    );
+    const inPrisonInterior =
+      this.state.islandId === "ile-depart" &&
+      x >= 21 && x <= 30 && y >= 8 && y <= 11;
+
+    const zone = inPrisonInterior
+      ? null
+      : island.wildZones.find(
+          (z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2
+        );
 
     if (zone && Math.random() < zone.encounterRate) {
       const pool = zone.enemyPool && zone.enemyPool.length
