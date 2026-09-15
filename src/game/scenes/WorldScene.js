@@ -790,7 +790,7 @@ export default class WorldScene extends Phaser.Scene {
         0
       );
 
-      sprite.setScale(2.5);
+      sprite.setScale((npc.characterId || "captain") === "bretteur" ? 0.625 : 2.5);
       sprite.setOrigin(0.5, 0.78);
       sprite.setDepth(npc.y + 0.5);
       this.talkNpcSprites[`${npc.x},${npc.y}`] = npc;
@@ -826,7 +826,7 @@ export default class WorldScene extends Phaser.Scene {
         spriteKey(boss.enemyId),
         0
       );
-      this.bossSprite.setScale(2.5);
+      this.bossSprite.setScale(boss.enemyId === "officierMarine" ? 2.5 : boss.enemyId === "pirateRival" ? 2.5 : 2.5);
       this.bossSprite.setOrigin(0.5, 0.78);
       this.bossSprite.setDepth(boss.y + 0.5);
     }
@@ -841,7 +841,7 @@ export default class WorldScene extends Phaser.Scene {
           0
         );
 
-        sprite.setScale(2.5);
+        sprite.setScale(npc.characterId === "bretteur" ? 0.625 : 2.5);
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
@@ -1103,7 +1103,7 @@ showVictoryReward(winner, xp, berrys) {
       duration: 140,
       onComplete: () => {
         this.isMoving = false;
-        const idleFrame = { down: 0, up: 6, left: 8, right: 8 }[this.playerDirection] ?? 0;
+        const idleFrame = { down: 0, up: 1, left: 2, right: 2 }[this.playerDirection] ?? 0;
         this.player.stop();
         this.player.setFrame(idleFrame);
         this.persist();

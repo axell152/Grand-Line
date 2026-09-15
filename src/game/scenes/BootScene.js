@@ -19,11 +19,13 @@ export default class BootScene extends Phaser.Scene {
     this.load.image("tile-path", "/tiles/path.png");
     this.load.image("tile-wild", "/tiles/wild.png");
 
-    // Les personnages fournis sont des spritesheets de 10 frames de 16x16.
+    // La majorité des personnages utilisent 10 frames de 16x16.
+    // Le bretteur utilise une spritesheet plus détaillée en 10 frames de 64x64.
     SPRITES.forEach((key) => {
+      const frameSize = key === "character_03" ? 64 : 16;
       this.load.spritesheet(key, `/sprites/${key}.png`, {
-        frameWidth: 16,
-        frameHeight: 16,
+        frameWidth: frameSize,
+        frameHeight: frameSize,
         endFrame: 9,
       });
     });
@@ -48,9 +50,9 @@ export default class BootScene extends Phaser.Scene {
     // 0-2 = bas, 3-5 = haut, 6-7 = gauche, 8-9 = droite.
     SPRITES.forEach((key) => {
       const animations = [
-  { suffix: "down", frames: [0, 4, 5] },
-  { suffix: "up", frames: [1, 6, 7] },
-  { suffix: "side", frames: [2, 8, 9] },
+  { suffix: "down", frames: [4, 5] },
+  { suffix: "up", frames: [6, 7] },
+  { suffix: "side", frames: [8, 9] },
 ];
 
       animations.forEach(({ suffix, frames }) => {
