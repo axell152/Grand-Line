@@ -122,15 +122,16 @@ export default class WorldScene extends Phaser.Scene {
       }
       if (!this.state.crewDetails[recruitedId]) {
         const base = CHARACTERS[recruitedId];
+        const recruitedLevel = Math.max(1, Number(this.incoming.recruitedLevel) || 1);
         this.state.crewDetails[recruitedId] = {
-          level: 1,
+          level: recruitedLevel,
           exp: 0,
           maxExp: 100,
-          hp: base?.maxHp || 1,
-          maxHp: base?.maxHp || 1,
-          atk: base?.atk || 1,
-          def: base?.def || 1,
-          spd: base?.spd || 1,
+          hp: (base?.maxHp || 1) + (recruitedLevel - 1) * 8,
+          maxHp: (base?.maxHp || 1) + (recruitedLevel - 1) * 8,
+          atk: (base?.atk || 1) + (recruitedLevel - 1) * 2,
+          def: (base?.def || 1) + (recruitedLevel - 1),
+          spd: (base?.spd || 1) + (recruitedLevel - 1),
           moves: [...(base?.moves || [])].slice(0, 4),
           ppData: {},
         };
@@ -833,6 +834,7 @@ export default class WorldScene extends Phaser.Scene {
 
     island.recruitNpcs
       .filter((npc) => !this.state.crew.includes(npc.characterId))
+      .filter((npc) => !npc.requiredFlag || !!this.state.progressFlags?.[npc.requiredFlag])
       .forEach((npc) => {
         const sprite = this.add.sprite(
           npc.x * TILE_SIZE + TILE_SIZE / 2,
@@ -845,6 +847,8 @@ export default class WorldScene extends Phaser.Scene {
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
+         this.recruitNpcData ||= {};
+         this.recruitNpcData[`${npc.x},${npc.y}`] = npc;
       });
 
     this.player = this.add.sprite(
@@ -1423,7 +1427,7 @@ showVictoryReward(winner, xp, berrys) {
     return respawnAt > Date.now();
   }
 
-  startBattle({ mode, characterId, enemyLevel, boss = false, bossId, bossTeam, bossRespawnMinutes, bossName, bossUnlockFlag }) {
+  startBattle({ mode, characterId, enemyLevel, recruitedLevel, boss = false, bossId, bossTeam, bossRespawnMinutes, bossName, bossUnlockFlag }) {
     this.scene.start("Battle", {
       mode,
       characterId,

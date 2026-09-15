@@ -30,7 +30,14 @@ export default class BattleScene extends Phaser.Scene {
     this.bossExpRewards = [];
 
     const enemySource = this.battleMode === "recruit"
-      ? CHARACTERS[d.characterId]
+      ? {
+          ...CHARACTERS[d.characterId],
+          level: Math.max(1, Number(d.enemyLevel) || 1),
+          maxHp: CHARACTERS[d.characterId].maxHp + (Math.max(1, Number(d.enemyLevel) || 1) - 1) * 8,
+          atk: CHARACTERS[d.characterId].atk + (Math.max(1, Number(d.enemyLevel) || 1) - 1) * 2,
+          def: CHARACTERS[d.characterId].def + (Math.max(1, Number(d.enemyLevel) || 1) - 1),
+          spd: CHARACTERS[d.characterId].spd + (Math.max(1, Number(d.enemyLevel) || 1) - 1),
+        }
       : scaleEnemyForLevel(ENEMY_CHARACTERS[d.characterId || "marineRecrue"], d.enemyLevel || 1);
 
     const level = d.playerLevel || 1;
