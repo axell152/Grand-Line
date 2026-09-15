@@ -88,7 +88,7 @@ export const ISLANDS = {
   // ============================================================
   // 2 — COCOYASI VILLAGE
   // ============================================================
-  "ile-brume": {
+  "ile-cocoyasi": {
   name: "Cocoyasi Village",
 
   terrain: [
