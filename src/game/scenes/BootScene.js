@@ -14,33 +14,57 @@ export default class BootScene extends Phaser.Scene {
   }
 
   preload() {
+    // Tiles classiques
     this.load.image("tile-floor", "/tiles/floor.png");
     this.load.image("tile-wall", "/tiles/wall.png");
     this.load.image("tile-path", "/tiles/path.png");
     this.load.image("tile-wild", "/tiles/wild.png");
 
-    // Tiles spécifiques à Shells Town : chaque image est un atlas 8x8
-    // composé de vraies cases de 32x32 pixels.
+    // Tiles personnalisés.
+    // Chaque image est un atlas 8x8 de cases 32x32.
     const customTiles = [
-      "village-floor", "village-path", "military-floor", "marine-wall",
-      "prison-wall", "prison-bars", "sea", "dock",
+      // Shells Town
+      "village-floor",
+      "village-path",
+      "military-floor",
+      "marine-wall",
+      "prison-wall",
+      "prison-bars",
+      "sea",
+      "dock",
+
+      // Cocoyasi
+      "cocoyasi-ground",
+      "cocoyasi-rubble",
+      "cocoyasi-vegetation",
+      "cocoyasi-ruins",
     ];
+
     customTiles.forEach((key) => {
-      this.load.spritesheet(`tile-${key}`, `/tiles/custom/${key}.png`, {
-        frameWidth: 32,
-        frameHeight: 32,
-      });
+      this.load.spritesheet(
+        `tile-${key}`,
+        `/tiles/custom/${key}.png`,
+        {
+          frameWidth: 32,
+          frameHeight: 32,
+        }
+      );
     });
 
     // La majorité des personnages utilisent 10 frames de 16x16.
-    // Le bretteur utilise une spritesheet plus détaillée en 10 frames de 64x64.
+    // Le bretteur utilise une spritesheet 10 frames de 64x64.
     SPRITES.forEach((key) => {
       const frameSize = key === "character_03" ? 64 : 16;
-      this.load.spritesheet(key, `/sprites/${key}.png`, {
-        frameWidth: frameSize,
-        frameHeight: frameSize,
-        endFrame: 9,
-      });
+
+      this.load.spritesheet(
+        key,
+        `/sprites/${key}.png`,
+        {
+          frameWidth: frameSize,
+          frameHeight: frameSize,
+          endFrame: 9,
+        }
+      );
     });
   }
 
@@ -52,26 +76,56 @@ export default class BootScene extends Phaser.Scene {
 
   makeWarpMarker() {
     const g = this.add.graphics();
+
     g.fillStyle(0xd4a24c, 1);
-    g.fillCircle(TILE_SIZE / 2, TILE_SIZE / 2, 6);
-    g.generateTexture("warp-marker", TILE_SIZE, TILE_SIZE);
+    g.fillCircle(
+      TILE_SIZE / 2,
+      TILE_SIZE / 2,
+      6
+    );
+
+    g.generateTexture(
+      "warp-marker",
+      TILE_SIZE,
+      TILE_SIZE
+    );
+
     g.destroy();
   }
 
   createCharacterAnimations() {
-    // Organisation utilisée par les sprites fournis :
-    // 0-2 = bas, 3-5 = haut, 6-7 = gauche, 8-9 = droite.
+    // Organisation des sprites :
+    // 0 = face / bas statique
+    // 1 = dos / haut statique
+    // 2 = côté statique
+    // 3 = inutilisé
+    // 4-5 = marche bas
+    // 6-7 = marche haut
+    // 8-9 = marche côté
+
     SPRITES.forEach((key) => {
       const animations = [
-  { suffix: "down", frames: [4, 5] },
-  { suffix: "up", frames: [6, 7] },
-  { suffix: "side", frames: [8, 9] },
-];
+        {
+          suffix: "down",
+          frames: [4, 5],
+        },
+        {
+          suffix: "up",
+          frames: [6, 7],
+        },
+        {
+          suffix: "side",
+          frames: [8, 9],
+        },
+      ];
 
       animations.forEach(({ suffix, frames }) => {
         this.anims.create({
           key: `${key}-${suffix}`,
-          frames: frames.map((frame) => ({ key, frame })),
+          frames: frames.map((frame) => ({
+            key,
+            frame,
+          })),
           frameRate: 8,
           repeat: -1,
         });
