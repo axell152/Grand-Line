@@ -728,19 +728,32 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   getShellsTownTile(x, y, tile, zone) {
-    // Bordure extérieure : mer, avec un quai sur la partie basse centrale.
+    // Shells Town : grande île ouverte. Terre partout, sauf mer/quai,
+    // chemin et ensemble de la prison à l'extrémité est.
     if (y <= 1) return "tile-sea";
     if (y >= 30) return "tile-sea";
-    if (y === 29) return "tile-dock";
+    if (y === 29 && x >= 3 && x <= 14) return "tile-dock";
     if (x <= 1 || x >= 46) return "tile-sea";
 
-    // Prison : murs en pierre sombre, barreaux sur le côté de l'entrée.
-    const inPrisonBoundary =
-      x >= 20 && x <= 31 && y >= 7 && y <= 12 &&
-      (x === 20 || x === 31 || y === 7 || y === 12);
-    if (inPrisonBoundary) {
-      // Pas de porte : les barreaux constituent le seul accès visuel.
-      if (y === 12) {
+    // Chemin principal : de la taverne vers la prison.
+    if ((y === 24 && x >= 3 && x <= 39) || (x === 39 && y >= 19 && y <= 24)) {
+      return "tile-village-path";
+    }
+
+    // Grande prison tout au bout de la zone, à l'opposé de la taverne.
+    const prisonLeft = 35;
+    const prisonRight = 44;
+    const prisonTop = 8;
+    const prisonBottom = 18;
+    const onPrisonBoundary =
+      x >= prisonLeft && x <= prisonRight &&
+      y >= prisonTop && y <= prisonBottom &&
+      (x === prisonLeft || x === prisonRight || y === prisonTop || y === prisonBottom);
+
+    if (onPrisonBoundary) {
+      // L'unique ouverture est l'entrée au sud. Avant Morgan, les barreaux
+      // et Morgan la bloquent. Après sa défaite, elle devient du sol.
+      if (y === prisonBottom && x === 39) {
         return this.state.progressFlags?.["boss_ile-depart"]
           ? "tile-military-floor"
           : "tile-prison-bars";
@@ -748,24 +761,13 @@ export default class WorldScene extends Phaser.Scene {
       return "tile-prison-wall";
     }
 
-    // Intérieur de la prison : Zoro est visible derrière les barreaux.
-    if (x >= 21 && x <= 30 && y >= 8 && y <= 11) {
+    // Intérieur de la prison : sol militaire, Zoro visible derrière les murs.
+    if (x > prisonLeft && x < prisonRight && y > prisonTop && y < prisonBottom) {
       return "tile-military-floor";
     }
 
-    // Chemin principal du village jusqu'à l'entrée de la prison.
-    if ((y === 26 && x >= 3 && x <= 24) || (x === 24 && y >= 13 && y <= 26)) {
-      return "tile-village-path";
-    }
-
-    // Base de la Marine à l'est.
-    if (x >= 29 && x <= 45 && y >= 7 && y <= 13) {
-      return tile === "#" ? "tile-marine-wall" : "tile-military-floor";
-    }
-
-    // Quartier du village à l'ouest et autour de la prison.
-    if (tile === "P") return "tile-village-path";
-    if (tile === "#") return "tile-marine-wall";
+    // Toute la ville restante est de la terre, sans distinction visuelle
+    // entre zone normale et zone de rencontres.
     return "tile-village-floor";
   }
 
@@ -1108,7 +1110,7 @@ showVictoryReward(winner, xp, berrys) {
     if (
       this.state.islandId === "ile-depart" &&
       this.state.progressFlags?.["boss_ile-depart"] &&
-      x >= 21 && x <= 30 && y === 12
+      x === 39 && y === 18
     ) {
       return ".";
     }

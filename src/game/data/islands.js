@@ -3,30 +3,32 @@ export const TILE_SIZE = 32;
 export const ISLANDS = {
   "ile-depart": {
     name: "Shells Town",
+    // Shells Town est volontairement très ouverte : presque toute la surface
+    // accessible est de la terre. Les seuls vrais murs sont ceux de la prison.
     grid: [
       "################################################",
       "################################################",
       "##............................................##",
       "##............................................##",
-      "##....##########..................##############",
-      "##....##########..................##############",
-      "##....##########..................##############",
-      "##..................############..............##",
-      "##..................#..........#..............##",
-      "##..................#..........#..............##",
-      "##..................#..........#..............##",
-      "##..................#..........#..............##",
-      "##..................############..............##",
       "##............................................##",
       "##............................................##",
-      "##..............########......................##",
-      "##..............########......................##",
-      "##..............########......................##",
       "##............................................##",
       "##............................................##",
-      "##....########........................####....##",
-      "##....########........................####....##",
-      "##....########........................####....##",
+      "##................................##########..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................#........#..##",
+      "##................................##########..##",
+      "##............................................##",
+      "##............................................##",
+      "##............................................##",
+      "##............................................##",
       "##............................................##",
       "##............................................##",
       "##............................................##",
@@ -43,8 +45,8 @@ export const ISLANDS = {
       { x: 8, y: 24, key: "taverne" }
     ],
     recruitNpcs: [
-      // Zoro est visible dans la prison dès le début. Morgan bloque son unique entrée.
-      { x: 24, y: 10, characterId: "bretteur", level: 10 },
+      // Zoro est visible dans la prison dès le début. Morgan bloque l'entrée.
+      { x: 39, y: 13, characterId: "bretteur", level: 10 },
     ],
     npcs: [
       {
@@ -59,8 +61,8 @@ export const ISLANDS = {
       },
       {
         id: "marin-shells",
-        x: 31,
-        y: 5,
+        x: 32,
+        y: 6,
         name: "Marine",
         dialogue: [
           "Circulez ! La base de la Marine est interdite aux civils.",
@@ -69,8 +71,8 @@ export const ISLANDS = {
       },
       {
         id: "prisonnier-shells",
-        x: 20,
-        y: 14,
+        x: 26,
+        y: 15,
         name: "Prisonnier",
         dialogue: [
           "Le sabreur enfermé dans la prison s'appelle Roronoa Zoro.",
@@ -90,13 +92,13 @@ export const ISLANDS = {
     ],
     chests: [
       { id: "shells-chest-1", x: 14, y: 18, itemId: "potion", amount: 2 },
-      { id: "shells-chest-2", x: 40, y: 18, itemId: "potion", amount: 2 },
-      { id: "shells-chest-3", x: 35, y: 14, itemId: "superPotion", amount: 1 },
+      { id: "shells-chest-2", x: 30, y: 25, itemId: "potion", amount: 2 },
+      { id: "shells-chest-3", x: 33, y: 10, itemId: "superPotion", amount: 1 },
     ],
     boss: {
       id: "morgan",
-      x: 24,
-      y: 12,
+      x: 39,
+      y: 18,
       enemyId: "officierMarine",
       level: 8,
       name: "Colonel Morgan",
@@ -108,15 +110,13 @@ export const ISLANDS = {
         { characterId: "officierMarine", level: 8, isBoss: true },
       ],
     },
+    // Zone sauvage discrète : aucun revêtement spécial n'est affiché.
+    // Les rencontres sont concentrées dans la moitié est, autour de la prison.
     wildZones: [
-      // Grande zone de rencontres autour de la prison et de Morgan.
-      { x1: 16, y1: 4, x2: 34, y2: 6, level: 1, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
-      { x1: 16, y1: 7, x2: 20, y2: 16, level: 1, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
-      { x1: 29, y1: 7, x2: 34, y2: 16, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
-      { x1: 16, y1: 17, x2: 34, y2: 20, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
-      // Le reste de la ville conserve des rencontres plus espacées.
-      { x1: 3, y1: 3, x2: 18, y2: 20, level: 1, encounterRate: 0.035, enemyPool: ["marineRecrue"] },
-      { x1: 35, y1: 14, x2: 44, y2: 28, level: 2, encounterRate: 0.04, enemyPool: ["marineRecrue", "officierMarine"] },
+      { x1: 20, y1: 4, x2: 44, y2: 7, level: 1, encounterRate: 0.045, enemyPool: ["marineRecrue"] },
+      { x1: 20, y1: 8, x2: 34, y2: 18, level: 1, encounterRate: 0.05, enemyPool: ["marineRecrue"] },
+      { x1: 45, y1: 8, x2: 45, y2: 18, level: 2, encounterRate: 0.05, enemyPool: ["marineRecrue", "officierMarine"] },
+      { x1: 20, y1: 19, x2: 44, y2: 28, level: 2, encounterRate: 0.055, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
     warps: [
       { x: 46, y: 16, toIsland: "ile-brume", toX: 3, toY: 16, lockedBy: "boss_ile-depart" },
