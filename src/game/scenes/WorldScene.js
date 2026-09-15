@@ -765,7 +765,6 @@ export default class WorldScene extends Phaser.Scene {
 
     // Quartier du village à l'ouest et autour de la prison.
     if (tile === "P") return "tile-village-path";
-    if (zone) return "tile-wild";
     if (tile === "#") return "tile-marine-wall";
     return "tile-village-floor";
   }
@@ -817,7 +816,9 @@ export default class WorldScene extends Phaser.Scene {
           ).setDepth(0);
         }
 
-        if (zone) img.setTint(zoneColors[zone.level] || 0xe8895f);
+        if (zone && this.state.islandId !== "ile-depart") {
+          img.setTint(zoneColors[zone.level] || 0xe8895f);
+        }
       }
     }
 
