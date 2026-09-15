@@ -740,6 +740,11 @@ export default class WorldScene extends Phaser.Scene {
         : "tile-prison-bars",
       d: "tile-dock",
       s: "tile-sea",
+      // COCOYASI
+      g: "tile-cocoyasi-ground",
+      r: "tile-cocoyasi-rubble",
+      v: "tile-cocoyasi-vegetation",
+      q: "tile-cocoyasi-ruins",
     };
 
     return terrainKeys[tile] || "tile-village-floor";
@@ -1081,6 +1086,11 @@ showVictoryReward(winner, xp, berrys) {
       if (unlockFlag && !this.state.progressFlags?.[unlockFlag]) return "#";
     }
     return ".";
+    if (terrain === "s") return true;
+    if (terrain === "w") return true;
+    if (terrain === "q") return true;
+    if (terrain === "r") return true;
+    if (terrain === "v") return true;
   }
 
   update() {
