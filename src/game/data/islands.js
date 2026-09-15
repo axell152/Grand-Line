@@ -77,7 +77,7 @@ export const ISLANDS = {
       ],
     },
     wildZones: [
-      { x1: 4, y1: 16, x2: 44, y2: 18, level: 1, encounterRate: 1, enemyPool: ["marineRecrue"] },
+      { x1: 4, y1: 16, x2: 44, y2: 18, level: 1, encounterRate: 0.1, enemyPool: ["marineRecrue"] },
       { x1: 4, y1: 12, x2: 44, y2: 14, level: 2, encounterRate: 0.1, enemyPool: ["marineRecrue"] },
       { x1: 4, y1: 3, x2: 44, y2: 10, level: 3, encounterRate: 0.1, enemyPool: ["marineRecrue", "officierMarine"] },
       { x1: 4, y1: 5, x2: 44, y2: 4, level: 10, encounterRate: 0.07, enemyPool: ["marineRecrue", "officierMarine"] },
