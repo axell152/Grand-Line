@@ -759,14 +759,13 @@ export default class WorldScene extends Phaser.Scene {
     const zoneAt = (x, y) =>
       island.wildZones.find((z) => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2);
 
-    const mapRows = island.terrain || island.grid;
+    const mapRows = island.terrain;
     for (let y = 0; y < mapRows.length; y++) {
       const row = mapRows[y];
       for (let x = 0; x < row.length; x++) {
         const tile = row[x];
-        const collisionTile = island.grid?.[y]?.[x] ?? ".";
-        const zone = collisionTile === "." ? zoneAt(x, y) : null;
-        let key = tile === "#" ? "tile-wall" : tile === "P" ? "tile-path" : "tile-floor";
+        const zone = !["w", "s"].includes(tile) ? zoneAt(x, y) : null;
+        let key = tile === "w" ? "tile-wall" : tile === "c" ? "tile-path" : "tile-floor";
 
         if (this.state.islandId === "ile-depart") {
           // Le terrain visuel est entièrement piloté par islands.js.
@@ -919,8 +918,8 @@ export default class WorldScene extends Phaser.Scene {
     this.cameras.main.setBounds(
   0,
   0,
-  island.grid[0].length * TILE_SIZE,
-  island.grid.length * TILE_SIZE
+  island.terrain[0].length * TILE_SIZE,
+  island.terrain.length * TILE_SIZE
 );
 
 this.cameras.main.startFollow(this.player, true);
@@ -1087,25 +1086,17 @@ showVictoryReward(winner, xp, berrys) {
   tileAt(x, y) {
     const island = this.island;
 
-    // Shells Town est pilotée par terrain[] : on peut donc dessiner et structurer
-    // l'île sans modifier une deuxième grille de collision.
-    if (this.state.islandId === "ile-depart" && island.terrain) {
-      if (y < 0 || y >= island.terrain.length) return "#";
-      const row = island.terrain[y];
-      if (x < 0 || x >= row.length) return "#";
-
-      const terrain = row[x];
-      // Mer et murs de prison sont infranchissables.
-      if (terrain === "s" || terrain === "w") return "#";
-      // L'entrée de la prison est bloquée tant que Morgan est présent.
-      if (terrain === "b" && !this.state.progressFlags?.["boss_ile-depart"]) return "#";
-      return ".";
-    }
-
-    if (y < 0 || y >= island.grid.length) return "#";
-    const row = island.grid[y];
+    if (!island.terrain) return "#";
+    if (y < 0 || y >= island.terrain.length) return "#";
+    const row = island.terrain[y];
     if (x < 0 || x >= row.length) return "#";
-    return row[x];
+
+    const terrain = row[x];
+    // Mer et murs de prison sont infranchissables.
+    if (terrain === "s" || terrain === "w") return "#";
+    // L'entrée de la prison est bloquée tant que Morgan est présent.
+    if (terrain === "b" && !this.state.progressFlags?.["boss_ile-depart"]) return "#";
+    return ".";
   }
 
   update() {

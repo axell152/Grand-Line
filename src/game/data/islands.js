@@ -5,40 +5,6 @@ export const ISLANDS = {
     name: "Shells Town",
     // Shells Town est volontairement très ouverte : presque toute la surface
     // accessible est de la terre. Les seuls vrais murs sont ceux de la prison.
-    grid: [
-      "################################################",
-      "################################################",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##................................##########..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................#........#..##",
-      "##................................##########..##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "##............................................##",
-      "################################################",
-      "################################################",
-    ],
     // Terrain visuel ET structurel : on modèle l'île ici, case par case.
     // t = terre, c = chemin, p = sol intérieur, w = mur, b = entrée de prison,
     // d = quai, s = mer.
@@ -164,39 +130,72 @@ export const ISLANDS = {
 
   "ile-brume": {
     name: "Île de la Brume",
-    grid: [
-      "################################################################",
-      "################################################################",
-      "##..........#####.....................#####...................##",
-      "##..........#####.............####....#####...................##",
-      "##.....##########.............####..............#####....####.##",
-      "#####..#####...........####...####............#######...#####.##",
-      "#####..#####...........####...................#######.#######.##",
-      "##.................................................##.#######.##",
-      "##.#########................####........###.....#####..######.##",
-      "##.######...................####........###............#####..##",
-      "##..............####........####........###...###.....###.....##",
-      "##..............####.......#####.......#####..###.....###.....##",
-      "##...###.....#####.........####........#####..###.....###.....##",
-      "##...###.....#####.........####.......######..###.....###.....##",
-      "##...###.....#######..................#####...###.............##",
-      "##...###############..................#####...................##",
-      "##...########.........................###.....................##",
-      "##......#####.................................................##",
-      "##......#####.....##...................###....................##",
-      "##.............#####...................###....................##",
-      "##.............#####.#####....................................##",
-      "##.###............##.#####....................................##",
-      "##.###............##..........................................##",
-      "##.###.....................####...............................##",
-      "##.........................###................................##",
-      "##.......#####.............####...............................##",
-      "##.......#####.##..###.....####.....................##........##",
-      "##.......#####.##..###.....####.....................######....##",
-      "##.......#####.##...................................######....##",
-      "##............................................................##",
-      "################################################################",
-      "################################################################",
+    terrain: [
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
+      "wwttttttttttwwwwwtttttttttttttttttttttwwwwwtttttttttttttttttttww",
+
+      "wwttttttttttwwwwwtttttttttttttwwwwttttwwwwwtttttttttttttttttttww",
+
+      "wwtttttwwwwwwwwwwtttttttttttttwwwwttttttttttttttwwwwwttttwwwwtww",
+
+      "wwwwwttwwwwwtttttttttttwwwwtttwwwwttttttttttttwwwwwwwtttwwwwwtww",
+
+      "wwwwwttwwwwwtttttttttttwwwwtttttttttttttttttttwwwwwwwtwwwwwwwtww",
+
+      "wwtttttttttttttttttttttttttttttttttttttttttttttttttwwtwwwwwwwtww",
+
+      "wwtwwwwwwwwwttttttttttttttttwwwwttttttttwwwtttttwwwwwttwwwwwwtww",
+
+      "wwtwwwwwwtttttttttttttttttttwwwwttttttttwwwttttttttttttwwwwwttww",
+
+      "wwttttttttttttttwwwwttttttttwwwwttttttttwwwtttwwwtttttwwwtttttww",
+
+      "wwttttttttttttttwwwwtttttttwwwwwtttttttwwwwwttwwwtttttwwwtttttww",
+
+      "wwtttwwwtttttwwwwwtttttttttwwwwttttttttwwwwwttwwwtttttwwwtttttww",
+
+      "wwtttwwwtttttwwwwwtttttttttwwwwtttttttwwwwwwttwwwtttttwwwtttttww",
+
+      "wwtttwwwtttttwwwwwwwttttttttttttttttttwwwwwtttwwwtttttttttttttww",
+
+      "wwtttwwwwwwwwwwwwwwwttttttttttttttttttwwwwwtttttttttttttttttttww",
+
+      "wwtttwwwwwwwwtttttttttttttttttttttttttwwwtttttttttttttttttttttww",
+
+      "wwttttttwwwwwtttttttttttttttttttttttttttttttttttttttttttttttttww",
+
+      "wwttttttwwwwwtttttwwtttttttttttttttttttwwwttttttttttttttttttttww",
+
+      "wwtttttttttttttwwwwwtttttttttttttttttttwwwttttttttttttttttttttww",
+
+      "wwtttttttttttttwwwwwtwwwwwttttttttttttttttttttttttttttttttttttww",
+
+      "wwtwwwttttttttttttwwtwwwwwttttttttttttttttttttttttttttttttttttww",
+
+      "wwtwwwttttttttttttwwttttttttttttttttttttttttttttttttttttttttttww",
+
+      "wwtwwwtttttttttttttttttttttwwwwtttttttttttttttttttttttttttttttww",
+
+      "wwtttttttttttttttttttttttttwwwttttttttttttttttttttttttttttttttww",
+
+      "wwtttttttwwwwwtttttttttttttwwwwtttttttttttttttttttttttttttttttww",
+
+      "wwtttttttwwwwwtwwttwwwtttttwwwwtttttttttttttttttttttwwttttttttww",
+
+      "wwtttttttwwwwwtwwttwwwtttttwwwwtttttttttttttttttttttwwwwwwttttww",
+
+      "wwtttttttwwwwwtwwtttttttttttttttttttttttttttttttttttwwwwwwttttww",
+
+      "wwttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttww",
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
     ],
     playerStart: { x: 3, y: 16 },
     recruitNpcs: [
@@ -258,39 +257,72 @@ export const ISLANDS = {
 
   "ile-hiver": {
     name: "Île d'Hiver",
-    grid: [
-      "################################################################",
-      "################################################################",
-      "##..###...............###.....................................##",
-      "#######...............###................................###..##",
-      "#######....##..####...###........#####........#####......###..##",
-      "#######....########...###........#####.......######...........##",
-      "#######.....#######..............#####.......#####......####..##",
-      "##.............####..............#####.......#####......####..##",
-      "##..........####........#####.................................##",
-      "##............##........#####...............####..............##",
-      "##......................#####...............####......###.....##",
-      "##......................##########.......###..........###.....##",
-      "##..........................######.......######.##....###.....##",
-      "##..........................######.......#########............##",
-      "##........................########...#############............##",
-      "##.................####...##..####...####..#######.....###....##",
-      "##.................####...##.........####..#######.....###....##",
-      "##..............##.####...##.........####..............###....##",
-      "##..............##.####...##...........................###....##",
-      "##.................########............#####..................##",
-      "##....................#####............#####............##....##",
-      "##....................#####....######..###############..##....##",
-      "##....................#####....######..###############..###...##",
-      "##....###......................######......########.....###...##",
-      "##....###......................######...........##.......##...##",
-      "##.............................###.##...........###......##...##",
-      "##.................................##.........................##",
-      "##.................................##.........................##",
-      "##.....#####..................................................##",
-      "##.....#####..................................................##",
-      "################################################################",
-      "################################################################",
+    terrain: [
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
+      "wwttwwwtttttttttttttttwwwtttttttttttttttttttttttttttttttttttttww",
+
+      "wwwwwwwtttttttttttttttwwwttttttttttttttttttttttttttttttttwwwttww",
+
+      "wwwwwwwttttwwttwwwwtttwwwttttttttwwwwwttttttttwwwwwttttttwwwttww",
+
+      "wwwwwwwttttwwwwwwwwtttwwwttttttttwwwwwtttttttwwwwwwtttttttttttww",
+
+      "wwwwwwwtttttwwwwwwwttttttttttttttwwwwwtttttttwwwwwttttttwwwwttww",
+
+      "wwtttttttttttttwwwwttttttttttttttwwwwwtttttttwwwwwttttttwwwwttww",
+
+      "wwttttttttttwwwwttttttttwwwwwtttttttttttttttttttttttttttttttttww",
+
+      "wwttttttttttttwwttttttttwwwwwtttttttttttttttwwwwttttttttttttttww",
+
+      "wwttttttttttttttttttttttwwwwwtttttttttttttttwwwwttttttwwwtttttww",
+
+      "wwttttttttttttttttttttttwwwwwwwwwwtttttttwwwttttttttttwwwtttttww",
+
+      "wwttttttttttttttttttttttttttwwwwwwtttttttwwwwwwtwwttttwwwtttttww",
+
+      "wwttttttttttttttttttttttttttwwwwwwtttttttwwwwwwwwwttttttttttttww",
+
+      "wwttttttttttttttttttttttttwwwwwwwwtttwwwwwwwwwwwwwttttttttttttww",
+
+      "wwtttttttttttttttttwwwwtttwwttwwwwtttwwwwttwwwwwwwtttttwwwttttww",
+
+      "wwtttttttttttttttttwwwwtttwwtttttttttwwwwttwwwwwwwtttttwwwttttww",
+
+      "wwttttttttttttttwwtwwwwtttwwtttttttttwwwwttttttttttttttwwwttttww",
+
+      "wwttttttttttttttwwtwwwwtttwwtttttttttttttttttttttttttttwwwttttww",
+
+      "wwtttttttttttttttttwwwwwwwwttttttttttttwwwwwttttttttttttttttttww",
+
+      "wwttttttttttttttttttttwwwwwttttttttttttwwwwwttttttttttttwwttttww",
+
+      "wwttttttttttttttttttttwwwwwttttwwwwwwttwwwwwwwwwwwwwwwttwwttttww",
+
+      "wwttttttttttttttttttttwwwwwttttwwwwwwttwwwwwwwwwwwwwwwttwwwtttww",
+
+      "wwttttwwwttttttttttttttttttttttwwwwwwttttttwwwwwwwwtttttwwwtttww",
+
+      "wwttttwwwttttttttttttttttttttttwwwwwwtttttttttttwwtttttttwwtttww",
+
+      "wwtttttttttttttttttttttttttttttwwwtwwtttttttttttwwwttttttwwtttww",
+
+      "wwtttttttttttttttttttttttttttttttttwwtttttttttttttttttttttttttww",
+
+      "wwtttttttttttttttttttttttttttttttttwwtttttttttttttttttttttttttww",
+
+      "wwtttttwwwwwttttttttttttttttttttttttttttttttttttttttttttttttttww",
+
+      "wwtttttwwwwwttttttttttttttttttttttttttttttttttttttttttttttttttww",
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
+      "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+
     ],
     playerStart: { x: 3, y: 16 },
     recruitNpcs: [
