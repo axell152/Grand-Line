@@ -728,27 +728,30 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   getTerrainTileKey(tile) {
-    const bossFlag = this.island?.boss?.unlockFlag;
+  const bossFlag = this.island?.boss?.unlockFlag;
 
-    const terrainKeys = {
-      t: "tile-village-floor",
-      c: "tile-village-path",
-      p: "tile-military-floor",
-      w: "tile-prison-wall",
-      b: bossFlag && this.state.progressFlags?.[bossFlag]
+  const terrainKeys = {
+    // Shells Town
+    t: "tile-village-floor",
+    c: "tile-village-path",
+    p: "tile-military-floor",
+    w: "tile-prison-wall",
+    b:
+      bossFlag && this.state.progressFlags?.[bossFlag]
         ? "tile-military-floor"
         : "tile-prison-bars",
-      d: "tile-dock",
-      s: "tile-sea",
-      // COCOYASI
-      g: "tile-cocoyasi-ground",
-      r: "tile-cocoyasi-rubble",
-      v: "tile-cocoyasi-vegetation",
-      q: "tile-cocoyasi-ruins",
-    };
+    d: "tile-dock",
+    s: "tile-sea",
 
-    return terrainKeys[tile] || "tile-village-floor";
-  }
+    // Cocoyasi
+    g: "tile-cocoyasi-ground",
+    r: "tile-cocoyasi-rubble",
+    v: "tile-cocoyasi-vegetation",
+    q: "tile-cocoyasi-ruins",
+  };
+
+  return terrainKeys[tile] || "tile-village-floor";
+}
 
   drawIsland() {
     const island = this.island;
@@ -760,10 +763,22 @@ export default class WorldScene extends Phaser.Scene {
     // l'apparence et la structure de la carte. Les wildZones restent invisibles.
     const mapRows = island.terrain || [];
     const customKeys = new Set([
-      "tile-village-floor", "tile-village-path", "tile-military-floor",
-      "tile-marine-wall", "tile-prison-wall", "tile-prison-bars",
-      "tile-sea", "tile-dock",
-    ]);
+  // Shells Town
+  "tile-village-floor",
+  "tile-village-path",
+  "tile-military-floor",
+  "tile-marine-wall",
+  "tile-prison-wall",
+  "tile-prison-bars",
+  "tile-sea",
+  "tile-dock",
+
+  // Cocoyasi
+  "tile-cocoyasi-ground",
+  "tile-cocoyasi-rubble",
+  "tile-cocoyasi-vegetation",
+  "tile-cocoyasi-ruins",
+]);
 
     for (let y = 0; y < mapRows.length; y++) {
       const row = mapRows[y];
@@ -1070,28 +1085,78 @@ showVictoryReward(winner, xp, berrys) {
   }
 
   tileAt(x, y) {
-    const island = this.island;
+  const island = this.island;
 
-    if (!island.terrain) return "#";
-    if (y < 0 || y >= island.terrain.length) return "#";
-    const row = island.terrain[y];
-    if (x < 0 || x >= row.length) return "#";
+  if (!island?.terrain) return "#";
 
-    const terrain = row[x];
-    // Mer et murs de prison sont infranchissables.
-    if (terrain === "s" || terrain === "w") return "#";
-    // Un passage "b" reste bloqué jusqu'à la victoire du boss de l'île.
-    if (terrain === "b") {
-      const unlockFlag = island.boss?.unlockFlag;
-      if (unlockFlag && !this.state.progressFlags?.[unlockFlag]) return "#";
-    }
-    return ".";
-    if (terrain === "s") return true;
-    if (terrain === "w") return true;
-    if (terrain === "q") return true;
-    if (terrain === "r") return true;
-    if (terrain === "v") return true;
+  if (
+    y < 0 ||
+    y >= island.terrain.length
+  ) {
+    return "#";
   }
+
+  const row = island.terrain[y];
+
+  if (
+    x < 0 ||
+    x >= row.length
+  ) {
+    return "#";
+  }
+
+  const terrain = row[x];
+
+  // ============================
+  // TERRAIN INFRANCHISSABLE
+  // ============================
+
+  // Mer
+  if (terrain === "s") {
+    return "#";
+  }
+
+  // Murs de prison / bâtiments
+  if (terrain === "w") {
+    return "#";
+  }
+
+  // Cocoyasi : végétation
+  if (terrain === "v") {
+    return "#";
+  }
+
+  // Cocoyasi : ruines
+  if (terrain === "q") {
+    return "#";
+  }
+
+  // Cocoyasi : gravats
+  if (terrain === "r") {
+    return "#";
+  }
+
+  // ============================
+  // PASSAGE BARRÉ
+  // ============================
+
+  if (terrain === "b") {
+    const unlockFlag = island.boss?.unlockFlag;
+
+    if (
+      unlockFlag &&
+      !this.state.progressFlags?.[unlockFlag]
+    ) {
+      return "#";
+    }
+  }
+
+  // ============================
+  // TERRAIN ACCESSIBLE
+  // ============================
+
+  return ".";
+}
 
   update() {
     if (this.isMoving || this.learningObjects.length) return;
