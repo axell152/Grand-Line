@@ -895,13 +895,13 @@ if (island.boss) {
       0
     );
 
-    this.bossSprite.setScale(
-      boss.enemyId === "officierMarine"
-        ? 2.5
-        : boss.enemyId === "pirateRival"
-        ? 2.5
-        : 2.5
-    );
+  const bossScales = {
+    arlong: 0.65,
+    officierMarine: 2.5,
+    pirateRival: 2.5,
+  };
+
+  this.bossSprite.setScale(bossScales[boss.enemyId] ?? 2.5);
 
     this.bossSprite.setOrigin(0.5, 0.78);
     this.bossSprite.setDepth(bossPos.y + 0.5);
