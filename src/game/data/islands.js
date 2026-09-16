@@ -94,7 +94,6 @@ export const ISLANDS = {
   terrain: [
     "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-
     "ssggggggggggggggggggggggggggggggggggggggggggggggggggggggggggss",
     "ssggggggggggggggggqqqqqqqqqqqqqqqqggggggggggggggggggggggggggss",
     "ssggggggggggggggggqgggggggggggggqggggggggggggggggggggggggggss",
@@ -103,19 +102,16 @@ export const ISLANDS = {
     "ssggggqggggggggggggggggggggggggggqgggggqvvvvvvvvvvvvvvvqggggss",
     "ssggggqggggggggggggggggggggggggggqgggggqvvvvvvvvvvvvvvvqggggss",
     "ssggggqggggggggggqqqqqqqqqqqqqqqqqgggggqvvvvvvvvvvvvvvvqggggss",
-
     "ssggggqggggggggggqrrrrrrrrrrrrrrrqgggggqvvvvvvvvvvvvvvvqggggss",
     "ssggggqggggggggggqrrrrrrrrrrrrrrrqgggggqqqqqqqqqqqqqqqqqggggss",
     "ssggggqggggggggggqrrrrrrrrrrrrrrrqqqqqqqqggggggggggggggggggss",
     "ssggggqggggggggggqrrrrrrrrrrrrrrrggggggggggggggggggggggggggss",
     "ssggggqggggggggggqrrrrrrrrrrrrrrrggggggggggggqqqqqqqqqqqqqss",
     "ssggggqggggggggggqrrrrrrrrrrrrrrrggggggggggggqggggggggggggqss",
-
     "ssggggqggggggggggqqqqqqqqqqqqqqqqggggggggggggqggggggggggggqss",
     "ssggggqgggggggggggggggggggggggggggggggggggggqggggggggggggqss",
     "ssggggqgggggggggggggggggggggggggggggggggggggqggggggggggggqss",
     "ssggggqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqggggggggggggqss",
-
     "ssggggggggggggggggggggggggggggggggggggggggggqggggggggggggqss",
     "ssggggggggggggggggggqqqqqqqqqqqqqqqqqqqqqqqqqggggggggggggqss",
     "ssggggggggggggggggggqggggggggggggggggggggggggggggggggggggqss",
@@ -127,190 +123,53 @@ export const ISLANDS = {
     "ssggggggggggggggggggqgggggqggggggggggqgggggggggggggggggggss",
     "ssggggggggggggggggggqgggggqggggggggggqgggggggggggggggggggss",
     "ssggggggggggggggggggqqqqqqqqqqqqqqqqqqgggggggggggggggggggss",
-
     "ssccccccccccccccccccccccccccccccccccccccccccccccccccccccccccss",
     "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
   ],
 
-  playerStart: {
-    x: 3,
-    y: 16,
-  },
+  playerStart: { x: 3, y: 16, },
 
   recruitNpcs: [
-    {
-      x: 57,
-      y: 27,
-      characterId: "navigatrice",
-      level: 15,
-      requiresBattle: true,
-      battleLevel: 15,
-    },
-  ],
+    { x: 57, y: 27, characterId: "navigatrice", level: 15, requiresBattle: true, battleLevel: 15, }, ],
 
   npcs: [
-    {
-      id: "ancien-cocoyasi",
-      x: 10,
-      y: 6,
-      name: "Habitant de Cocoyasi",
-      dialogue: [
-        "Cocoyasi était autrefois un village paisible.",
-        "Les hommes-poissons ont tout détruit.",
-      ],
-    },
+    { id: "ancien-cocoyasi", x: 10, y: 6, name: "Habitant de Cocoyasi", dialogue: [ "Cocoyasi était autrefois un village paisible.", "Les hommes-poissons ont tout détruit.", ], },
 
-    {
-      id: "habitant-cocoyasi",
-      x: 28,
-      y: 22,
-      name: "Habitante de Cocoyasi",
-      dialogue: [
-        "Nami est quelque part dans les ruines.",
-        "Elle semble protéger quelque chose...",
-      ],
-    },
+    { id: "habitant-cocoyasi", x: 28, y: 22, name: "Habitante de Cocoyasi", dialogue: [ "Nami est quelque part dans les ruines.", "Elle semble protéger quelque chose...", ], },
 
-    {
-      id: "pecheur-cocoyasi",
-      x: 47,
-      y: 10,
-      name: "Pêcheur",
-      dialogue: [
-        "Attention aux hommes-poissons.",
-        "Ils rôdent dans toutes les ruines du village.",
-      ],
-    },
+    { id: "pecheur-cocoyasi", x: 47, y: 10, name: "Pêcheur", dialogue: [ "Attention aux hommes-poissons.", "Ils rôdent dans toutes les ruines du village.", ], },
   ],
 
   chests: [
-    {
-      id: "cocoyasi-chest-1",
-      x: 13,
-      y: 8,
-      itemId: "potion",
-      amount: 2,
-    },
+    { id: "cocoyasi-chest-1", x: 13, y: 8, itemId: "potion", amount: 2, },
 
-    {
-      id: "cocoyasi-chest-2",
-      x: 34,
-      y: 14,
-      itemId: "superPotion",
-      amount: 1,
-    },
+    { id: "cocoyasi-chest-2", x: 34, y: 14, itemId: "superPotion", amount: 1, },
 
-    {
-      id: "cocoyasi-chest-3",
-      x: 50,
-      y: 24,
-      itemId: "potion",
-      amount: 3,
-    },
+    { id: "cocoyasi-chest-3", x: 50, y: 24, itemId: "potion", amount: 3, },
   ],
 
-  boss: {
-    id: "nami-cocoyasi",
-    x: 57,
-    y: 27,
+  boss: { id: "nami-cocoyasi", x: 57, y: 27, enemyId: "navigatrice", level: 15, name: "Nami", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
+  team: [
+      { characterId: "pirateRival", level: 12, },
 
-    enemyId: "navigatrice",
+      { characterId: "chasseurDePrimes", level: 13, },
 
-    level: 15,
-
-    name: "Nami",
-
-    unlockFlag: "boss_ile-brume",
-
-    respawnMinutes: 15,
-
-    team: [
-      {
-        characterId: "pirateRival",
-        level: 12,
-      },
-
-      {
-        characterId: "chasseurDePrimes",
-        level: 13,
-      },
-
-      {
-        characterId: "navigatrice",
-        level: 15,
-        isBoss: true,
-      },
+      { characterId: "navigatrice", level: 15, isBoss: true, },
     ],
   },
 
   wildZones: [
-    {
-      x1: 4,
-      y1: 4,
-      x2: 22,
-      y2: 30,
+    { x1: 4, y1: 4, x2: 22, y2: 30, level: 7, encounterRate: 0.045, enemyPool: [ "pirateRival", "chasseurDePrimes", ], },
 
-      level: 7,
+    { x1: 24, y1: 4, x2: 43, y2: 30, level: 9, encounterRate: 0.05, enemyPool: [ "pirateRival", "chasseurDePrimes", "marineRecrue", ], },
 
-      encounterRate: 0.045,
-
-      enemyPool: [
-        "pirateRival",
-        "chasseurDePrimes",
-      ],
-    },
-
-    {
-      x1: 24,
-      y1: 4,
-      x2: 43,
-      y2: 30,
-
-      level: 9,
-
-      encounterRate: 0.05,
-
-      enemyPool: [
-        "pirateRival",
-        "chasseurDePrimes",
-        "marineRecrue",
-      ],
-    },
-
-    {
-      x1: 45,
-      y1: 4,
-      x2: 62,
-      y2: 30,
-
-      level: 11,
-
-      encounterRate: 0.055,
-
-      enemyPool: [
-        "chasseurDePrimes",
-        "pirateRival",
-      ],
-    },
+    { x1: 45, y1: 4, x2: 62, y2: 30, level: 11, encounterRate: 0.055, enemyPool: [ "chasseurDePrimes", "pirateRival", ], },
   ],
 
   warps: [
-    {
-      x: 2,
-      y: 16,
-      toIsland: "ile-depart",
-      toX: 1,
-      toY: 3,
-    },
+    { x: 2, y: 16, toIsland: "ile-depart", toX: 1, toY: 3, },
 
-    {
-      x: 62,
-      y: 16,
-      toIsland: "ile-hiver",
-      toX: 3,
-      toY: 16,
-      lockedBy: "boss_ile-brume",
-    },
+    { x: 62, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
   ],
 },
 
