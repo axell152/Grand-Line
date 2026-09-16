@@ -100,15 +100,15 @@ export const ISLANDS = {
   "ssqtqtqtttttqtttqtttqtttttqtttqtqtqtqtttqtqtqtttqtttttttttqtqqss",
   "ssqtqtqtqqqqqtqtqqqtqqqqqqqqqtqtqtqtqtqtqtqqqtqtqtqqqqqqqqqtqqss",
   "ssqtqtttqtttttqtttqtttttttqtttqtqtttttqtqtttqtqtqtqtttttqtttqqss",
-  "ssqtqqqqqtqqqqqqqtqqqqqqqtqtqqqtqqqqqqqqqqqtqtqtqqqtqqqtqqqqqqss",
+  "ssqtqqqqqtqqqqqqqtqqqqqqqtqtqqqtqqqqqqqqqqqtqtqtqqqtqqqtqqtqqqss",
   "ssqtttqtttqtttttqtttttqtqtqtttqtttttttttqtttqtqtttqtttqtttttqqss",
   "ssqtqtqtqqqqqtqqqqqqqtqtqtqqqtqqqqqqqqqtqtqtqtqqqtqqqtqqqqqtqqss",
   "ssqtqtttttttttqtttttttqtqtttttqtttttttttttqtqtqtqtttttqtttqtqqss",
   "ssqqqqqqqqqqqtqtqqqqqqqtqqqtqqqqqqqqqtqqqqqqqtqtqqqqqqqqqtqtqqss",
   "ssqtttttttttttqtqtttttttttqtttttttttqtqtttttttqtttttttttttqtqqss",
   "ssqttttttttttqqtqtqqqtqqqqqtttttttttqqqtqqqqqqqtqqqqqqqtqtqtqqss",
-  "dddtttttttttttttqtttqtttttqtttttttttqtttqtqtttqtttttqtttqtqtqddd",
-  "dddtttttttttttqqqqqtqqqqqtqtttttttttqtqqqtqtqtqtqqqqqtqqqqqtqddd",
+  "dddtttttttttttttqtttqtttttqtttttttttqtttqtqtttqtttttqtttqtqttddd",
+  "dddtttttttttttqqqqqtqqqqqtqtttttttttqtqqqtqtqtqtqqqqqtqqqqqttddd",
   "ssqtttttttttttttttqtqtttttqtttttttttqtttqtqtqtqtqtttttqtttqtqqss",
   "ssqtttttttttttqqqtqqqtqqqqqtttttttttqqqtqtqtqtqtqtqqqqqtqtqtqqss",
   "ssqtttttttttttttqtttqtttttttttttttttqtqtqtttqtttqtttttqtqtttqqss",
@@ -168,7 +168,7 @@ export const ISLANDS = {
   warps: [
     { x: 1, y: 16, toIsland: "ile-depart", toX: 2, toY: 29, },
 
-    { x: 64, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
+    { x: 63, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
   ],
 },
 
