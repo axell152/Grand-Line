@@ -108,7 +108,7 @@ export const ISLANDS = {
   "ssqgggggggggggqgqgggggggggqgggggggggqgqgggggggqgggggggggggqgqqss",
   "ssqggggggggggqqgqgqqqgqqqqqgggggggggqqqgqqqqqqqgqqqqqqqgqgqgqqss",
   "dddgggggggggggggqgggqgggggqgggggggggqgggqgqgggqgggggqgggqgqgqddd",
-  "ssggggggggggggqqqqqgqqqqqgqgggggggggqgqqqgqgqgqgqqqqqgqqqqqgqqss",
+  "dddgggggggggggqqqqqgqqqqqgqgggggggggqgqqqgqgqgqgqqqqqgqqqqqgqddd",
   "ssqgggggggggggggggqgqgggggqgggggggggqgggqgqgqgqgqgggggqgggqgqqss",
   "ssqgggggggggggqqqgqqqgqqqqqgggggggggqqqgqgqgqgqgqgqqqqqgqgqgqqss",
   "ssqgggggggggggggqgggqgggggggggggggggqgqgqgggqgggqgggggqgqgggqqss",
@@ -155,13 +155,7 @@ export const ISLANDS = {
   team: [ {characterId: "arlong", level: 20, isBoss: true, }, ],
 },
 
-  wildZones: [
-    { x1: 4, y1: 4, x2: 22, y2: 30, level: 7, encounterRate: 0.045, enemyPool: [ "pirateRival", "chasseurDePrimes", ], },
-
-    { x1: 24, y1: 4, x2: 43, y2: 30, level: 9, encounterRate: 0.05, enemyPool: [ "pirateRival", "chasseurDePrimes", "marineRecrue", ], },
-
-    { x1: 45, y1: 4, x2: 62, y2: 30, level: 11, encounterRate: 0.055, enemyPool: [ "chasseurDePrimes", "pirateRival", ], },
-  ],
+  
 
   warps: [
     { x: 1, y: 16, toIsland: "ile-depart", toX: 1, toY: 3, },
