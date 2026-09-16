@@ -145,14 +145,23 @@ export default class BattleScene extends Phaser.Scene {
 
   drawCombatants() {
     const enemyId = this.targetCharacterId || this.battleData.characterId || "marineRecrue";
-    const enemyScale = enemyId === "navigatrice" || enemyId === "arlong" ? 1.75 : 7;
+    const enemyScale =
+      spriteKey(enemyId) === "character_03" ||
+      spriteKey(enemyId) === "character_04" ||
+      enemyId === "arlong"
+      ? 1.75
+      : 7;
 
     this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 0) .setScale(enemyScale) .setOrigin(0.5, 0.82) .setDepth(10);
     this.enemyNameText = this.add.text(480, 72, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
     this.enemyHpBarBg = this.add.rectangle(480, 110, 300, 20, 0x161616).setOrigin(0, 0.5);
     this.enemyHpBar = this.add.rectangle(482, 110, 296, 16, 0xc0392b).setOrigin(0, 0.5);
 
-    const playerScale = this.player.crewId === "navigatrice" ? 1.75 : 7;
+    const playerScale =
+      spriteKey(this.player.crewId) === "character_03" ||
+      spriteKey(this.player.crewId) === "character_04"
+      ? 1.75
+      : 7;
 
     this.playerSprite = this.add.sprite(240, 470, spriteKey(this.player.crewId), 1) .setScale(playerScale) .setOrigin(0.5, 0.82) .setDepth(10);
     this.playerNameText = this.add.text(300, 495, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
@@ -313,7 +322,12 @@ export default class BattleScene extends Phaser.Scene {
     const old = this.player;
     this.player = newMember;
     this.playerSprite.setTexture(spriteKey(newMember.crewId), 1);
-    this.playerSprite.setScale(newMember.crewId === "navigatrice" ? 1.75 : 7 );
+    this.playerSprite.setScale(
+      spriteKey(newMember.crewId) === "character_03" ||
+      spriteKey(newMember.crewId) === "character_04"
+      ? 1.75
+      : 7
+    );
     this.setLog(`${old.name} ${old.hp <= 0 ? "est K.O." : "revient à bord"} ! ${newMember.name} prend sa place.`);
     this.refreshBars();
 
