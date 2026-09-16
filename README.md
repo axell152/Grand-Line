@@ -5,7 +5,7 @@ Jeu perso d'exploration et de combat au tour par tour, dans l'esprit Pokémon (v
 > Projet à usage strictement personnel, comme convenu.
 
 ## Stack
-
+ 
 - **Next.js 14** (App Router) — hébergement et API
 - **Phaser 3** — moteur de jeu 2D, exécuté côté client
 - **Prisma + Neon (Postgres)** — sauvegarde de partie persistante (optionnelle : sans Neon configuré, le jeu sauvegarde automatiquement dans le navigateur via `localStorage`)
