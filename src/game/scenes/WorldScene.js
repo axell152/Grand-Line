@@ -896,7 +896,7 @@ if (island.boss) {
     );
 
   const bossScales = {
-    arlong: 0.7,
+    arlong: 0.8,
     officierMarine: 2.5,
     pirateRival: 2.5,
   };
