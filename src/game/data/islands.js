@@ -130,7 +130,7 @@ export const ISLANDS = {
   playerStart: { x: 3, y: 16, },
 
   recruitNpcs: [
-    { x: 57, y: 27, characterId: "navigatrice", level: 15, requiresBattle: true, battleLevel: 15, }, ],
+    { x: 8, y: 18, characterId: "navigatrice", level: 15, requiresBattle: true, battleLevel: 15, }, ],
 
   npcs: [
     { id: "ancien-cocoyasi", x: 10, y: 6, name: "Habitant de Cocoyasi", dialogue: [ "Cocoyasi était autrefois un village paisible.", "Les hommes-poissons ont tout détruit.", ], },
@@ -148,15 +148,12 @@ export const ISLANDS = {
     { id: "cocoyasi-chest-3", x: 50, y: 24, itemId: "potion", amount: 3, },
   ],
 
-  boss: { id: "nami-cocoyasi", x: 8, y: 16, enemyId: "navigatrice", level: 15, name: "Nami", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
+  boss: {
+  id: "arlong-cocoyasi", x: 8, y: 16, respawnX: 56, respawnY: 15, enemyId: "arlong", level: 20, name: "Arlong", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
   team: [
-      { characterId: "pirateRival", level: 12, },
-
-      { characterId: "chasseurDePrimes", level: 13, },
-
-      { characterId: "navigatrice", level: 15, isBoss: true, },
-    ],
-  },
+    { characterId: "arlong", level: 20, isBoss: true },
+  ],
+},
 
   wildZones: [
     { x1: 4, y1: 4, x2: 22, y2: 30, level: 7, encounterRate: 0.045, enemyPool: [ "pirateRival", "chasseurDePrimes", ], },
