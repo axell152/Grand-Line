@@ -26,6 +26,7 @@ const CHARACTER_SPRITES = {
   pirateRival: "character_09",
   chasseurDePrimes: "character_13",
   officierMarine: "character_12",
+  arlong: "arlong",
 };
 
 function spriteKey(characterId) {
@@ -49,6 +50,7 @@ export default class WorldScene extends Phaser.Scene {
 
   preload() {
     this.load.image("taverne", "tiles/taverne.png");
+    this.load.image("arlong", "sprites/arlong.png");
   }
 
   init(data) {
