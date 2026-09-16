@@ -810,11 +810,11 @@ export default class WorldScene extends Phaser.Scene {
   island.buildings.forEach((b) => {
     const buildingSprite = this.add.image(
       b.x * TILE_SIZE + TILE_SIZE / 2,
-      (b.y + 1) * TILE_SIZE + 60, // ← augmenté de 40 à 60 pour descendre
+      (b.y + 1) * TILE_SIZE + 50, // ← augmenté de 40 à 60 pour descendre
       b.key
     ).setOrigin(0.5, 1).setDepth(b.y);
 
-    buildingSprite.setScale(0.2); // ← augmenté de 0.15 à 0.2 pour grossir
+    buildingSprite.setScale(0.3); // ← augmenté de 0.15 à 0.2 pour grossir
   });
 }
 
