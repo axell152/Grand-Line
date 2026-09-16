@@ -130,7 +130,7 @@ export const ISLANDS = {
   playerStart: { x: 3, y: 16, },
 
   recruitNpcs: [
-    { x: 8, y: 18, characterId: "navigatrice", level: 15, requiresBattle: true, battleLevel: 15, }, ],
+    { x: 3, y: 14, characterId: "navigatrice", level: 15, requiresBattle: true, battleLevel: 15, }, ],
 
   npcs: [
     { id: "ancien-cocoyasi", x: 10, y: 6, name: "Habitant de Cocoyasi", dialogue: [ "Cocoyasi était autrefois un village paisible.", "Les hommes-poissons ont tout détruit.", ], },
