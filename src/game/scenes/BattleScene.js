@@ -6,12 +6,22 @@ import { createBattler, getTurnOrder, applyMove, isDefeated, scaleEnemyForLevel 
 import { ISLANDS } from "@/game/data/islands";
 
 const CHARACTER_SPRITES = {
-  captain: "character_01", bretteur: "character_03", navigatrice: "character_04",
-  tireur: "character_05", medecin: "character_06", cuisinier: "character_08",
-  charpentier: "character_07", musicien: "character_14", archeologue: "character_02",
-  marineRecrue: "character_10", pirateRival: "character_09", chasseurDePrimes: "character_13",
+  captain: "character_01",
+  bretteur: "character_03",
+  navigatrice: "character_04",
+  tireur: "character_05",
+  medecin: "character_06",
+  cuisinier: "character_08",
+  charpentier: "character_07",
+  musicien: "character_14",
+  archeologue: "character_02",
+  marineRecrue: "character_10",
+  pirateRival: "character_09",
+  chasseurDePrimes: "character_13",
   officierMarine: "character_12",
+  arlong: "arlong",
 };
+
 const spriteKey = (id) => CHARACTER_SPRITES[id] || "character_01";
 
 export default class BattleScene extends Phaser.Scene {
