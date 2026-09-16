@@ -871,19 +871,40 @@ export default class WorldScene extends Phaser.Scene {
     });
 
     // Boss d'île.
-    this.bossSprite = null;
-    if (island.boss && !this.state.progressFlags?.[island.boss.unlockFlag]) {
-      const boss = island.boss;
-      this.bossSprite = this.add.sprite(
-        boss.x * TILE_SIZE + TILE_SIZE / 2,
-        boss.y * TILE_SIZE + TILE_SIZE / 2,
-        spriteKey(boss.enemyId),
-        0
-      );
-      this.bossSprite.setScale(boss.enemyId === "officierMarine" ? 2.5 : boss.enemyId === "pirateRival" ? 2.5 : 2.5);
-      this.bossSprite.setOrigin(0.5, 0.78);
-      this.bossSprite.setDepth(boss.y + 0.5);
-    }
+this.bossSprite = null;
+
+if (island.boss) {
+  const boss = island.boss;
+  const bossPos = this.getBossPosition(boss);
+
+  // Le boss initial reste présent tant qu'il n'a jamais été vaincu.
+  // Après sa victoire, il réapparaît uniquement après son cooldown,
+  // à sa nouvelle position.
+  const defeated = !!this.state.progressFlags?.[boss.unlockFlag];
+
+  if (
+    bossPos &&
+    (!defeated || !this.isBossOnCooldown(boss))
+  ) {
+    this.bossSprite = this.add.sprite(
+      bossPos.x * TILE_SIZE + TILE_SIZE / 2,
+      bossPos.y * TILE_SIZE + TILE_SIZE / 2,
+      spriteKey(boss.enemyId),
+      0
+    );
+
+    this.bossSprite.setScale(
+      boss.enemyId === "officierMarine"
+        ? 2.5
+        : boss.enemyId === "pirateRival"
+        ? 2.5
+        : 2.5
+    );
+
+    this.bossSprite.setOrigin(0.5, 0.78);
+    this.bossSprite.setDepth(bossPos.y + 0.5);
+  }
+}
 
     island.recruitNpcs
       .filter((npc) => !this.state.crew.includes(npc.characterId))
@@ -1218,13 +1239,15 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    const targetIsBoss =
-      this.island.boss &&
-      targetX === this.island.boss.x &&
-      targetY === this.island.boss.y &&
-      !this.isBossOnCooldown(this.island.boss);
+    const bossPosition = this.getBossPosition(this.island.boss);
 
-    if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
+const targetIsBoss =
+  bossPosition &&
+  targetX === bossPosition.x &&
+  targetY === bossPosition.y &&
+  !this.isBossOnCooldown(this.island.boss);
+
+if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
 
     this.isMoving = true;
     this.state.x = targetX;
@@ -1259,25 +1282,28 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    if (
-      island.boss &&
-      x === island.boss.x &&
-      y === island.boss.y &&
-      !this.isBossOnCooldown(island.boss)
-    ) {
-      this.startBattle({
-        mode: "wild",
-        characterId: island.boss.enemyId,
-        enemyLevel: island.boss.level,
-        boss: true,
-        bossId: island.boss.id,
-        bossTeam: island.boss.team,
-        bossRespawnMinutes: island.boss.respawnMinutes || 15,
-        bossName: island.boss.name,
-        bossUnlockFlag: island.boss.unlockFlag,
-      });
-      return;
-    }
+    const bossPosition = this.getBossPosition(island.boss);
+
+if (
+  island.boss &&
+  bossPosition &&
+  x === bossPosition.x &&
+  y === bossPosition.y &&
+  !this.isBossOnCooldown(island.boss)
+) {
+  this.startBattle({
+    mode: "wild",
+    characterId: island.boss.enemyId,
+    enemyLevel: island.boss.level,
+    boss: true,
+    bossId: island.boss.id,
+    bossTeam: island.boss.team,
+    bossRespawnMinutes: island.boss.respawnMinutes || 15,
+    bossName: island.boss.name,
+    bossUnlockFlag: island.boss.unlockFlag,
+  });
+  return;
+}
 
     if (island.tavern && island.tavern.x === x && island.tavern.y === y) {
       this.state.respawnIsland = this.state.islandId;
@@ -1538,26 +1564,54 @@ showVictoryReward(winner, xp, berrys) {
     }
 
     const boss = this.island.boss;
-    if (
-      boss &&
-      boss.x === x &&
-      boss.y === y &&
-      !this.isBossOnCooldown(boss)
-    ) {
-      this.startBattle({
-        mode: "wild",
-        characterId: boss.enemyId,
-        enemyLevel: boss.level,
-        boss: true,
-        bossId: boss.id,
-        bossTeam: boss.team,
-        bossRespawnMinutes: boss.respawnMinutes || 15,
-        bossName: boss.name,
-        bossUnlockFlag: boss.unlockFlag,
-      });
-    }
+const bossPosition = this.getBossPosition(boss);
+
+if (
+  boss &&
+  bossPosition &&
+  bossPosition.x === x &&
+  bossPosition.y === y &&
+  !this.isBossOnCooldown(boss)
+) {
+  this.startBattle({
+    mode: "wild",
+    characterId: boss.enemyId,
+    enemyLevel: boss.level,
+    boss: true,
+    bossId: boss.id,
+    bossTeam: boss.team,
+    bossRespawnMinutes: boss.respawnMinutes || 15,
+    bossName: boss.name,
+    bossUnlockFlag: boss.unlockFlag,
+  });
+}
   }
 
+getBossPosition(boss) {
+  if (!boss) return null;
+
+  const respawnAt = Number(this.state.bossRespawns?.[boss.id] || 0);
+
+  // Premier emplacement de Morgan
+  if (!respawnAt) {
+    return {
+      x: boss.x,
+      y: boss.y,
+    };
+  }
+
+  // Après les 15 minutes : nouvel emplacement
+  if (Date.now() >= respawnAt) {
+    return {
+      x: boss.respawnX ?? boss.x,
+      y: boss.respawnY ?? boss.y,
+    };
+  }
+
+  // Pendant le cooldown : aucun emplacement actif
+  return null;
+}
+  
   isBossOnCooldown(boss) {
     if (!boss?.id) return false;
     const respawnAt = Number(this.state.bossRespawns?.[boss.id] || 0);
