@@ -82,7 +82,7 @@ export const ISLANDS = {
       { x1: 4, y1: 3, x2: 44, y2: 10, level: 3, encounterRate: 0.1, enemyPool: ["marineRecrue", "officierMarine"] },
       { x1: 4, y1: 5, x2: 44, y2: 4, level: 10, encounterRate: 0.07, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
-    warps: [{ x: 1, y: 29, toIsland: "ile-cocoyasi", toX: 3, toY: 16, lockedBy: "boss_ile-depart" }],
+    warps: [{ x: 1, y: 29, toIsland: "ile-cocoyasi", toX: 1, toY: 16, lockedBy: "boss_ile-depart" }],
   },
 
   // ============================================================
@@ -107,7 +107,7 @@ export const ISLANDS = {
   "ssqqqqqqqqqqqgqgqqqqqqqgqqqgqqqqqqqqqgqqqqqqqgqgqqqqqqqqqgqgqqss",
   "ssqgggggggggggqgqgggggggggqgggggggggqgqgggggggqgggggggggggqgqqss",
   "ssqggggggggggqqgqgqqqgqqqqqgggggggggqqqgqqqqqqqgqqqqqqqgqgqgqqss",
-  "ssqgggggggggggggqgggqgggggqgggggggggqgggqgqgggqgggggqgggqgqgqqss",
+  "dddgggggggggggggqgggqgggggqgggggggggqgggqgqgggqgggggqgggqgqgqddd",
   "ssggggggggggggqqqqqgqqqqqgqgggggggggqgqqqgqgqgqgqqqqqgqqqqqgqqss",
   "ssqgggggggggggggggqgqgggggqgggggggggqgggqgqgqgqgqgggggqgggqgqqss",
   "ssqgggggggggggqqqgqqqgqqqqqgggggggggqqqgqgqgqgqgqgqqqqqgqgqgqqss",
@@ -164,9 +164,9 @@ export const ISLANDS = {
   ],
 
   warps: [
-    { x: 2, y: 16, toIsland: "ile-depart", toX: 1, toY: 3, },
+    { x: 1, y: 16, toIsland: "ile-depart", toX: 1, toY: 3, },
 
-    { x: 62, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
+    { x: 64, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
   ],
 },
 
