@@ -148,7 +148,7 @@ export const ISLANDS = {
     { id: "cocoyasi-chest-3", x: 50, y: 24, itemId: "potion", amount: 3, },
   ],
 
-  boss: { id: "nami-cocoyasi", x: 57, y: 27, enemyId: "navigatrice", level: 15, name: "Nami", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
+  boss: { id: "nami-cocoyasi", x: 8, y: 16, enemyId: "navigatrice", level: 15, name: "Nami", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
   team: [
       { characterId: "pirateRival", level: 12, },
 
