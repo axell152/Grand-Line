@@ -26,6 +26,7 @@ const CHARACTER_SPRITES = {
   pirateRival: "character_09",
   chasseurDePrimes: "character_13",
   officierMarine: "character_12",
+  arlong: "arlong",
 };
 
 function spriteKey(characterId) {
@@ -49,6 +50,7 @@ export default class WorldScene extends Phaser.Scene {
 
   preload() {
     this.load.image("taverne", "tiles/taverne.png");
+    this.load.image("arlong", "sprites/arlong.png");
   }
 
   init(data) {
@@ -893,13 +895,13 @@ if (island.boss) {
       0
     );
 
-    this.bossSprite.setScale(
-      boss.enemyId === "officierMarine"
-        ? 2.5
-        : boss.enemyId === "pirateRival"
-        ? 2.5
-        : 2.5
-    );
+  const bossScales = {
+    arlong: 0.8,
+    officierMarine: 2.5,
+    pirateRival: 2.5,
+  };
+
+  this.bossSprite.setScale(bossScales[boss.enemyId] ?? 2.5);
 
     this.bossSprite.setOrigin(0.5, 0.78);
     this.bossSprite.setDepth(bossPos.y + 0.5);
@@ -917,7 +919,7 @@ if (island.boss) {
           0
         );
 
-        sprite.setScale(npc.characterId === "bretteur" ? 0.625 : 2.5);
+        sprite.setScale(npc.characterId === "bretteur" || npc.characterId === "navigatrice" ? 0.625 : 2.5);
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
