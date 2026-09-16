@@ -846,7 +846,7 @@ export default class WorldScene extends Phaser.Scene {
         0
       );
 
-      sprite.setScale((npc.characterId || "captain") === "bretteur" || npc.characterId === "navigatrice" ? 0.625 : 2.5);
+      sprite.setScale((npc.characterId || "captain") === "bretteur" ? 0.625 : 2.5);
       sprite.setOrigin(0.5, 0.78);
       sprite.setDepth(npc.y + 0.5);
       this.talkNpcSprites[`${npc.x},${npc.y}`] = npc;
@@ -919,7 +919,7 @@ if (island.boss) {
           0
         );
 
-        sprite.setScale(npc.characterId === "bretteur" ? 0.625 : 2.5);
+        sprite.setScale(npc.characterId === "bretteur" || npc.characterId === "navigatrice" ? 0.625 : 2.5);
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
