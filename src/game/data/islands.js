@@ -155,7 +155,14 @@ export const ISLANDS = {
   team: [ {characterId: "arlong", level: 20, isBoss: true, }, ],
 },
 
-  
+  wildZones: [
+    { x1: 1, y1: 1, x2: 1, y2: 1, level: 7, encounterRate: 0.045, enemyPool: [ "pirateRival", "chasseurDePrimes", ], },
+
+    { x1: 1, y1: 1, x2: 1, y2: 1, level: 9, encounterRate: 0.05, enemyPool: [ "pirateRival", "chasseurDePrimes", "marineRecrue", ], },
+
+    { x1: 1, y1: 1, x2: 1, y2: 1, level: 11, encounterRate: 0.055, enemyPool: [ "chasseurDePrimes", "pirateRival", ], },
+  ],
+
 
   warps: [
     { x: 1, y: 16, toIsland: "ile-depart", toX: 1, toY: 3, },
