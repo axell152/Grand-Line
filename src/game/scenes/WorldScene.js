@@ -1243,11 +1243,14 @@ showVictoryReward(winner, xp, berrys) {
 
     const bossPosition = this.getBossPosition(this.island.boss);
 
-const targetIsBoss =
-  bossPosition &&
-  targetX === bossPosition.x &&
-  targetY === bossPosition.y &&
-  !this.isBossOnCooldown(this.island.boss);
+    const bossPosition = this.getBossPosition(this.island.boss);
+
+    const targetIsBoss =
+      this.island.boss &&
+      bossPosition &&
+      targetX === bossPosition.x &&
+      targetY === bossPosition.y &&
+      !this.isBossOnCooldown(this.island.boss);
 
 if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
 
@@ -1285,6 +1288,8 @@ if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
     }
 
     const bossPosition = this.getBossPosition(island.boss);
+
+const bossPosition = this.getBossPosition(island.boss);
 
 if (
   island.boss &&
@@ -1612,6 +1617,24 @@ getBossPosition(boss) {
 
   // Pendant le cooldown : aucun emplacement actif
   return null;
+}
+
+getBossPosition(boss) {
+  if (!boss) return null;
+
+  const defeated = !!this.state.progressFlags?.[boss.unlockFlag];
+
+  if (defeated) {
+    return {
+      x: boss.respawnX ?? boss.x,
+      y: boss.respawnY ?? boss.y,
+    };
+  }
+
+  return {
+    x: boss.x,
+    y: boss.y,
+  };
 }
   
   isBossOnCooldown(boss) {
