@@ -149,7 +149,7 @@ export const ISLANDS = {
   ],
 
   boss: {
-  id: "arlong-cocoyasi", x: 8, y: 16, respawnX: 56, respawnY: 15, enemyId: "arlong", level: 20, name: "Arlong", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
+  id: "arlong-cocoyasi", x: 4, y: 19, respawnX: 56, respawnY: 15, enemyId: "arlong", level: 20, name: "Arlong", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
   team: [
     { characterId: "arlong", level: 20, isBoss: true },
   ],
