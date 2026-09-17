@@ -195,14 +195,14 @@ getEnemyScale(enemyId, sprite) {
     this.getEnemyScale(enemyId, this.enemySprite)
   );
 
-  this.enemyNameText = this.add.text(360, 72, "", {
+  this.enemyNameText = this.add.text(300, 72, "", {
     fontFamily: "monospace",
     fontSize: "21px",
     color: "#ead9b8",
   });
 
   this.enemyHpBarBg = this.add.rectangle(
-    360,
+    300,
     110,
     300,
     20,
@@ -210,7 +210,7 @@ getEnemyScale(enemyId, sprite) {
   ).setOrigin(0, 0.5);
 
   this.enemyHpBar = this.add.rectangle(
-    362,
+    302,
     110,
     296,
     16,
@@ -234,14 +234,14 @@ getEnemyScale(enemyId, sprite) {
   .setOrigin(0.5, 0.82)
   .setDepth(10);
 
-  this.playerNameText = this.add.text(400, 495, "", {
+  this.playerNameText = this.add.text(500, 495, "", {
     fontFamily: "monospace",
     fontSize: "21px",
     color: "#ead9b8",
   });
 
   this.playerHpBarBg = this.add.rectangle(
-    400,
+    500,
     533,
     300,
     20,
@@ -249,7 +249,7 @@ getEnemyScale(enemyId, sprite) {
   ).setOrigin(0, 0.5);
 
   this.playerHpBar = this.add.rectangle(
-    402,
+    502,
     533,
     296,
     16,
