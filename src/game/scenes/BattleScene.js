@@ -176,38 +176,88 @@ getEnemyScale(enemyId, sprite) {
 }
   
   drawCombatants() {
-    const enemyId = this.targetCharacterId || this.battleData.characterId || "marineRecrue";
-    this.enemySprite = this.add.sprite(
-      760,
-      245,
-      spriteKey(enemyId),
-      0
+  const enemyId =
+    this.targetCharacterId ||
+    this.battleData.characterId ||
+    "marineRecrue";
+
+  // ENNEMI
+  this.enemySprite = this.add.sprite(
+    760,
+    245,
+    spriteKey(enemyId),
+    0
   )
   .setOrigin(0.5, 0.82)
   .setDepth(10);
 
-this.enemySprite.setScale(
-  this.getEnemyScale(enemyId, this.enemySprite)
-);
+  this.enemySprite.setScale(
+    this.getEnemyScale(enemyId, this.enemySprite)
+  );
 
-    this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 0) .setScale(enemyScale) .setOrigin(0.5, 0.82) .setDepth(10);
-    this.enemyNameText = this.add.text(480, 72, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
-    this.enemyHpBarBg = this.add.rectangle(480, 110, 300, 20, 0x161616).setOrigin(0, 0.5);
-    this.enemyHpBar = this.add.rectangle(482, 110, 296, 16, 0xc0392b).setOrigin(0, 0.5);
+  this.enemyNameText = this.add.text(480, 72, "", {
+    fontFamily: "monospace",
+    fontSize: "21px",
+    color: "#ead9b8",
+  });
 
-    const playerScale =
-      spriteKey(this.player.crewId) === "character_03" ||
-      spriteKey(this.player.crewId) === "character_04"
+  this.enemyHpBarBg = this.add.rectangle(
+    480,
+    110,
+    300,
+    20,
+    0x161616
+  ).setOrigin(0, 0.5);
+
+  this.enemyHpBar = this.add.rectangle(
+    482,
+    110,
+    296,
+    16,
+    0xc0392b
+  ).setOrigin(0, 0.5);
+
+  // JOUEUR
+  const playerScale =
+    spriteKey(this.player.crewId) === "character_03" ||
+    spriteKey(this.player.crewId) === "character_04"
       ? 1.75
       : 7;
 
-    this.playerSprite = this.add.sprite(240, 470, spriteKey(this.player.crewId), 1) .setScale(playerScale) .setOrigin(0.5, 0.82) .setDepth(10);
-    this.playerNameText = this.add.text(300, 495, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
-    this.playerHpBarBg = this.add.rectangle(300, 533, 300, 20, 0x161616).setOrigin(0, 0.5);
-    this.playerHpBar = this.add.rectangle(302, 533, 296, 16, 0x27ae60).setOrigin(0, 0.5);
+  this.playerSprite = this.add.sprite(
+    240,
+    470,
+    spriteKey(this.player.crewId),
+    1
+  )
+  .setScale(playerScale)
+  .setOrigin(0.5, 0.82)
+  .setDepth(10);
 
-    this.refreshBars();
-  }
+  this.playerNameText = this.add.text(300, 495, "", {
+    fontFamily: "monospace",
+    fontSize: "21px",
+    color: "#ead9b8",
+  });
+
+  this.playerHpBarBg = this.add.rectangle(
+    300,
+    533,
+    300,
+    20,
+    0x161616
+  ).setOrigin(0, 0.5);
+
+  this.playerHpBar = this.add.rectangle(
+    302,
+    533,
+    296,
+    16,
+    0x27ae60
+  ).setOrigin(0, 0.5);
+
+  this.refreshBars();
+}
 
   refreshBars() {
     if (!this.enemy || !this.player) return;
