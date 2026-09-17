@@ -68,12 +68,12 @@ export const ISLANDS = {
       { id: "shells-chest-3", x: 24, y: 4, itemId: "superPotion", amount: 1 },
     ],
     boss: {
-      id: "morgan", x: 22, y: 8, respawnX: 24, respawnY: 8, enemyId: "officierMarine", level: 8,
+      id: "morgan", x: 22, y: 8, respawnX: 24, respawnY: 8, enemyId: "colonelMorgan", level: 8,
       name: "Colonel Morgan", unlockFlag: "boss_ile-depart", respawnMinutes: 15,
       team: [
         { characterId: "marineRecrue", level: 4 },
         { characterId: "marineRecrue", level: 5 },
-        { characterId: "officierMarine", level: 8, isBoss: true },
+        { characterId: "colonelMorgan", level: 8, isBoss: true },
       ],
     },
     wildZones: [

@@ -90,10 +90,8 @@ export default class BootScene extends Phaser.Scene {
     });
 
     // Arlong est également un personnage statique.
-    this.load.image(
-      "arlong",
-      "/sprites/arlong.png"
-    );
+    this.load.image("arlong", "/sprites/arlong.png");
+    this.load.image("colonel_morgan", "/sprites/colonel_morgan.png");
   }
 
   create() {

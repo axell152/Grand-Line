@@ -27,6 +27,7 @@ const CHARACTER_SPRITES = {
   chasseurDePrimes: "character_13",
   officierMarine: "character_12",
   arlong: "arlong",
+  colonelMorgan: "colonel_morgan",
 };
 
 function spriteKey(characterId) {
@@ -51,6 +52,7 @@ export default class WorldScene extends Phaser.Scene {
   preload() {
     this.load.image("taverne", "tiles/taverne.png");
     this.load.image("arlong", "sprites/arlong.png");
+    this.load.image("colonel_morgan", "sprites/colonel_morgan.png");
   }
 
   init(data) {
@@ -899,6 +901,7 @@ if (island.boss) {
     arlong: 0.8,
     officierMarine: 2.5,
     pirateRival: 2.5,
+    colonelMorgan: 0.08,
   };
 
   this.bossSprite.setScale(bossScales[boss.enemyId] ?? 2.5);
