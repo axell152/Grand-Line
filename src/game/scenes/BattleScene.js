@@ -165,7 +165,7 @@ getEnemyScale(enemyId, sprite) {
   }
 
   if (enemyId === "colonelMorgan") {
-    return 0.75;
+    return 0.4;
   }
   
   if (enemyId.startsWith("fishman")) {
