@@ -276,14 +276,31 @@ export default class WorldScene extends Phaser.Scene {
     });
 
     if (this.incoming.isRespawn) {
-      this.state.islandId = this.state.respawnIsland;
-      this.state.x = this.state.respawnX;
-      this.state.y = this.state.respawnY;
-    } else if (this.incoming.islandId) {
-      this.state.islandId = this.incoming.islandId;
-      this.state.x = this.incoming.x;
-      this.state.y = this.incoming.y;
-    }
+  // Après une défaite : retour au dernier point de respawn enregistré.
+  this.state.islandId = this.state.respawnIsland;
+  this.state.x = this.state.respawnX;
+  this.state.y = this.state.respawnY;
+} else if (this.incoming.islandId) {
+  // Arrivée normale sur une nouvelle île :
+  // cette île devient automatiquement le nouveau point de respawn.
+  this.state.islandId = this.incoming.islandId;
+  this.state.x = this.incoming.x;
+  this.state.y = this.incoming.y;
+
+  const respawnIsland = ISLANDS[this.state.islandId];
+
+  this.state.respawnIsland = this.state.islandId;
+  this.state.respawnX =
+    respawnIsland?.tavern?.x ??
+    respawnIsland?.playerStart?.x ??
+    this.state.x;
+  this.state.respawnY =
+    respawnIsland?.tavern?.y ??
+    respawnIsland?.playerStart?.y ??
+    this.state.y;
+
+  this.persist();
+}
   }
 
   applyExperience(memberId, amount) {
