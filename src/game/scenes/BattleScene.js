@@ -836,12 +836,22 @@ getEnemyScale(enemyId, sprite) {
           d.ppData = {};
         });
 
-        const islandKey = state.islandId || returnIsland || "ile-depart";
-        const island = ISLANDS[islandKey];
+        // Le respawn dépend TOUJOURS de l'île où le combat a eu lieu.
+const islandKey = returnIsland || state.islandId || "ile-depart";
+const island = ISLANDS[islandKey];
 
-        state.respawnIsland ||= islandKey;
-        state.respawnX ??= island?.tavern?.x ?? island?.playerStart?.x ?? returnX ?? 5;
-        state.respawnY ??= island?.tavern?.y ?? island?.playerStart?.y ?? returnY ?? 5;
+state.respawnIsland = islandKey;
+state.respawnX =
+  island?.tavern?.x ??
+  island?.playerStart?.x ??
+  returnX ??
+  5;
+
+state.respawnY =
+  island?.tavern?.y ??
+  island?.playerStart?.y ??
+  returnY ??
+  5;
 
         this.game.registry.set("gameState", state);
         this.scene.start("World", { isRespawn: true });
