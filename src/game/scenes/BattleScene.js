@@ -15,10 +15,21 @@ const CHARACTER_SPRITES = {
   charpentier: "character_07",
   musicien: "character_14",
   archeologue: "character_02",
+
   marineRecrue: "character_10",
   pirateRival: "character_09",
   chasseurDePrimes: "character_13",
   officierMarine: "character_12",
+
+  // Hommes-poissons de Cocoyasi
+  fishmanPirate: "fishman_pirate",
+  fishmanLancer: "fishman_lancer",
+  fishmanSwordsman: "fishman_swordsman",
+  fishmanBrute: "fishman_brute",
+  fishmanBountyHunter: "fishman_bounty_hunter",
+  fishmanCaptain: "fishman_captain",
+
+  // Boss
   arlong: "arlong",
 };
 
@@ -148,7 +159,8 @@ export default class BattleScene extends Phaser.Scene {
     const enemyScale =
       spriteKey(enemyId) === "character_03" ||
       spriteKey(enemyId) === "character_04" ||
-      enemyId === "arlong"
+      enemyId === "arlong" ||
+      enemyId.startsWith("fishman")
       ? 1.75
       : 7;
 
