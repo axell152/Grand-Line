@@ -8,6 +8,15 @@ const SPRITES = [
   "character_13", "character_14",
 ];
 
+const FISHMAN_SPRITES = [
+  "fishman_pirate",
+  "fishman_lancer",
+  "fishman_swordsman",
+  "fishman_brute",
+  "fishman_bounty_hunter",
+  "fishman_captain",
+];
+
 export default class BootScene extends Phaser.Scene {
   constructor() {
     super("Boot");
@@ -51,10 +60,14 @@ export default class BootScene extends Phaser.Scene {
       );
     });
 
-    // La majorité des personnages utilisent 10 frames de 16x16.
-    // Le bretteur utilise une spritesheet 10 frames de 64x64.
+    // Personnages classiques
+    // La majorité utilise 10 frames de 16x16.
+    // Zoro et Nami utilisent des spritesheets 10 frames de 64x64.
     SPRITES.forEach((key) => {
-      const frameSize = key === "character_03" || key === "character_04" ? 64 : 16;
+      const frameSize =
+        key === "character_03" || key === "character_04"
+          ? 64
+          : 16;
 
       this.load.spritesheet(
         key,
@@ -66,6 +79,21 @@ export default class BootScene extends Phaser.Scene {
         }
       );
     });
+
+    // Hommes-poissons de Cocoyasi
+    // Ce sont des images statiques : une seule image, pas une spritesheet.
+    FISHMAN_SPRITES.forEach((key) => {
+      this.load.image(
+        key,
+        `/sprites/${key}.png`
+      );
+    });
+
+    // Arlong est également un personnage statique.
+    this.load.image(
+      "arlong",
+      "/sprites/arlong.png"
+    );
   }
 
   create() {
