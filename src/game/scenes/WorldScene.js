@@ -78,9 +78,16 @@ export default class WorldScene extends Phaser.Scene {
     this.input.keyboard.on("keydown-SPACE", () => this.interact());
 
     this.input.keyboard.on("keydown-T", () => {
-      this.scene.launch("CrewScene", { state: this.state });
-      this.scene.pause();
-    });
+  // Toujours transmettre l'état actuellement sauvegardé dans le registry
+  const currentState =
+    this.game.registry.get("gameState") || this.state;
+
+  this.scene.launch("CrewScene", {
+    state: currentState,
+  });
+
+  this.scene.pause();
+});
 
     this.input.keyboard.on("keydown-F", () => this.exportSaveFile());
 
