@@ -270,4 +270,15 @@ export const ENEMY_CHARACTERS = {
     spd: 18,
     moves: ["taillade"],
   },
+
+colonelMorgan: {
+  id: "colonelMorgan",
+  name: "Colonel Morgan",
+  type: "tranchant",
+  maxHp: 180,
+  atk: 32,
+  def: 24,
+  spd: 18,
+  moves: ["taillade"],
+},   
 };
