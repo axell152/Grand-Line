@@ -133,22 +133,141 @@ export const CHARACTERS = {
 
 export const ENEMY_CHARACTERS = {
   marineRecrue: {
-    id: "marineRecrue", name: "Recrue de la Marine", title: "Ennemi", color: 0x6f7a8c,
-    maxHp: 45, atk: 9, def: 7, spd: 9, moves: ["coupTonnerre", "griffureSauvage"],
+    id: "marineRecrue",
+    name: "Recrue de la Marine",
+    title: "Ennemi",
+    color: 0x6f7a8c,
+    maxHp: 45,
+    atk: 9,
+    def: 7,
+    spd: 9,
+    moves: ["coupTonnerre", "griffureSauvage"],
   },
+
   pirateRival: {
-    id: "pirateRival", name: "Pirate Rival", title: "Ennemi", color: 0x7c3c3c,
-    maxHp: 50, atk: 11, def: 6, spd: 11, moves: ["taillade", "vagueDeChoc"],
+    id: "pirateRival",
+    name: "Pirate Rival",
+    title: "Ennemi",
+    color: 0x7c3c3c,
+    maxHp: 50,
+    atk: 11,
+    def: 6,
+    spd: 11,
+    moves: ["taillade", "vagueDeChoc"],
   },
+
   chasseurDePrimes: {
-    id: "chasseurDePrimes", name: "Chasseur de Primes", title: "Ennemi", color: 0x4a4a4a,
-    maxHp: 85, atk: 18, def: 10, spd: 14, moves: ["hachoirDeSabre", "vagueDeChoc"],
+    id: "chasseurDePrimes",
+    name: "Chasseur de Primes",
+    title: "Ennemi",
+    color: 0x4a4a4a,
+    maxHp: 85,
+    atk: 18,
+    def: 10,
+    spd: 14,
+    moves: ["hachoirDeSabre", "vagueDeChoc"],
   },
+
   officierMarine: {
-    id: "officierMarine", name: "Officier de la Marine", title: "Ennemi", color: 0x2c3e78,
-    maxHp: 70, atk: 13, def: 11, spd: 9, moves: ["coupTonnerre", "coupDeMarteau"],
+    id: "officierMarine",
+    name: "Officier de la Marine",
+    title: "Ennemi",
+    color: 0x2c3e78,
+    maxHp: 70,
+    atk: 13,
+    def: 11,
+    spd: 9,
+    moves: ["coupTonnerre", "coupDeMarteau"],
   },
- arlong: {
-   id: "arlong", name: "Arlong", type: "tranchant", maxHp: 180, atk: 32, def: 24, spd: 18, moves: ["taillade"],
-  }, 
+
+  // =========================
+  // HOMMES-POISSONS - COCOYASI
+  // =========================
+
+  fishmanPirate: {
+    id: "fishmanPirate",
+    name: "Pirate Homme-Poisson",
+    title: "Ennemi de Cocoyasi",
+    color: 0x4f91a8,
+    maxHp: 60,
+    atk: 13,
+    def: 8,
+    spd: 11,
+    moves: ["taillade", "vagueDeChoc"],
+  },
+
+  fishmanLancer: {
+    id: "fishmanLancer",
+    name: "Lancier Homme-Poisson",
+    title: "Ennemi de Cocoyasi",
+    color: 0x3d8f91,
+    maxHp: 65,
+    atk: 14,
+    def: 9,
+    spd: 10,
+    moves: ["taillade", "cravacheDeJambe"],
+  },
+
+  fishmanSwordsman: {
+    id: "fishmanSwordsman",
+    name: "Épéiste Homme-Poisson",
+    title: "Ennemi de Cocoyasi",
+    color: 0x477f9e,
+    maxHp: 68,
+    atk: 16,
+    def: 9,
+    spd: 13,
+    moves: ["taillade", "hachoirDeSabre"],
+  },
+
+  fishmanBountyHunter: {
+    id: "fishmanBountyHunter",
+    name: "Chasseur de Primes Homme-Poisson",
+    title: "Ennemi de Cocoyasi",
+    color: 0x365e68,
+    maxHp: 82,
+    atk: 18,
+    def: 11,
+    spd: 14,
+    moves: ["tirDePrecision", "hachoirDeSabre"],
+  },
+
+  fishmanBrute: {
+    id: "fishmanBrute",
+    name: "Brute Homme-Poisson",
+    title: "Ennemi de Cocoyasi",
+    color: 0x3d806d,
+    maxHp: 105,
+    atk: 21,
+    def: 14,
+    spd: 7,
+    moves: ["coupDeMarteau", "taillade"],
+  },
+
+  fishmanCaptain: {
+    id: "fishmanCaptain",
+    name: "Capitaine Homme-Poisson",
+    title: "Ennemi de Cocoyasi",
+    color: 0x245d63,
+    maxHp: 120,
+    atk: 24,
+    def: 16,
+    spd: 15,
+    moves: ["hachoirDeSabre", "vagueDeChoc"],
+  },
+
+  // =========================
+  // BOSS
+  // =========================
+
+  arlong: {
+    id: "arlong",
+    name: "Arlong",
+    type: "tranchant",
+    maxHp: 180,
+    atk: 32,
+    def: 24,
+    spd: 18,
+    moves: ["taillade"],
+  },
 };
