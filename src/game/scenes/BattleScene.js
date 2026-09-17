@@ -166,7 +166,7 @@ getEnemyScale(enemyId, sprite) {
   if (enemyId.startsWith("fishman")) {
     // Les hommes-poissons sont des PNG complets,
     // donc on adapte leur taille à celle du joueur.
-    const targetSize = 130;
+    const targetSize = 160;
     const maxDimension = Math.max(sprite.width, sprite.height);
 
     return targetSize / maxDimension;
@@ -195,14 +195,14 @@ getEnemyScale(enemyId, sprite) {
     this.getEnemyScale(enemyId, this.enemySprite)
   );
 
-  this.enemyNameText = this.add.text(400, 72, "", {
+  this.enemyNameText = this.add.text(360, 72, "", {
     fontFamily: "monospace",
     fontSize: "21px",
     color: "#ead9b8",
   });
 
   this.enemyHpBarBg = this.add.rectangle(
-    400,
+    360,
     110,
     300,
     20,
@@ -210,7 +210,7 @@ getEnemyScale(enemyId, sprite) {
   ).setOrigin(0, 0.5);
 
   this.enemyHpBar = this.add.rectangle(
-    402,
+    362,
     110,
     296,
     16,
@@ -234,14 +234,14 @@ getEnemyScale(enemyId, sprite) {
   .setOrigin(0.5, 0.82)
   .setDepth(10);
 
-  this.playerNameText = this.add.text(360, 495, "", {
+  this.playerNameText = this.add.text(400, 495, "", {
     fontFamily: "monospace",
     fontSize: "21px",
     color: "#ead9b8",
   });
 
   this.playerHpBarBg = this.add.rectangle(
-    360,
+    400,
     533,
     300,
     20,
@@ -249,7 +249,7 @@ getEnemyScale(enemyId, sprite) {
   ).setOrigin(0, 0.5);
 
   this.playerHpBar = this.add.rectangle(
-    362,
+    402,
     533,
     296,
     16,
