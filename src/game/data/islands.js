@@ -154,17 +154,17 @@ export const ISLANDS = {
 
   wildZones: [
   // 🟢 Entrée / premières zones
-  {x1: 3, y1: 3, x2: 20, y2: 14, level: 9, encounterRate: 0.07, enemyPool: ["pirateRival"], },
+  {x1: 3, y1: 3, x2: 20, y2: 14, level: 9, encounterRate: 0.07, enemyPool: ["fishmanPirate"], },
   // 🟢 Premiers couloirs du labyrinthe
-  {x1: 4, y1: 15, x2: 25, y2: 22, level: 10, encounterRate: 0.08, enemyPool: ["pirateRival"], },
+  {x1: 4, y1: 15, x2: 25, y2: 22, level: 10, encounterRate: 0.08, enemyPool: ["fishmanLancer"], },
   // 🟡 Labyrinthe intermédiaire
-  {x1: 15, y1: 5, x2: 38, y2: 25, level: 12, encounterRate: 0.09, enemyPool: ["pirateRival", "chasseurDePrimes"], },
+  {x1: 15, y1: 5, x2: 38, y2: 25, level: 12, encounterRate: 0.09, enemyPool: ["fishmanPirate", "fishmanBountyHunter"], },
   // 🟡 Labyrinthe profond
-  {x1: 25, y1: 4, x2: 52, y2: 28, level: 14, encounterRate: 0.10, enemyPool: ["pirateRival", "chasseurDePrimes"], },
+  {x1: 25, y1: 4, x2: 52, y2: 28, level: 14, encounterRate: 0.10, enemyPool: ["fishmanSwordsman", "fishmanBountyHunter"], },
   // 🟠 Approche d'Arlong Park
-  {x1: 38, y1: 8, x2: 60, y2: 25, level: 16, encounterRate: 0.11, enemyPool: ["chasseurDePrimes", "pirateRival"], },
+  {x1: 38, y1: 8, x2: 60, y2: 25, level: 16, encounterRate: 0.11, enemyPool: ["fishmanBrute", "fishmanLancer"], },
   // 🔴 Zone très proche d'Arlong
-  {x1: 48,y1: 12, x2: 61, y2: 21, level: 17, encounterRate: 0.12, enemyPool: ["chasseurDePrimes", "officierMarine"], },
+  {x1: 48,y1: 12, x2: 61, y2: 21, level: 17, encounterRate: 0.12, enemyPool: ["fishmanCaptain", "fishmanBrute"], },
 ],
 
   warps: [
