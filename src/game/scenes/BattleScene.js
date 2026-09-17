@@ -15,10 +15,21 @@ const CHARACTER_SPRITES = {
   charpentier: "character_07",
   musicien: "character_14",
   archeologue: "character_02",
+
   marineRecrue: "character_10",
   pirateRival: "character_09",
   chasseurDePrimes: "character_13",
   officierMarine: "character_12",
+
+  // Hommes-poissons de Cocoyasi
+  fishmanPirate: "fishman_pirate",
+  fishmanLancer: "fishman_lancer",
+  fishmanSwordsman: "fishman_swordsman",
+  fishmanBrute: "fishman_brute",
+  fishmanBountyHunter: "fishman_bounty_hunter",
+  fishmanCaptain: "fishman_captain",
+
+  // Boss
   arlong: "arlong",
 };
 
@@ -143,33 +154,110 @@ export default class BattleScene extends Phaser.Scene {
     this.add.text(30, 25, "GRAND LINE", { fontFamily: "monospace", fontSize: "18px", color: "#d4a24c" });
   }
 
-  drawCombatants() {
-    const enemyId = this.targetCharacterId || this.battleData.characterId || "marineRecrue";
-    const enemyScale =
-      spriteKey(enemyId) === "character_03" ||
-      spriteKey(enemyId) === "character_04" ||
-      enemyId === "arlong"
-      ? 1.75
-      : 7;
-
-    this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 0) .setScale(enemyScale) .setOrigin(0.5, 0.82) .setDepth(10);
-    this.enemyNameText = this.add.text(480, 72, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
-    this.enemyHpBarBg = this.add.rectangle(480, 110, 300, 20, 0x161616).setOrigin(0, 0.5);
-    this.enemyHpBar = this.add.rectangle(482, 110, 296, 16, 0xc0392b).setOrigin(0, 0.5);
-
-    const playerScale =
-      spriteKey(this.player.crewId) === "character_03" ||
-      spriteKey(this.player.crewId) === "character_04"
-      ? 1.75
-      : 7;
-
-    this.playerSprite = this.add.sprite(240, 470, spriteKey(this.player.crewId), 1) .setScale(playerScale) .setOrigin(0.5, 0.82) .setDepth(10);
-    this.playerNameText = this.add.text(300, 495, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
-    this.playerHpBarBg = this.add.rectangle(300, 533, 300, 20, 0x161616).setOrigin(0, 0.5);
-    this.playerHpBar = this.add.rectangle(302, 533, 296, 16, 0x27ae60).setOrigin(0, 0.5);
-
-    this.refreshBars();
+getEnemyScale(enemyId, sprite) {
+  if (
+    spriteKey(enemyId) === "character_03" ||
+    spriteKey(enemyId) === "character_04" ||
+    enemyId === "arlong"
+  ) {
+    return 1.75;
   }
+
+  if (enemyId.startsWith("fishman")) {
+    // Les hommes-poissons sont des PNG complets,
+    // donc on adapte leur taille à celle du joueur.
+    const targetSize = 160;
+    const maxDimension = Math.max(sprite.width, sprite.height);
+
+    return targetSize / maxDimension;
+  }
+
+  return 7;
+}
+  
+  drawCombatants() {
+  const enemyId =
+    this.targetCharacterId ||
+    this.battleData.characterId ||
+    "marineRecrue";
+
+  // ENNEMI
+  this.enemySprite = this.add.sprite(
+    760,
+    285,
+    spriteKey(enemyId),
+    0
+  )
+  .setOrigin(0.5, 0.82)
+  .setDepth(10);
+
+  this.enemySprite.setScale(
+    this.getEnemyScale(enemyId, this.enemySprite)
+  );
+
+  this.enemyNameText = this.add.text(300, 72, "", {
+    fontFamily: "monospace",
+    fontSize: "21px",
+    color: "#ead9b8",
+  });
+
+  this.enemyHpBarBg = this.add.rectangle(
+    300,
+    110,
+    300,
+    20,
+    0x161616
+  ).setOrigin(0, 0.5);
+
+  this.enemyHpBar = this.add.rectangle(
+    302,
+    110,
+    296,
+    16,
+    0xc0392b
+  ).setOrigin(0, 0.5);
+
+  // JOUEUR
+  const playerScale =
+    spriteKey(this.player.crewId) === "character_03" ||
+    spriteKey(this.player.crewId) === "character_04"
+      ? 1.75
+      : 7;
+
+  this.playerSprite = this.add.sprite(
+    240,
+    500,
+    spriteKey(this.player.crewId),
+    1
+  )
+  .setScale(playerScale)
+  .setOrigin(0.5, 0.82)
+  .setDepth(10);
+
+  this.playerNameText = this.add.text(500, 495, "", {
+    fontFamily: "monospace",
+    fontSize: "21px",
+    color: "#ead9b8",
+  });
+
+  this.playerHpBarBg = this.add.rectangle(
+    500,
+    533,
+    300,
+    20,
+    0x161616
+  ).setOrigin(0, 0.5);
+
+  this.playerHpBar = this.add.rectangle(
+    502,
+    533,
+    296,
+    16,
+    0x27ae60
+  ).setOrigin(0, 0.5);
+
+  this.refreshBars();
+}
 
   refreshBars() {
     if (!this.enemy || !this.player) return;
@@ -575,7 +663,7 @@ export default class BattleScene extends Phaser.Scene {
         this.targetCharacterId = this.battleData.bossTeam[this.bossEnemyIndex].characterId;
         this.enemySprite.setTexture(spriteKey(this.targetCharacterId), 0);
         this.enemySprite.setAlpha(0);
-        this.enemySprite.setScale(spriteKey(this.targetCharacterId) === "character_03" || spriteKey(this.targetCharacterId) === "character_04" || spriteKey(this.targetCharacterId) === "arlong" ? 1.75 : 7 );
+        this.enemySprite.setScale( this.getEnemyScale( this.targetCharacterId, this.enemySprite ) );
         this.tweens.add({ targets: this.enemySprite, alpha: 1, duration: 350 });
         this.refreshBars();
         this.setLog(`${this.enemy.name} entre dans le combat !`);

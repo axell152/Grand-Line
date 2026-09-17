@@ -1243,11 +1243,12 @@ showVictoryReward(winner, xp, berrys) {
 
     const bossPosition = this.getBossPosition(this.island.boss);
 
-const targetIsBoss =
-  bossPosition &&
-  targetX === bossPosition.x &&
-  targetY === bossPosition.y &&
-  !this.isBossOnCooldown(this.island.boss);
+    const targetIsBoss =
+      this.island.boss &&
+      bossPosition &&
+      targetX === bossPosition.x &&
+      targetY === bossPosition.y &&
+      !this.isBossOnCooldown(this.island.boss);
 
 if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
 
@@ -1592,26 +1593,19 @@ if (
 getBossPosition(boss) {
   if (!boss) return null;
 
-  const respawnAt = Number(this.state.bossRespawns?.[boss.id] || 0);
+  const defeated = !!this.state.progressFlags?.[boss.unlockFlag];
 
-  // Premier emplacement de Morgan
-  if (!respawnAt) {
-    return {
-      x: boss.x,
-      y: boss.y,
-    };
-  }
-
-  // Après les 15 minutes : nouvel emplacement
-  if (Date.now() >= respawnAt) {
+  if (defeated) {
     return {
       x: boss.respawnX ?? boss.x,
       y: boss.respawnY ?? boss.y,
     };
   }
 
-  // Pendant le cooldown : aucun emplacement actif
-  return null;
+  return {
+    x: boss.x,
+    y: boss.y,
+  };
 }
   
   isBossOnCooldown(boss) {

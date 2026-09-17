@@ -77,12 +77,12 @@ export const ISLANDS = {
       ],
     },
     wildZones: [
-      { x1: 4, y1: 16, x2: 44, y2: 18, level: 1, encounterRate: 0.1, enemyPool: ["marineRecrue"] },
-      { x1: 4, y1: 12, x2: 44, y2: 14, level: 2, encounterRate: 0.1, enemyPool: ["marineRecrue"] },
-      { x1: 4, y1: 3, x2: 44, y2: 10, level: 3, encounterRate: 0.1, enemyPool: ["marineRecrue", "officierMarine"] },
+      { x1: 4, y1: 16, x2: 44, y2: 18, level: 1, encounterRate: 0.07, enemyPool: ["marineRecrue"] },
+      { x1: 4, y1: 12, x2: 44, y2: 14, level: 2, encounterRate: 0.07, enemyPool: ["marineRecrue"] },
+      { x1: 4, y1: 3, x2: 44, y2: 10, level: 3, encounterRate: 0.07, enemyPool: ["marineRecrue", "officierMarine"] },
       { x1: 4, y1: 5, x2: 44, y2: 4, level: 10, encounterRate: 0.07, enemyPool: ["marineRecrue", "officierMarine"] },
     ],
-    warps: [{ x: 1, y: 29, toIsland: "ile-cocoyasi", toX: 3, toY: 16, lockedBy: "boss_ile-depart" }],
+    warps: [{ x: 1, y: 29, toIsland: "ile-cocoyasi", toX: 1, toY: 16, lockedBy: "boss_ile-depart" }],
   },
 
   // ============================================================
@@ -92,81 +92,84 @@ export const ISLANDS = {
   name: "Cocoyasi Village",
 
   terrain: [
-    "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-    "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-    "ssggggggggggggggggggggggggggggggggggggggggggggggggggggggggggss",
-    "ssggggggggggggggggqqqqqqqqqqqqqqqqggggggggggggggggggggggggggss",
-    "ssggggggggggggggggqgggggggggggggqggggggggggggggggggggggggggss",
-    "ssggggggggggggggggqgggggggggggggqggggggqqqqqqqqqqqqqqqqggggss",
-    "ssggggqqqqqqqqqqqqqggggggggggggggqgggggqvvvvvvvvvvvvvvvqggggss",
-    "ssggggqggggggggggggggggggggggggggqgggggqvvvvvvvvvvvvvvvqggggss",
-    "ssggggqggggggggggggggggggggggggggqgggggqvvvvvvvvvvvvvvvqggggss",
-    "ssggggqggggggggggqqqqqqqqqqqqqqqqqgggggqvvvvvvvvvvvvvvvqggggss",
-    "ssggggqggggggggggqrrrrrrrrrrrrrrrqgggggqvvvvvvvvvvvvvvvqggggss",
-    "ssggggqggggggggggqrrrrrrrrrrrrrrrqgggggqqqqqqqqqqqqqqqqqggggss",
-    "ssggggqggggggggggqrrrrrrrrrrrrrrrqqqqqqqqggggggggggggggggggss",
-    "ssggggqggggggggggqrrrrrrrrrrrrrrrggggggggggggggggggggggggggss",
-    "ssggggqggggggggggqrrrrrrrrrrrrrrrggggggggggggqqqqqqqqqqqqqss",
-    "ssggggqggggggggggqrrrrrrrrrrrrrrrggggggggggggqggggggggggggqss",
-    "ssggggqggggggggggqqqqqqqqqqqqqqqqggggggggggggqggggggggggggqss",
-    "ssggggqgggggggggggggggggggggggggggggggggggggqggggggggggggqss",
-    "ssggggqgggggggggggggggggggggggggggggggggggggqggggggggggggqss",
-    "ssggggqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqggggggggggggqss",
-    "ssggggggggggggggggggggggggggggggggggggggggggqggggggggggggqss",
-    "ssggggggggggggggggggqqqqqqqqqqqqqqqqqqqqqqqqqggggggggggggqss",
-    "ssggggggggggggggggggqggggggggggggggggggggggggggggggggggggqss",
-    "ssggggggggggggggggggqggggggggggggggggggggggggggggggggggggqss",
-    "ssggggggggggggggggggqggggggqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqss",
-    "ssggggggggggggggggggqgggggqggggggggggggggggggggggggggggggss",
-    "ssggggggggggggggggggqgggggqggggggggggggggggggggggggggggggss",
-    "ssggggggggggggggggggqgggggqggggggggggqqqqqqqqqqqqqqqqqqqqss",
-    "ssggggggggggggggggggqgggggqggggggggggqgggggggggggggggggggss",
-    "ssggggggggggggggggggqgggggqggggggggggqgggggggggggggggggggss",
-    "ssggggggggggggggggggqqqqqqqqqqqqqqqqqqgggggggggggggggggggss",
-    "ssccccccccccccccccccccccccccccccccccccccccccccccccccccccccccss",
-    "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-  ],
+  "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+  "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+  "ssqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqss",
+  "ssqtttttttttttttttttqtqtttttttttqtqtttttttttttttttttttttqtttqqss",
+  "ssqtqqqqqqqtqqqqqqqtqtqtqqqtqqqtqtqtqqqqqtqtqqqqqqqqqqqtqtqtqqss",
+  "ssqtqtqtttttqtttqtttqtttttqtttqtqtqtqtttqtqtqtttqtttttttttqtqqss",
+  "ssqtqtqtqqqqqtqtqqqtqqqqqqqqqtqtqtqtqtqtqtqqqtqtqtqqqqqqqqqtqqss",
+  "ssqtqtttqtttttqtttqtttttttqtttqtqtttttqtqtttqtqtqtqtttttqtttqqss",
+  "ssqtqqqqqtqqqqqqqtqqqqqqqtqtqqqtqqqqqqqqqqqtqtqtqqqtqqqtqqtqqqss",
+  "ssqtttqtttqtttttqtttttqtqtqtttqtttttttttqtttqtqtttqtttqtttttqqss",
+  "ssqtqtqtqqqqqtqqqqqqqtqtqtqqqtqqqqqqqqqtqtqtqtqqqtqqqtqqqqqtqqss",
+  "ssqtqtttttttttqtttttttqtqtttttqtttttttttttqtqtqtqtttttqtttqtqqss",
+  "ssqqqqqqqqqqqtqtqqqqqqqtqqqtqqqqqqqqqtqqqqqqqtqtqqqqqqqqqtqtqqss",
+  "ssqtttttttttttqtqtttttttttqtttttttttqtqtttttttqtttttttttttqtqqss",
+  "ssqttttttttttqqtqtqqqtqqqqqtttttttttqqqtqqqqqqqtqqqqqqqtqtqtqqss",
+  "dddtttttttttttttqtttqtttttqtttttttttqtttqtqtttqtttttqtttqtqttddd",
+  "dddtttttttttttqqqqqtqqqqqtqtttttttttqtqqqtqtqtqtqqqqqtqqqqqttddd",
+  "ssqtttttttttttttttqtqtttttqtttttttttqtttqtqtqtqtqtttttqtttqtqqss",
+  "ssqtttttttttttqqqtqqqtqqqqqtttttttttqqqtqtqtqtqtqtqqqqqtqtqtqqss",
+  "ssqtttttttttttttqtttqtttttttttttttttqtqtqtttqtttqtttttqtqtttqqss",
+  "ssqqqqqqqqqqqtqqqtqtqqqqqqqqttttttttqtqtqtqqqqqqqqqqqtqtqqqtqqss",
+  "ssqtqtttttttttqtqtqtttqtttttttttttttttqtqtttqtttqtttttqtqtttqqss",
+  "ssqtqtqqqqqqqqqtqqqtqtqtqqqtqqqqqqqqqtqtqqqqqtqtqtqqqqqtqtqqqqss",
+  "ssqtqtqtttqtttqtttqtqtttttqtttttttqtttqtqtttttqtttqtttttqtqtqqss",
+  "ssqtqtqqqtqtqtqqqtqtqqqqqqqqqqqqqtqqqqqtqtqtqqqqqtqqqqqtqtttqqss",
+  "ssqtqtttqtqtqtttqtqtqtttqtttttttqtttqtttttqtqtttqtqtqtttqtqtqqss",
+  "ssqtqqqtqtqtqtqtqtqqqtqtqtqqqqqtqtqtqtqqqqqqqtqtqtqtqtqtqtttqqss",
+  "ssqtttttqtttqtqtqtttttqtttqtttttqtqtttqtttttttqtqtqtqtqtqtqtqqss",
+  "ssqtqqqqqqqqqtqtqqqqqqqqqqqtqqqqqqqqqqqtqqqqqqqtqqqtqtqtqtqtqqss",
+  "ssqtttttttttttqtttttttttttqtttttttttttttqtttttttttttqtqtttttqqss",
+  "ssqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqss",
+  "ssqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqss",
+  "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+  "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+],
 
+
+  tavern : {x: 7, y: 16, },
+  buildings: [ { x: 7, y: 16, key: "taverne" }, ],
   playerStart: { x: 3, y: 16, },
 
   recruitNpcs: [
-    { x: 3, y: 14, characterId: "navigatrice", level: 15, requiresBattle: true, battleLevel: 15, }, ],
+    { x: 33, y: 17, characterId: "navigatrice", level: 15, requiresBattle: true, battleLevel: 15, }, ],
 
   npcs: [
     { id: "ancien-cocoyasi", x: 10, y: 6, name: "Habitant de Cocoyasi", dialogue: [ "Cocoyasi était autrefois un village paisible.", "Les hommes-poissons ont tout détruit.", ], },
-
     { id: "habitant-cocoyasi", x: 28, y: 22, name: "Habitante de Cocoyasi", dialogue: [ "Nami est quelque part dans les ruines.", "Elle semble protéger quelque chose...", ], },
-
     { id: "pecheur-cocoyasi", x: 47, y: 10, name: "Pêcheur", dialogue: [ "Attention aux hommes-poissons.", "Ils rôdent dans toutes les ruines du village.", ], },
   ],
 
   chests: [
     { id: "cocoyasi-chest-1", x: 13, y: 8, itemId: "potion", amount: 2, },
-
-    { id: "cocoyasi-chest-2", x: 34, y: 14, itemId: "superPotion", amount: 1, },
-
-    { id: "cocoyasi-chest-3", x: 50, y: 24, itemId: "potion", amount: 3, },
+    { id: "cocoyasi-chest-2", x: 43, y: 20, itemId: "superPotion", amount: 2, },
+    { id: "cocoyasi-chest-3", x: 59, y: 31, itemId: "potion", amount: 5, },
   ],
 
-  boss: {
-  id: "arlong-cocoyasi", x: 4, y: 19, respawnX: 56, respawnY: 15, enemyId: "arlong", level: 20, name: "Arlong", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
-  team: [
-    { characterId: "arlong", level: 20, isBoss: true },
-  ],
+  boss: { id: "arlong-cocoyasi", x: 28, y: 16, respawnX: 27, respawnY: 16, enemyId: "arlong", level: 20, name: "Arlong", unlockFlag: "boss_ile-brume", respawnMinutes: 15,
+  team: [ {characterId: "arlong", level: 20, isBoss: true, }, ],
 },
 
   wildZones: [
-    { x1: 4, y1: 4, x2: 22, y2: 30, level: 7, encounterRate: 0.045, enemyPool: [ "pirateRival", "chasseurDePrimes", ], },
-
-    { x1: 24, y1: 4, x2: 43, y2: 30, level: 9, encounterRate: 0.05, enemyPool: [ "pirateRival", "chasseurDePrimes", "marineRecrue", ], },
-
-    { x1: 45, y1: 4, x2: 62, y2: 30, level: 11, encounterRate: 0.055, enemyPool: [ "chasseurDePrimes", "pirateRival", ], },
-  ],
+  // 🟢 Entrée / premières zones
+  {x1: 3, y1: 3, x2: 20, y2: 14, level: 9, encounterRate: 0.07, enemyPool: ["fishmanPirate"], },
+  // 🟢 Premiers couloirs du labyrinthe
+  {x1: 4, y1: 15, x2: 25, y2: 22, level: 10, encounterRate: 0.08, enemyPool: ["fishmanLancer"], },
+  // 🟡 Labyrinthe intermédiaire
+  {x1: 15, y1: 5, x2: 38, y2: 25, level: 12, encounterRate: 0.09, enemyPool: ["fishmanPirate", "fishmanBountyHunter"], },
+  // 🟡 Labyrinthe profond
+  {x1: 25, y1: 4, x2: 52, y2: 28, level: 14, encounterRate: 0.10, enemyPool: ["fishmanSwordsman", "fishmanBountyHunter"], },
+  // 🟠 Approche d'Arlong Park
+  {x1: 38, y1: 8, x2: 60, y2: 25, level: 16, encounterRate: 0.11, enemyPool: ["fishmanBrute", "fishmanLancer"], },
+  // 🔴 Zone très proche d'Arlong
+  {x1: 48,y1: 12, x2: 61, y2: 21, level: 17, encounterRate: 0.12, enemyPool: ["fishmanCaptain", "fishmanBrute"], },
+],
 
   warps: [
-    { x: 2, y: 16, toIsland: "ile-depart", toX: 1, toY: 3, },
-
-    { x: 62, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
+    { x: 1, y: 16, toIsland: "ile-depart", toX: 2, toY: 29, },
+    { x: 63, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
   ],
 },
 
