@@ -166,7 +166,7 @@ getEnemyScale(enemyId, sprite) {
   if (enemyId.startsWith("fishman")) {
     // Les hommes-poissons sont des PNG complets,
     // donc on adapte leur taille à celle du joueur.
-    const targetSize = 110;
+    const targetSize = 130;
     const maxDimension = Math.max(sprite.width, sprite.height);
 
     return targetSize / maxDimension;
