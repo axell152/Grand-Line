@@ -154,16 +154,41 @@ export default class BattleScene extends Phaser.Scene {
     this.add.text(30, 25, "GRAND LINE", { fontFamily: "monospace", fontSize: "18px", color: "#d4a24c" });
   }
 
+getEnemyScale(enemyId, sprite) {
+  if (
+    spriteKey(enemyId) === "character_03" ||
+    spriteKey(enemyId) === "character_04" ||
+    enemyId === "arlong"
+  ) {
+    return 1.75;
+  }
+
+  if (enemyId.startsWith("fishman")) {
+    // Les hommes-poissons sont des PNG complets,
+    // donc on adapte leur taille à celle du joueur.
+    const targetSize = 110;
+    const maxDimension = Math.max(sprite.width, sprite.height);
+
+    return targetSize / maxDimension;
+  }
+
+  return 7;
+}
+  
   drawCombatants() {
     const enemyId = this.targetCharacterId || this.battleData.characterId || "marineRecrue";
-    const enemyScale =
-      spriteKey(enemyId) === "character_03" ||
-      spriteKey(enemyId) === "character_04" ||
-      enemyId === "arlong"
-        ? 1.75
-        : enemyId.startsWith("fishman")
-          ? 1.5
-          : 7;
+    this.enemySprite = this.add.sprite(
+      760,
+      245,
+      spriteKey(enemyId),
+      0
+  )
+  .setOrigin(0.5, 0.82)
+  .setDepth(10);
+
+this.enemySprite.setScale(
+  this.getEnemyScale(enemyId, this.enemySprite)
+);
 
     this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 0) .setScale(enemyScale) .setOrigin(0.5, 0.82) .setDepth(10);
     this.enemyNameText = this.add.text(480, 72, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
@@ -588,7 +613,7 @@ export default class BattleScene extends Phaser.Scene {
         this.targetCharacterId = this.battleData.bossTeam[this.bossEnemyIndex].characterId;
         this.enemySprite.setTexture(spriteKey(this.targetCharacterId), 0);
         this.enemySprite.setAlpha(0);
-        this.enemySprite.setScale(spriteKey(this.targetCharacterId) === "character_03" || spriteKey(this.targetCharacterId) === "character_04" || spriteKey(this.targetCharacterId) === "arlong" ? 1.75 : 7 );
+        this.enemySprite.setScale( this.getEnemyScale( this.targetCharacterId, this.enemySprite ) );
         this.tweens.add({ targets: this.enemySprite, alpha: 1, duration: 350 });
         this.refreshBars();
         this.setLog(`${this.enemy.name} entre dans le combat !`);
