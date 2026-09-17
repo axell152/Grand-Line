@@ -901,7 +901,7 @@ if (island.boss) {
     arlong: 0.8,
     officierMarine: 2.5,
     pirateRival: 2.5,
-    colonelMorgan: 0.2,
+    colonelMorgan: 0.05,
   };
 
   this.bossSprite.setScale(bossScales[boss.enemyId] ?? 2.5);
