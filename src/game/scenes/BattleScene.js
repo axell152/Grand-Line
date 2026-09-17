@@ -31,6 +31,7 @@ const CHARACTER_SPRITES = {
 
   // Boss
   arlong: "arlong",
+  colonelMorgan: "colonel_morgan"
 };
 
 const spriteKey = (id) => CHARACTER_SPRITES[id] || "character_01";
