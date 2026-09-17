@@ -159,10 +159,11 @@ export default class BattleScene extends Phaser.Scene {
     const enemyScale =
       spriteKey(enemyId) === "character_03" ||
       spriteKey(enemyId) === "character_04" ||
-      enemyId === "arlong" ||
-      enemyId.startsWith("fishman")
-      ? 1.75
-      : 7;
+      enemyId === "arlong"
+        ? 1.75
+        : enemyId.startsWith("fishman")
+          ? 1.5
+          : 7;
 
     this.enemySprite = this.add.sprite(760, 245, spriteKey(enemyId), 0) .setScale(enemyScale) .setOrigin(0.5, 0.82) .setDepth(10);
     this.enemyNameText = this.add.text(480, 72, "", { fontFamily: "monospace", fontSize: "21px", color: "#ead9b8" });
