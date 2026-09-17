@@ -79,12 +79,36 @@ refreshCrewDisplay() {
 }
   
   getMemberData(entry) {
-    if (entry === "captain") {
-      return { ...PLAYER_CHARACTER, name: this.gameState?.playerName || "Capitaine", title: "Capitaine" };
-    }
-    return CHARACTERS[entry] || { name: entry, title: "", moves: [] };
+  if (entry === "captain") {
+    return {
+      ...PLAYER_CHARACTER,
+      ...this.gameState,
+      name: this.gameState?.playerName || "Capitaine",
+      title: "Capitaine",
+      moves: Array.isArray(this.gameState?.moves)
+        ? this.gameState.moves
+        : PLAYER_CHARACTER.moves,
+    };
   }
 
+  const base = CHARACTERS[entry] || {
+    name: entry,
+    title: "",
+    moves: [],
+  };
+
+  const detail = this.gameState?.crewDetails?.[entry] || {};
+
+  return {
+    ...base,
+    ...detail,
+    name: detail.name || base.name,
+    title: detail.title || base.title,
+    moves: Array.isArray(detail.moves)
+      ? detail.moves
+      : base.moves,
+  };
+}
   getMemberProgress(entry) {
     if (entry === "captain") {
       return { level: this.gameState.level || 1, exp: this.gameState.exp || 0, maxExp: this.gameState.maxExp || 100 };
@@ -214,7 +238,7 @@ refreshCrewDisplay() {
       fontFamily: "monospace", fontSize: "18px", color: "#9fd18f",
     }));
     y += 30;
-    this.detailGroup.add(this.add.text(570, y, `ATQ ${data.atk}   DEF ${data.def}   VIT ${data.spd}`, {
+    this.detailGroup.add(this.add.text(570, y, `ATQ ${this.gameState.atk}   DEF ${this.gameState.def}   VIT ${this.gameState.spd}`, {
       fontFamily: "monospace", fontSize: "16px", color: "#ffffff",
     }));
     y += 40;
