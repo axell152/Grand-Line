@@ -164,6 +164,10 @@ getEnemyScale(enemyId, sprite) {
     return 1.75;
   }
 
+  if (enemyId === "colonelMorgan") {
+    return 0.75;
+  }
+  
   if (enemyId.startsWith("fishman")) {
     // Les hommes-poissons sont des PNG complets,
     // donc on adapte leur taille à celle du joueur.
