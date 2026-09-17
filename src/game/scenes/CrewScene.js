@@ -11,8 +11,11 @@ export default class CrewScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.gameState = data.state;
-  }
+  this.gameState =
+    this.game?.registry?.get("gameState") ||
+    data?.state ||
+    {};
+}
 
   create() {
     this.add.rectangle(512, 384, 1024, 768, 0x0b2545, 0.95);
@@ -44,13 +47,37 @@ export default class CrewScene extends Phaser.Scene {
 
     this.selected = this.gameState.teamOrder[0];
 
-    this.drawList();
-    this.drawDetail();
+    this.refreshCrewDisplay();
 
     this.input.keyboard.on("keydown-T", () => this.resumeWorld());
     this.input.keyboard.on("keydown-ESC", () => this.resumeWorld());
   }
 
+refreshCrewDisplay() {
+  // Toujours récupérer la version la plus récente du jeu
+  const latestState = this.game.registry.get("gameState");
+
+  if (latestState) {
+    this.gameState = latestState;
+  }
+
+  // Sécurité si l'ordre n'existe pas encore
+  if (!this.gameState.teamOrder) {
+    this.gameState.teamOrder = [
+      "captain",
+      ...(this.gameState.crew || []),
+    ];
+  }
+
+  // Si le personnage sélectionné n'est plus présent
+  if (!this.gameState.teamOrder.includes(this.selected)) {
+    this.selected = this.gameState.teamOrder[0];
+  }
+
+  this.drawList();
+  this.drawDetail();
+}
+  
   getMemberData(entry) {
     if (entry === "captain") {
       return { ...PLAYER_CHARACTER, name: this.gameState?.playerName || "Capitaine", title: "Capitaine" };
@@ -223,15 +250,18 @@ export default class CrewScene extends Phaser.Scene {
   }
 
   moveEntry(from, to) {
-    const order = this.gameState.teamOrder;
-    const [moved] = order.splice(from, 1);
-    order.splice(to, 0, moved);
+    this.gameState = this.game.registry.get("gameState") || this.gameState;
 
-    this.game.registry.set("gameState", this.gameState);
-    saveGame(this.gameState);
+  const order = this.gameState.teamOrder;
+  const [moved] = order.splice(from, 1);
+  order.splice(to, 0, moved);
 
-    this.drawList();
-  }
+  this.game.registry.set("gameState", this.gameState);
+  saveGame(this.gameState);
+
+  this.refreshCrewDisplay();
+}
+
 
   resumeWorld() {
     this.scene.stop();
