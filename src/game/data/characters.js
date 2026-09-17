@@ -146,7 +146,7 @@ export const ENEMY_CHARACTERS = {
   },
   officierMarine: {
     id: "officierMarine", name: "Officier de la Marine", title: "Ennemi", color: 0x2c3e78,
-    maxHp: 100, atk: 16, def: 16, spd: 9, moves: ["coupTonnerre", "coupDeMarteau"],
+    maxHp: 70, atk: 13, def: 11, spd: 9, moves: ["coupTonnerre", "coupDeMarteau"],
   },
  arlong: {
    id: "arlong", name: "Arlong", type: "tranchant", maxHp: 180, atk: 32, def: 24, spd: 18, moves: ["taillade"],
