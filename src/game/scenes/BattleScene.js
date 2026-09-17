@@ -590,47 +590,90 @@ getEnemyScale(enemyId, sprite) {
 
 
   applyImmediateExperience(memberId, amount) {
-    const xp = Math.max(0, Number(amount) || 0);
-    if (!xp) return;
+  const xp = Math.max(0, Number(amount) || 0);
+  if (!xp) return;
 
-    const target = this.teamList.find((m) =>
-      memberId === "captain" ? m.isCaptain : m.crewId === memberId
-    );
-    if (!target) return;
+  const target = this.teamList.find((m) =>
+    memberId === "captain"
+      ? m.isCaptain
+      : m.crewId === memberId
+  );
 
-    const base = memberId === "captain"
+  if (!target) return;
+
+  const base =
+    memberId === "captain"
       ? PLAYER_CHARACTER
       : CHARACTERS[memberId];
 
-    if (!base) return;
+  if (!base) return;
 
-    target.level ||= 1;
-    target.exp ||= 0;
-    target.maxExp ||= 100;
-    target.maxHp ||= base.maxHp + (target.level - 1) * 8;
-    target.atk ??= base.atk + (target.level - 1) * 2;
-    target.def ??= base.def + (target.level - 1);
-    target.spd ??= base.spd + (target.level - 1);
-    target.moves = Array.isArray(target.moves)
-      ? target.moves.slice(0, 4)
-      : [...(base.moves || [])].slice(0, 4);
-    target.ppData ||= {};
+  target.level ||= 1;
+  target.exp ||= 0;
+  target.maxExp ||= 100;
 
-    target.exp += xp;
+  target.maxHp ||= base.maxHp + (target.level - 1) * 8;
+  target.atk ??= base.atk + (target.level - 1) * 2;
+  target.def ??= base.def + (target.level - 1);
+  target.spd ??= base.spd + (target.level - 1);
 
-    while (target.exp >= target.maxExp) {
-      target.exp -= target.maxExp;
-      target.level += 1;
-      target.maxExp = Math.round(target.maxExp * 1.4);
-      target.maxHp += 8;
-      target.atk += 2;
-      target.def += 1;
-      target.spd += 1;
-      target.hp = Math.min(target.maxHp, target.hp + 8);
-    }
+  target.moves = Array.isArray(target.moves)
+    ? [...target.moves].slice(0, 4)
+    : [...(base.moves || [])].slice(0, 4);
 
-    this.saveTeamState();
+  target.ppData ||= {};
+
+  target.exp += xp;
+
+  while (target.exp >= target.maxExp) {
+    target.exp -= target.maxExp;
+    target.level += 1;
+    target.maxExp = Math.round(target.maxExp * 1.4);
+
+    target.maxHp += 8;
+    target.atk += 2;
+    target.def += 1;
+    target.spd += 1;
+
+    target.hp = Math.min(
+      target.maxHp,
+      target.hp + 8
+    );
+
+    // =========================
+    // NOUVELLES ATTAQUES
+    // =========================
+
+    const learnset = Array.isArray(base.learnset)
+      ? base.learnset
+      : [];
+
+    const newMoves = learnset.filter(
+      (learn) =>
+        learn.level === target.level &&
+        learn.move &&
+        !target.moves.includes(learn.move)
+    );
+
+    newMoves.forEach((learn) => {
+      const moveKey = learn.move;
+
+      // Maximum 4 attaques
+      if (target.moves.length < 4) {
+        target.moves.push(moveKey);
+
+        target.ppData[moveKey] =
+          MOVES[moveKey]?.maxPp || 10;
+
+        this.setLog(
+          `${target.name} apprend ${MOVES[moveKey]?.name || moveKey} !`
+        );
+      }
+    });
   }
+
+  this.saveTeamState();
+}
 
   handleEnemyDefeated(attacker) {
     if (this.battleOver) return false;

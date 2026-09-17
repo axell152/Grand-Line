@@ -11,8 +11,11 @@ export default class CrewScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.gameState = data.state;
-  }
+  this.gameState =
+    this.game?.registry?.get("gameState") ||
+    data?.state ||
+    {};
+}
 
   create() {
     this.add.rectangle(512, 384, 1024, 768, 0x0b2545, 0.95);
@@ -44,20 +47,68 @@ export default class CrewScene extends Phaser.Scene {
 
     this.selected = this.gameState.teamOrder[0];
 
-    this.drawList();
-    this.drawDetail();
+    this.refreshCrewDisplay();
 
     this.input.keyboard.on("keydown-T", () => this.resumeWorld());
     this.input.keyboard.on("keydown-ESC", () => this.resumeWorld());
   }
 
-  getMemberData(entry) {
-    if (entry === "captain") {
-      return { ...PLAYER_CHARACTER, name: this.gameState?.playerName || "Capitaine", title: "Capitaine" };
-    }
-    return CHARACTERS[entry] || { name: entry, title: "", moves: [] };
+refreshCrewDisplay() {
+  // Toujours récupérer la version la plus récente du jeu
+  const latestState = this.game.registry.get("gameState");
+
+  if (latestState) {
+    this.gameState = latestState;
   }
 
+  // Sécurité si l'ordre n'existe pas encore
+  if (!this.gameState.teamOrder) {
+    this.gameState.teamOrder = [
+      "captain",
+      ...(this.gameState.crew || []),
+    ];
+  }
+
+  // Si le personnage sélectionné n'est plus présent
+  if (!this.gameState.teamOrder.includes(this.selected)) {
+    this.selected = this.gameState.teamOrder[0];
+  }
+
+  this.drawList();
+  this.drawDetail();
+}
+  
+  getMemberData(entry) {
+  if (entry === "captain") {
+    return {
+      ...PLAYER_CHARACTER,
+      ...this.gameState,
+      name: this.gameState?.playerName || "Capitaine",
+      title: "Capitaine",
+      moves: Array.isArray(this.gameState?.moves)
+        ? this.gameState.moves
+        : PLAYER_CHARACTER.moves,
+    };
+  }
+
+  const base = CHARACTERS[entry] || {
+    name: entry,
+    title: "",
+    moves: [],
+  };
+
+  const detail = this.gameState?.crewDetails?.[entry] || {};
+
+  return {
+    ...base,
+    ...detail,
+    name: detail.name || base.name,
+    title: detail.title || base.title,
+    moves: Array.isArray(detail.moves)
+      ? detail.moves
+      : base.moves,
+  };
+}
   getMemberProgress(entry) {
     if (entry === "captain") {
       return { level: this.gameState.level || 1, exp: this.gameState.exp || 0, maxExp: this.gameState.maxExp || 100 };
@@ -187,7 +238,7 @@ export default class CrewScene extends Phaser.Scene {
       fontFamily: "monospace", fontSize: "18px", color: "#9fd18f",
     }));
     y += 30;
-    this.detailGroup.add(this.add.text(570, y, `ATQ ${data.atk}   DEF ${data.def}   VIT ${data.spd}`, {
+    this.detailGroup.add(this.add.text(570, y, `ATQ ${this.gameState.atk}   DEF ${this.gameState.def}   VIT ${this.gameState.spd}`, {
       fontFamily: "monospace", fontSize: "16px", color: "#ffffff",
     }));
     y += 40;
@@ -223,15 +274,18 @@ export default class CrewScene extends Phaser.Scene {
   }
 
   moveEntry(from, to) {
-    const order = this.gameState.teamOrder;
-    const [moved] = order.splice(from, 1);
-    order.splice(to, 0, moved);
+    this.gameState = this.game.registry.get("gameState") || this.gameState;
 
-    this.game.registry.set("gameState", this.gameState);
-    saveGame(this.gameState);
+  const order = this.gameState.teamOrder;
+  const [moved] = order.splice(from, 1);
+  order.splice(to, 0, moved);
 
-    this.drawList();
-  }
+  this.game.registry.set("gameState", this.gameState);
+  saveGame(this.gameState);
+
+  this.refreshCrewDisplay();
+}
+
 
   resumeWorld() {
     this.scene.stop();

@@ -78,9 +78,16 @@ export default class WorldScene extends Phaser.Scene {
     this.input.keyboard.on("keydown-SPACE", () => this.interact());
 
     this.input.keyboard.on("keydown-T", () => {
-      this.scene.launch("CrewScene", { state: this.state });
-      this.scene.pause();
-    });
+  // Toujours transmettre l'état actuellement sauvegardé dans le registry
+  const currentState =
+    this.game.registry.get("gameState") || this.state;
+
+  this.scene.launch("CrewScene", {
+    state: currentState,
+  });
+
+  this.scene.pause();
+});
 
     this.input.keyboard.on("keydown-F", () => this.exportSaveFile());
 
@@ -1500,25 +1507,35 @@ if (
   }
 
   openChest(key, chest) {
-  if (!chest || chest.opened) return;
+  if (!chest) return;
 
-  chest.opened = true;
+  this.state.openedChests ||= {};
+  this.state.items ||= { ...STARTING_ITEMS };
 
-  // Récompense du coffre
-  const reward = chest.reward || {};
-  const berryReward = Number(reward.berrys || 0);
+  // Le coffre utilise itemId + amount dans islands.js
+  const itemId = chest.itemId;
+  const amount = Number(chest.amount || 1);
 
-  if (berryReward > 0) {
-    this.state.berrys = (this.state.berrys || 0) + berryReward;
+  // Si le coffre n'a pas de contenu valide, on ne le consomme pas
+  if (!itemId) {
+    this.showMessage(
+      "COFFRE OUVERT",
+      "Ce coffre est vide."
+    );
+    return;
   }
 
-  if (reward.item) {
-    this.state.items = this.state.items || {};
-    this.state.items[reward.item] =
-      (this.state.items[reward.item] || 0) + (reward.quantity || 1);
-  }
+  // Ajout réel de l'objet dans l'inventaire
+  this.state.items[itemId] =
+    (this.state.items[itemId] || 0) + amount;
 
-  // Supprime uniquement le véritable objet graphique Phaser
+  // Marque le coffre comme ouvert
+  this.state.openedChests[chest.id || key] = true;
+
+  // Sauvegarde immédiate
+  this.persist();
+
+  // Supprime le coffre de la carte
   const sprite = this.chestGraphics?.[key];
 
   if (sprite && typeof sprite.destroy === "function") {
@@ -1529,24 +1546,23 @@ if (
     delete this.chestGraphics[key];
   }
 
-  // Sauvegarde le coffre comme ouvert
-  this.state.openedChests = this.state.openedChests || {};
-  this.state.openedChests[chest.id || key] = true;
-
-  this.persist();
-
-  let message = "Coffre ouvert !";
-
-  if (berryReward > 0) {
-    message += `\n+${berryReward} Berrys`;
+  if (this.chestSprites) {
+    delete this.chestSprites[key];
   }
 
-  if (reward.item) {
-    const quantity = reward.quantity || 1;
-    message += `\n+${quantity} ${reward.item}`;
-  }
+  // Nom affiché au joueur
+  const itemNames = {
+    potion: "Potion",
+    superPotion: "Super Potion",
+  };
 
-  this.showMessage(message);
+  const itemName = itemNames[itemId] || itemId;
+
+  // Message clair avec le contenu du coffre
+  this.showMessage(
+    "COFFRE OUVERT !",
+    `Tu trouves ${amount} ${itemName}${amount > 1 ? "s" : ""}.`
+  );
 }
 
   interact() {
