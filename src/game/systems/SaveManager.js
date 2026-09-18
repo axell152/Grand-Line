@@ -25,8 +25,8 @@ function loadLocal() {
 }
 
 /**
- * Sauvegarde automatique : localStorage immédiatement, puis Blob si disponible.
- * Le fichier de sauvegarde exporté n'en dépend pas.
+ * Sauvegarde automatique : uniquement localStorage.
+ * Le fichier de sauvegarde exporté (JSON téléchargeable) reste indépendant.
  */
 export async function saveGame(state) {
   const saveId = getSaveId();
@@ -38,53 +38,16 @@ export async function saveGame(state) {
 
   saveLocal(payload);
 
-  try {
-    const res = await fetch("/api/save", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      console.info("Sauvegarde Blob indisponible, sauvegarde locale conservée.");
-    }
-  } catch (err) {
-    console.info("Impossible de joindre Vercel Blob, sauvegarde locale conservée.");
-  }
-
   return payload;
 }
 
 export async function loadGame() {
-  const saveId = getSaveId();
-
-  if (!saveId) return loadLocal();
-
-  try {
-    const res = await fetch(
-      `/api/save?saveId=${encodeURIComponent(saveId)}`
-    );
-
-    if (res.ok) {
-      const data = await res.json();
-
-      if (data.save) {
-        saveLocal(data.save);
-        return data.save;
-      }
-    }
-  } catch (err) {
-    console.info("Impossible de charger la sauvegarde Blob.");
-  }
-
   return loadLocal();
 }
 
 /**
  * Télécharge la partie actuelle dans un fichier JSON.
- * Ce fichier est autonome : il ne dépend ni de Vercel, ni de Blob, ni du navigateur.
+ * Ce fichier est autonome : il ne dépend ni d'un serveur, ni du navigateur.
  */
 export function downloadSaveFile(state) {
   if (typeof window === "undefined" || !state) return false;

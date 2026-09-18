@@ -13,12 +13,12 @@ const DIRECTIONS = {
 };
 
 const CHARACTER_SPRITES = {
-  captain: "character_01",
-  bretteur: "character_03",
-  navigatrice: "character_04",
-  tireur: "character_05",
+  captain: "luffy",
+  bretteur: "zoro",
+  navigatrice: "nami",
+  tireur: "usopp",
   medecin: "character_06",
-  cuisinier: "character_08",
+  cuisinier: "sanji",
   charpentier: "character_07",
   musicien: "character_14",
   archeologue: "character_02",
@@ -32,6 +32,14 @@ const CHARACTER_SPRITES = {
 
 function spriteKey(characterId) {
   return CHARACTER_SPRITES[characterId] || "character_01";
+}
+
+// Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
+// grandes que les PNJ génériques character_XX, en 16x16). On compense donc leur
+// échelle pour que tout le monde ait la même taille à l'écran.
+const BIG_SPRITE_KEYS = new Set(["luffy", "zoro", "nami", "usopp", "sanji"]);
+function npcScaleFor(characterId) {
+  return BIG_SPRITE_KEYS.has(spriteKey(characterId)) ? 0.625 : 2.5;
 }
 
 function formatMoveStats(moveKey) {
@@ -855,7 +863,7 @@ export default class WorldScene extends Phaser.Scene {
         0
       );
 
-      sprite.setScale((npc.characterId || "captain") === "bretteur" ? 0.625 : 2.5);
+      sprite.setScale(npcScaleFor(npc.characterId || "captain"));
       sprite.setOrigin(0.5, 0.78);
       sprite.setDepth(npc.y + 0.5);
       this.talkNpcSprites[`${npc.x},${npc.y}`] = npc;
@@ -929,7 +937,7 @@ if (island.boss) {
           0
         );
 
-        sprite.setScale(npc.characterId === "bretteur" || npc.characterId === "navigatrice" ? 0.625 : 2.5);
+        sprite.setScale(npcScaleFor(npc.characterId));
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
@@ -944,7 +952,7 @@ if (island.boss) {
       0
     );
 
-    this.player.setScale(2.5);
+    this.player.setScale(npcScaleFor("captain"));
     this.player.setOrigin(0.5, 0.78);
     this.player.setDepth(999);
     this.playerDirection = "down";
@@ -1100,7 +1108,7 @@ showVictoryReward(winner, xp, berrys) {
   exportSaveFile() {
     if (!this.state) return;
 
-    // Le fichier est créé immédiatement, même si Vercel Blob est hors quota.
+    // Le fichier JSON est créé immédiatement, en plus de la sauvegarde locale automatique.
     downloadSaveFile(this.state);
     saveGame(this.state);
 

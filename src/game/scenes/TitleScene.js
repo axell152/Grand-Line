@@ -204,7 +204,7 @@ export default class TitleScene extends Phaser.Scene {
     const state = this.createNewState(playerName);
     this.game.registry.set("gameState", state);
 
-    // La sauvegarde locale est immédiate et la sauvegarde Blob est tentée ensuite.
+    // Sauvegarde locale immédiate (localStorage).
     await saveGame(state);
     this.scene.start("World");
   }
@@ -257,7 +257,7 @@ export default class TitleScene extends Phaser.Scene {
     input.click();
   }
 
-  // Ancien chargement en ligne conservé pour compatibilité interne.
+  // Chargement de la sauvegarde locale (localStorage), conservé pour compatibilité interne.
   async loadSavedGame() {
     if (this.loading) return;
     this.loading = true;

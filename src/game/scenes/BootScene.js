@@ -60,40 +60,90 @@ export default class BootScene extends Phaser.Scene {
       );
     });
 
-    // Personnages classiques
-    // La majorité utilise 10 frames de 16x16.
-    // Zoro et Nami utilisent des spritesheets 10 frames de 64x64.
-    SPRITES.forEach((key) => {
-      const frameSize =
-        key === "character_03" || key === "character_04"
-          ? 64
-          : 16;
+// ===============================
+// PERSONNAGES PNJ
+// ===============================
 
-      this.load.spritesheet(
-        key,
-        `/sprites/${key}.png`,
-        {
-          frameWidth: frameSize,
-          frameHeight: frameSize,
-          endFrame: 9,
-        }
-      );
-    });
+// Les character_XX restent les sprites des PNJ.
+// 10 frames de 16x16.
+SPRITES.forEach((key) => {
+  this.load.spritesheet(
+    key,
+    `/sprites/${key}.png`,
+    {
+      frameWidth: 16,
+      frameHeight: 16,
+      endFrame: 9,
+    }
+  );
+});
 
-    // Hommes-poissons de Cocoyasi
-    // Ce sont des images statiques : une seule image, pas une spritesheet.
-    FISHMAN_SPRITES.forEach((key) => {
-      this.load.image(
-        key,
-        `/sprites/${key}.png`
-      );
-    });
+// ===============================
+// PERSONNAGES PRINCIPAUX
+// ===============================
 
-    // Arlong est également un personnage statique.
-    this.load.image("arlong", "/sprites/arlong.png");
-    this.load.image("colonel_morgan", "/sprites/colonel_morgan.png");
+// Luffy, Zoro, Nami, Usopp et Sanji
+// sont des spritesheets de 10 frames en 64x64.
+const MAIN_CHARACTER_SPRITES = [
+  {
+    key: "luffy",
+    file: "luffy.PNG",
+  },
+  {
+    key: "zoro",
+    file: "zoro.png",
+  },
+  {
+    key: "nami",
+    file: "nami.png",
+  },
+  {
+    key: "usopp",
+    file: "usopp.PNG",
+  },
+  {
+    key: "sanji",
+    file: "sanji.PNG",
+  },
+];
+
+MAIN_CHARACTER_SPRITES.forEach(({ key, file }) => {
+  this.load.spritesheet(
+    key,
+    `/sprites/${file}`,
+    {
+      frameWidth: 64,
+      frameHeight: 64,
+      endFrame: 9,
+    }
+  );
+});
+
+// ===============================
+// HOMMES-POISSONS
+// ===============================
+
+FISHMAN_SPRITES.forEach((key) => {
+  this.load.image(
+    key,
+    `/sprites/${key}.png`
+  );
+});
+
+// ===============================
+// BOSS
+// ===============================
+
+this.load.image(
+  "arlong",
+  "/sprites/arlong.png"
+);
+
+this.load.image(
+  "colonel_morgan",
+  "/sprites/colonel_morgan.png"
+);
   }
-
   create() {
     this.makeWarpMarker();
     this.createCharacterAnimations();
@@ -120,42 +170,49 @@ export default class BootScene extends Phaser.Scene {
   }
 
   createCharacterAnimations() {
-    // Organisation des sprites :
-    // 0 = face / bas statique
-    // 1 = dos / haut statique
-    // 2 = côté statique
-    // 3 = inutilisé
-    // 4-5 = marche bas
-    // 6-7 = marche haut
-    // 8-9 = marche côté
+  const createAnimationsForSprite = (key) => {
+    const animations = [
+      {
+        suffix: "down",
+        frames: [4, 5],
+      },
+      {
+        suffix: "up",
+        frames: [6, 7],
+      },
+      {
+        suffix: "side",
+        frames: [8, 9],
+      },
+    ];
 
-    SPRITES.forEach((key) => {
-      const animations = [
-        {
-          suffix: "down",
-          frames: [4, 5],
-        },
-        {
-          suffix: "up",
-          frames: [6, 7],
-        },
-        {
-          suffix: "side",
-          frames: [8, 9],
-        },
-      ];
-
-      animations.forEach(({ suffix, frames }) => {
-        this.anims.create({
-          key: `${key}-${suffix}`,
-          frames: frames.map((frame) => ({
-            key,
-            frame,
-          })),
-          frameRate: 8,
-          repeat: -1,
-        });
+    animations.forEach(({ suffix, frames }) => {
+      this.anims.create({
+        key: `${key}-${suffix}`,
+        frames: frames.map((frame) => ({
+          key,
+          frame,
+        })),
+        frameRate: 8,
+        repeat: -1,
       });
     });
-  }
+  };
+
+  // PNJ
+  SPRITES.forEach((key) => {
+    createAnimationsForSprite(key);
+  });
+
+  // Personnages principaux
+  [
+    "luffy",
+    "zoro",
+    "nami",
+    "usopp",
+    "sanji",
+  ].forEach((key) => {
+    createAnimationsForSprite(key);
+  });
+}
 }
