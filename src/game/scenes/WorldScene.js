@@ -1821,6 +1821,7 @@ getBossPosition(boss) {
       mode,
       characterId,
       enemyLevel,
+      recruitedLevel,
       boss,
       bossId,
       bossTeam,
