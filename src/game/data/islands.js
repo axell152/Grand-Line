@@ -217,7 +217,7 @@ export const ISLANDS = {
     buildings: [{ x: 10, y: 23, key: "taverne" }],
     recruitNpcs: [{ x: 32, y: 10, characterId: "tireur", level: 22 }],
     npcs: [
-      { id: "syrup-maire", x: 16, y: 12, name: "Habitant de Syrup Village", dialogue: ["Des pirates rivaux rôdent autour du village.", "Un tireur d'élite du coin rêve de prendre la mer."] },
+      { id: "syrup-maire", x: 16, y: 12, name: "Maire de Syrup Village", dialogue: ["Des pirates rivaux rôdent autour du village.", "Un tireur d'élite du coin rêve de prendre la mer."] },
       { id: "syrup-garde", x: 46, y: 22, name: "Garde du village", dialogue: ["La vieille forêt à l'est est infestée de pirates.", "Le chef ennemi garde la sortie de l'île."] },
     ],
     chests: [
@@ -239,8 +239,8 @@ export const ISLANDS = {
       { x1: 46, y1: 5, x2: 60, y2: 28, level: 9, encounterRate: 0.055, enemyPool: ["chasseurDePrimes", "pirateRival"] },
     ],
     warps: [
-      { x: 2, y: 29, toIsland: "ile-cocoyasi", toX: 61, toY: 16 },
-      { x: 63, y: 29, toIsland: "ile-baratie", toX: 3, toY: 16, lockedBy: "boss_ile-syrup" },
+      { x: 1, y: 29, toIsland: "ile-cocoyasi", toX: 61, toY: 16 },
+      { x: 63, y: 29, toIsland: "ile-baratie", toX: 3, toY: 29, lockedBy: "boss_ile-syrup" },
     ],
   },
 
@@ -279,7 +279,7 @@ export const ISLANDS = {
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
-      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     ],
@@ -310,7 +310,7 @@ export const ISLANDS = {
       { x1: 46, y1: 5, x2: 60, y2: 28, level: 12, encounterRate: 0.055, enemyPool: ["officierMarine", "pirateRival"] },
     ],
     warps: [
-      { x: 2, y: 16, toIsland: "ile-syrup", toX: 61, toY: 16 },
+      { x: 2, y: 29, toIsland: "ile-syrup", toX: 61, toY: 16 },
       { x: 63, y: 16, toIsland: "ile-drum", toX: 3, toY: 16, lockedBy: "boss_ile-baratie" },
     ],
   },
