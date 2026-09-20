@@ -169,7 +169,7 @@ export const ISLANDS = {
 
   warps: [
     { x: 1, y: 16, toIsland: "ile-depart", toX: 2, toY: 29, },
-    { x: 63, y: 16, toIsland: "ile-hiver", toX: 3, toY: 16, lockedBy: "boss_ile-brume", },
+    { x: 63, y: 16, toIsland: "ile-hiver", toX: 2, toY: 29, lockedBy: "boss_ile-brume", },
   ],
 },
 
@@ -208,7 +208,7 @@ export const ISLANDS = {
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
-      "sdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddss",
+      "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     ],
@@ -239,8 +239,8 @@ export const ISLANDS = {
       { x1: 46, y1: 5, x2: 60, y2: 28, level: 9, encounterRate: 0.055, enemyPool: ["chasseurDePrimes", "pirateRival"] },
     ],
     warps: [
-      { x: 2, y: 16, toIsland: "ile-cocoyasi", toX: 61, toY: 16 },
-      { x: 63, y: 16, toIsland: "ile-baratie", toX: 3, toY: 16, lockedBy: "boss_ile-syrup" },
+      { x: 2, y: 29, toIsland: "ile-cocoyasi", toX: 61, toY: 16 },
+      { x: 63, y: 29, toIsland: "ile-baratie", toX: 3, toY: 16, lockedBy: "boss_ile-syrup" },
     ],
   },
 
