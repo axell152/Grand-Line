@@ -296,7 +296,7 @@ colonelMorgan: {
   type: "tranchant",
   maxHp: 180,
   atk: 32,
-  def: 24,
+  def: 15,
   spd: 18,
   moves: ["taillade"],
 },   
