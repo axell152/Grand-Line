@@ -82,8 +82,10 @@ SPRITES.forEach((key) => {
 // PERSONNAGES PRINCIPAUX
 // ===============================
 
-// Luffy, Zoro, Nami, Usopp et Sanji
-// sont des spritesheets de 10 frames en 64x64.
+// Luffy, Zoro, Nami, Usopp et Sanji sont des spritesheets de 10 frames en 64x64.
+// Ce sont les visuels utilisés une fois un personnage recruté (combat, équipage).
+// Sur la carte, avant recrutement, ces mêmes personnages apparaissent en PNJ
+// génériques (character_XX) — voir CHARACTER_SPRITES dans WorldScene.js.
 const MAIN_CHARACTER_SPRITES = [
   {
     key: "luffy",
