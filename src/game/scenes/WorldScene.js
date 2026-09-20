@@ -13,12 +13,12 @@ const DIRECTIONS = {
 };
 
 const CHARACTER_SPRITES = {
-  captain: "character_01",
-  bretteur: "character_03",
-  navigatrice: "character_04",
-  tireur: "character_05",
+  captain: "luffy",
+  bretteur: "zoro",
+  navigatrice: "nami",
+  tireur: "usopp",
+  cuisinier: "sanji",
   medecin: "character_06",
-  cuisinier: "character_08",
   charpentier: "character_07",
   musicien: "character_14",
   archeologue: "character_02",
@@ -32,6 +32,40 @@ const CHARACTER_SPRITES = {
 
 function spriteKey(characterId) {
   return CHARACTER_SPRITES[characterId] || "character_01";
+}
+
+// Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
+// grandes que les PNJ génériques character_XX, en 16x16) : on compense leur échelle.
+const BIG_SPRITE_KEYS = new Set(["luffy", "zoro", "nami", "usopp", "sanji"]);
+function scaleForSpriteKey(key) {
+  return BIG_SPRITE_KEYS.has(key) ? 0.8 : 2.6;
+}
+function npcScaleFor(characterId) {
+  return scaleForSpriteKey(spriteKey(characterId));
+}
+
+// PNJ de dialogue sans characterId (simples habitants) : on leur choisit un
+// sprite générique stable (toujours le même pour un même PNJ) parmi un petit
+// pool de villageois, plutôt que de tomber par défaut sur le capitaine.
+const GENERIC_VILLAGER_SPRITES = [
+  "character_01",
+  "character_03",
+  "character_04",
+  "character_05",
+  "character_08",
+  "character_11",
+];
+function genericVillagerSprite(seed) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  return GENERIC_VILLAGER_SPRITES[hash % GENERIC_VILLAGER_SPRITES.length];
+}
+function talkNpcSpriteKey(npc) {
+  return npc.characterId
+    ? spriteKey(npc.characterId)
+    : genericVillagerSprite(npc.id || `${npc.x},${npc.y}`);
 }
 
 function formatMoveStats(moveKey) {
@@ -848,14 +882,15 @@ export default class WorldScene extends Phaser.Scene {
     // PNJ de dialogue.
     this.talkNpcSprites = {};
     (island.npcs || []).forEach((npc) => {
+      const key = talkNpcSpriteKey(npc);
       const sprite = this.add.sprite(
         npc.x * TILE_SIZE + TILE_SIZE / 2,
         npc.y * TILE_SIZE + TILE_SIZE / 2,
-        spriteKey(npc.characterId || "captain"),
+        key,
         0
       );
 
-      sprite.setScale((npc.characterId || "captain") === "bretteur" ? 0.625 : 2.5);
+      sprite.setScale(scaleForSpriteKey(key));
       sprite.setOrigin(0.5, 0.78);
       sprite.setDepth(npc.y + 0.5);
       this.talkNpcSprites[`${npc.x},${npc.y}`] = npc;
@@ -929,7 +964,7 @@ if (island.boss) {
           0
         );
 
-        sprite.setScale(npc.characterId === "bretteur" || npc.characterId === "navigatrice" ? 0.625 : 2.5);
+        sprite.setScale(npcScaleFor(npc.characterId));
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;
@@ -944,7 +979,7 @@ if (island.boss) {
       0
     );
 
-    this.player.setScale(2.5);
+    this.player.setScale(npcScaleFor("captain"));
     this.player.setOrigin(0.5, 0.78);
     this.player.setDepth(999);
     this.playerDirection = "down";
@@ -1100,7 +1135,7 @@ showVictoryReward(winner, xp, berrys) {
   exportSaveFile() {
     if (!this.state) return;
 
-    // Le fichier est créé immédiatement, même si Vercel Blob est hors quota.
+    // Le fichier JSON est créé immédiatement, en plus de la sauvegarde locale automatique.
     downloadSaveFile(this.state);
     saveGame(this.state);
 

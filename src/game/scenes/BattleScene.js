@@ -6,12 +6,12 @@ import { createBattler, getTurnOrder, applyMove, isDefeated, scaleEnemyForLevel 
 import { ISLANDS } from "@/game/data/islands";
 
 const CHARACTER_SPRITES = {
-  captain: "character_01",
-  bretteur: "character_03",
-  navigatrice: "character_04",
-  tireur: "character_05",
+  captain: "luffy",
+  bretteur: "zoro",
+  navigatrice: "nami",
+  tireur: "usopp",
   medecin: "character_06",
-  cuisinier: "character_08",
+  cuisinier: "sanji",
   charpentier: "character_07",
   musicien: "character_14",
   archeologue: "character_02",
@@ -35,6 +35,11 @@ const CHARACTER_SPRITES = {
 };
 
 const spriteKey = (id) => CHARACTER_SPRITES[id] || "character_01";
+
+// Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
+// grandes que les PNJ génériques character_XX, en 16x16) : on compense leur échelle.
+const BIG_SPRITE_KEYS = new Set(["luffy", "zoro", "nami", "usopp", "sanji"]);
+const isBigSprite = (id) => BIG_SPRITE_KEYS.has(spriteKey(id));
 
 export default class BattleScene extends Phaser.Scene {
   constructor() { super("Battle"); }
@@ -68,8 +73,8 @@ export default class BattleScene extends Phaser.Scene {
       level,
       maxHp: d.playerMaxHp ?? (PLAYER_CHARACTER.maxHp + (level - 1) * 8),
       atk: d.playerAtk ?? (PLAYER_CHARACTER.atk + (level - 1) * 2),
-      def: d.playerDef ?? (PLAYER_CHARACTER.def + (level - 1)),
-      spd: d.playerSpd ?? (PLAYER_CHARACTER.spd + (level - 1)),
+      def: d.playerDef ?? (PLAYER_CHARACTER.def + (level - 1) * 1),
+      spd: d.playerSpd ?? (PLAYER_CHARACTER.spd + (level - 1) * 1),
       moves: d.playerMoves?.length ? d.playerMoves : PLAYER_CHARACTER.moves,
     });
     captain.name = d.playerName || captain.name || "Capitaine";
@@ -112,8 +117,8 @@ export default class BattleScene extends Phaser.Scene {
         level: lvl,
         maxHp: saved.maxHp || base.maxHp + (lvl - 1) * 8,
         atk: saved.atk ?? base.atk + (lvl - 1) * 2,
-        def: saved.def ?? base.def + (lvl - 1),
-        spd: saved.spd ?? base.spd + (lvl - 1),
+        def: saved.def ?? base.def + (lvl - 1) * 1,
+        spd: saved.spd ?? base.spd + (lvl - 1) * 1,
         moves: saved.moves?.length ? saved.moves : base.moves,
       });
       member.crewId = entry;
@@ -156,11 +161,7 @@ export default class BattleScene extends Phaser.Scene {
   }
 
 getEnemyScale(enemyId, sprite) {
-  if (
-    spriteKey(enemyId) === "character_03" ||
-    spriteKey(enemyId) === "character_04" ||
-    enemyId === "arlong"
-  ) {
+  if (isBigSprite(enemyId) || enemyId === "arlong") {
     return 1.75;
   }
 
@@ -223,11 +224,7 @@ getEnemyScale(enemyId, sprite) {
   ).setOrigin(0, 0.5);
 
   // JOUEUR
-  const playerScale =
-    spriteKey(this.player.crewId) === "character_03" ||
-    spriteKey(this.player.crewId) === "character_04"
-      ? 1.75
-      : 7;
+  const playerScale = isBigSprite(this.player.crewId) ? 1.75 : 7;
 
   this.playerSprite = this.add.sprite(
     240,
@@ -415,12 +412,7 @@ getEnemyScale(enemyId, sprite) {
     const old = this.player;
     this.player = newMember;
     this.playerSprite.setTexture(spriteKey(newMember.crewId), 1);
-    this.playerSprite.setScale(
-      spriteKey(newMember.crewId) === "character_03" ||
-      spriteKey(newMember.crewId) === "character_04"
-      ? 1.75
-      : 7
-    );
+    this.playerSprite.setScale(isBigSprite(newMember.crewId) ? 1.75 : 7);
     this.setLog(`${old.name} ${old.hp <= 0 ? "est K.O." : "revient à bord"} ! ${newMember.name} prend sa place.`);
     this.refreshBars();
 

@@ -3,7 +3,12 @@ import { PLAYER_CHARACTER, CHARACTERS } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
 import { saveGame } from "@/game/systems/SaveManager";
 
-const CHARACTER_SPRITES = { captain: "character_01", bretteur: "character_03", navigatrice: "character_04", tireur: "character_05", medecin: "character_06", cuisinier: "character_08", charpentier: "character_07", musicien: "character_14", archeologue: "character_02" };
+const CHARACTER_SPRITES = { captain: "luffy", bretteur: "zoro", navigatrice: "nami", tireur: "usopp", medecin: "character_06", cuisinier: "sanji", charpentier: "character_07", musicien: "character_14", archeologue: "character_02" };
+
+// Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
+// grandes que les PNJ génériques character_XX, en 16x16) : on compense leur échelle.
+const BIG_SPRITE_KEYS = new Set(["luffy", "zoro", "nami", "usopp", "sanji"]);
+const isBigSprite = (entry) => BIG_SPRITE_KEYS.has(CHARACTER_SPRITES[entry] || "character_01");
 
 export default class CrewScene extends Phaser.Scene {
   constructor() {
@@ -153,7 +158,7 @@ refreshCrewDisplay() {
       const y = 120 + index * 60;
       const isSelected = entry === this.selected;
 
-      const sprite = this.add.sprite(110, y + 12, CHARACTER_SPRITES[entry] || "character_01", 0).setScale(entry === "bretteur" ? 0.525 : 2.1);
+      const sprite = this.add.sprite(110, y + 12, CHARACTER_SPRITES[entry] || "character_01", 0).setScale(isBigSprite(entry) ? 0.525 : 2.1);
       this.listGroup.add(sprite);
 
       const nameTxt = this.add.text(140, y, `${index + 1}. ${data.name}`, {
@@ -205,7 +210,7 @@ refreshCrewDisplay() {
     const data = this.getMemberData(entry);
     const { hp, maxHp } = this.getMemberHp(entry);
 
-    const portrait = this.add.sprite(820, 215, CHARACTER_SPRITES[entry] || "character_01", 0).setScale(entry === "bretteur" ? 1.25 : 5);
+    const portrait = this.add.sprite(820, 215, CHARACTER_SPRITES[entry] || "character_01", 0).setScale(isBigSprite(entry) ? 1.25 : 5);
     this.detailGroup.add(portrait);
 
     const title = this.add.text(570, 110, `${data.name}`, {
@@ -238,7 +243,7 @@ refreshCrewDisplay() {
       fontFamily: "monospace", fontSize: "18px", color: "#9fd18f",
     }));
     y += 30;
-    this.detailGroup.add(this.add.text(570, y, `ATQ ${this.gameState.atk}   DEF ${this.gameState.def}   VIT ${this.gameState.spd}`, {
+    this.detailGroup.add(this.add.text(570, y, `ATQ ${data.atk}   DEF ${data.def}   VIT ${data.spd}`, {
       fontFamily: "monospace", fontSize: "16px", color: "#ffffff",
     }));
     y += 40;
