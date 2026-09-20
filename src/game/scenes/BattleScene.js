@@ -857,6 +857,7 @@ getEnemyScale(enemyId, sprite) {
         bossComplete: completeBossVictory,
         bossName: this.battleData.bossName,
         recruitedId: this.battleMode === "recruit" ? this.targetCharacterId : undefined,
+        recruitedLevel: this.battleMode === "recruit" ? this.battleData.recruitedLevel : undefined,
       }));
     } else {
       this.setLog(`💀 Toute l'équipe est K.O. !\nRetour à la taverne.\n\n▶ CLIQUEZ OU APPUYEZ SUR UNE TOUCHE POUR CONTINUER`);
