@@ -57,7 +57,6 @@ export const ISLANDS = {
     buildings: [{ x: 8, y: 23, key: "taverne" }],
     recruitNpcs: [{ x: 22, y: 5, characterId: "bretteur", level: 10 }],
     npcs: [
-      { id: "citoyen-shells", x: 15, y: 23, name: "Habitant de Shells Town", dialogue: ["La Marine contrôle toute la ville.", "Un chasseur de pirates est retenu prisonnier dans la base."] },
       { id: "marin-shells", x: 34, y: 21, name: "Marine", dialogue: ["Circulez ! La base de la Marine est interdite aux civils.", "Le Colonel Morgan ne tolère aucune intrusion."] },
       { id: "prisonnier-shells", x: 18, y: 23, name: "Prisonnier", dialogue: ["Le sabreur enfermé dans la prison s'appelle Roronoa Zoro.", "Si tu veux l'approcher, commence par vaincre la Marine."] },
       { id: "gardien-port-shells", x: 17, y: 29, name: "Garde du port", dialogue: ["Le départ vers Cocoyasi Village est interdit pour le moment.", "Bats le Colonel Morgan et la route sera ouverte."] },
