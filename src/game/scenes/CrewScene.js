@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { PLAYER_CHARACTER, CHARACTERS } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
+import { ITEMS, STARTING_ITEMS } from "@/game/data/items";
 import { saveGame } from "@/game/systems/SaveManager";
 
 const CHARACTER_SPRITES = { captain: "luffy", bretteur: "zoro", navigatrice: "nami", tireur: "usopp", medecin: "character_06", cuisinier: "sanji", charpentier: "character_07", musicien: "character_14", archeologue: "character_02" };
@@ -40,9 +41,9 @@ export default class CrewScene extends Phaser.Scene {
     // Séparation visuelle entre la liste (gauche) et le détail (droite)
     this.add.rectangle(534, 400, 2, 620, 0xead9b8, 0.4);
 
-    this.add.text(512, 740, "[ ▲/▼ ] réordonner   [ T ] ou [ Échap ] reprendre la mer", {
+    this.add.text(512, 740, "[ ▲/▼ ] réordonner   [ clic ] utiliser un objet   [ T ] ou [ Échap ] reprendre la mer", {
       fontFamily: "monospace",
-      fontSize: "15px",
+      fontSize: "14px",
       color: "#ead9b8",
     }).setOrigin(0.5);
 
@@ -275,7 +276,85 @@ refreshCrewDisplay() {
       this.detailGroup.add(this.add.text(590, y, "Aucune attaque connue.", {
         fontFamily: "monospace", fontSize: "14px", color: "#7f8c8d",
       }));
+      y += 30;
+    } else {
+      y += 6;
     }
+
+    this.detailGroup.add(this.add.text(570, y, "Objets :", {
+      fontFamily: "monospace", fontSize: "18px", color: "#d4a24c",
+    }));
+    y += 30;
+
+    const items = this.gameState.items || STARTING_ITEMS;
+    const usableItemIds = Object.keys(ITEMS).filter((id) => ITEMS[id].heal);
+
+    if (hp >= maxHp) {
+      this.detailGroup.add(this.add.text(590, y, "PV déjà au maximum.", {
+        fontFamily: "monospace", fontSize: "14px", color: "#7f8c8d",
+      }));
+      y += 26;
+    }
+
+    usableItemIds.forEach((itemId) => {
+      const item = ITEMS[itemId];
+      const count = items[itemId] || 0;
+      const usable = count > 0 && hp < maxHp;
+
+      const label = this.add.text(
+        590,
+        y,
+        `${usable ? "▶ " : "   "}${item.name} (x${count}) — Soigne ${item.heal} PV`,
+        {
+          fontFamily: "monospace",
+          fontSize: "15px",
+          color: usable ? "#9fd18f" : "#7f8c8d",
+        }
+      );
+
+      if (usable) {
+        label
+          .setInteractive({ useHandCursor: true })
+          .on("pointerdown", () => this.useItem(itemId))
+          .on("pointerover", () => label.setColor("#ffffff"))
+          .on("pointerout", () => label.setColor("#9fd18f"));
+      }
+
+      this.detailGroup.add(label);
+      y += 26;
+    });
+  }
+
+  useItem(itemId) {
+    const entry = this.selected;
+    const item = ITEMS[itemId];
+    if (!item || !item.heal) return;
+
+    this.gameState = this.game.registry.get("gameState") || this.gameState;
+    this.gameState.items ||= { ...STARTING_ITEMS };
+
+    const count = this.gameState.items[itemId] || 0;
+    if (count <= 0) return;
+
+    const { hp, maxHp } = this.getMemberHp(entry);
+    if (hp >= maxHp) return;
+
+    const newHp = Math.min(maxHp, hp + item.heal);
+
+    if (entry === "captain") {
+      this.gameState.hp = newHp;
+    } else {
+      this.gameState.crewDetails ||= {};
+      this.gameState.crewDetails[entry] ||= {};
+      this.gameState.crewDetails[entry].hp = newHp;
+    }
+
+    this.gameState.items[itemId] = count - 1;
+
+    this.game.registry.set("gameState", this.gameState);
+    saveGame(this.gameState);
+
+    this.refreshCrewDisplay();
   }
 
   moveEntry(from, to) {
