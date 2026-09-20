@@ -5,7 +5,7 @@ export const PLAYER_CHARACTER = {
   color: 0xd4a24c,
   type: "tranchant",
   maxHp: 90,
-  atk: 14,
+  atk: 9999,
   def: 10,
   spd: 12,
   moves: ["taillade", "cravacheDeJambe", "hakiArmement"],
