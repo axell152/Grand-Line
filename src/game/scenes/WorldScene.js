@@ -39,7 +39,7 @@ function spriteKey(characterId) {
 // échelle pour que tout le monde ait la même taille à l'écran.
 const BIG_SPRITE_KEYS = new Set(["luffy", "zoro", "nami", "usopp", "sanji"]);
 function npcScaleFor(characterId) {
-  return BIG_SPRITE_KEYS.has(spriteKey(characterId)) ? 0.625 : 2.5;
+  return BIG_SPRITE_KEYS.has(spriteKey(characterId)) ? 0.8 : 3.2;
 }
 
 function formatMoveStats(moveKey) {
