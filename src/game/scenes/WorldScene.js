@@ -43,7 +43,7 @@ function spriteKey(characterId) {
 // jouables utilisent désormais des sprites génériques character_XX (16x16).
 const BIG_SPRITE_KEYS = new Set(["luffy"]);
 function scaleForSpriteKey(key) {
-  return BIG_SPRITE_KEYS.has(key) ? 0.8 : 3.2;
+  return BIG_SPRITE_KEYS.has(key) ? 0.8 : 2.6;
 }
 function npcScaleFor(characterId) {
   return scaleForSpriteKey(spriteKey(characterId));
