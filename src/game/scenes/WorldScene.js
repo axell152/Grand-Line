@@ -14,11 +14,15 @@ const DIRECTIONS = {
 
 const CHARACTER_SPRITES = {
   captain: "luffy",
-  bretteur: "zoro",
-  navigatrice: "nami",
-  tireur: "usopp",
+  // Zoro, Nami, Usopp et Sanji apparaissent en PNJ génériques sur la carte,
+  // avant recrutement. Une fois recrutés, ils prennent leur vrai visuel
+  // (zoro.png, nami.png, usopp.PNG, sanji.PNG) en combat et dans l'équipage
+  // — voir CHARACTER_SPRITES dans BattleScene.js / CrewScene.js.
+  bretteur: "character_03",
+  navigatrice: "character_04",
+  tireur: "character_05",
   medecin: "character_06",
-  cuisinier: "sanji",
+  cuisinier: "character_08",
   charpentier: "character_07",
   musicien: "character_14",
   archeologue: "character_02",
@@ -34,12 +38,39 @@ function spriteKey(characterId) {
   return CHARACTER_SPRITES[characterId] || "character_01";
 }
 
-// Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
-// grandes que les PNJ génériques character_XX, en 16x16). On compense donc leur
-// échelle pour que tout le monde ait la même taille à l'écran.
-const BIG_SPRITE_KEYS = new Set(["luffy", "zoro", "nami", "usopp", "sanji"]);
+// Luffy est en feuille de sprites 64x64 (4x plus grande que les PNJ génériques
+// character_XX, en 16x16) : on compense son échelle. Tous les autres personnages
+// jouables utilisent désormais des sprites génériques character_XX (16x16).
+const BIG_SPRITE_KEYS = new Set(["luffy"]);
+function scaleForSpriteKey(key) {
+  return BIG_SPRITE_KEYS.has(key) ? 0.8 : 3.2;
+}
 function npcScaleFor(characterId) {
-  return BIG_SPRITE_KEYS.has(spriteKey(characterId)) ? 0.8 : 3.2;
+  return scaleForSpriteKey(spriteKey(characterId));
+}
+
+// PNJ de dialogue sans characterId (simples habitants) : on leur choisit un
+// sprite générique stable (toujours le même pour un même PNJ) parmi un petit
+// pool de villageois, plutôt que de tomber par défaut sur le capitaine.
+const GENERIC_VILLAGER_SPRITES = [
+  "character_01",
+  "character_03",
+  "character_04",
+  "character_05",
+  "character_08",
+  "character_11",
+];
+function genericVillagerSprite(seed) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  return GENERIC_VILLAGER_SPRITES[hash % GENERIC_VILLAGER_SPRITES.length];
+}
+function talkNpcSpriteKey(npc) {
+  return npc.characterId
+    ? spriteKey(npc.characterId)
+    : genericVillagerSprite(npc.id || `${npc.x},${npc.y}`);
 }
 
 function formatMoveStats(moveKey) {
@@ -856,14 +887,15 @@ export default class WorldScene extends Phaser.Scene {
     // PNJ de dialogue.
     this.talkNpcSprites = {};
     (island.npcs || []).forEach((npc) => {
+      const key = talkNpcSpriteKey(npc);
       const sprite = this.add.sprite(
         npc.x * TILE_SIZE + TILE_SIZE / 2,
         npc.y * TILE_SIZE + TILE_SIZE / 2,
-        spriteKey(npc.characterId || "captain"),
+        key,
         0
       );
 
-      sprite.setScale(npcScaleFor(npc.characterId || "captain"));
+      sprite.setScale(scaleForSpriteKey(key));
       sprite.setOrigin(0.5, 0.78);
       sprite.setDepth(npc.y + 0.5);
       this.talkNpcSprites[`${npc.x},${npc.y}`] = npc;
