@@ -1478,16 +1478,15 @@ if (
     const SHOP_ITEM_IDS = ["potion", "superPotion"];
     this.state.items ||= { ...STARTING_ITEMS };
 
-    this.shopSelection = 0;
     this.shopGroup = this.add.group();
 
     const width = this.scale.width;
     const height = this.scale.height;
-    const rowHeight = 34;
+    const rowHeight = 40;
     const boxHeight = 150 + SHOP_ITEM_IDS.length * rowHeight;
     const top = height / 2 - boxHeight / 2;
 
-    const bg = this.add.rectangle(width / 2, height / 2, 440, boxHeight, 0x071a2d, 0.97)
+    const bg = this.add.rectangle(width / 2, height / 2, 460, boxHeight, 0x071a2d, 0.97)
       .setStrokeStyle(3, 0xe8c96b).setScrollFactor(0).setDepth(12000);
     this.shopGroup.add(bg);
 
@@ -1499,6 +1498,14 @@ if (
       align: "center",
     }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
     this.shopGroup.add(title);
+
+    const closeBtn = this.add.text(width / 2 + 208, top + 18, "✕", {
+      fontFamily: "monospace",
+      fontSize: "20px",
+      color: "#ead9b8",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12002)
+      .setInteractive({ useHandCursor: true });
+    this.shopGroup.add(closeBtn);
 
     const berrysText = this.add.text(width / 2, top + 62, "", {
       fontFamily: "monospace",
@@ -1519,16 +1526,21 @@ if (
       return text;
     });
 
-    const quitIndex = SHOP_ITEM_IDS.length;
-    const quitText = this.add.text(width / 2, top + 100 + quitIndex * rowHeight, "", {
-      fontFamily: "monospace",
-      fontSize: "15px",
-      color: "#ffffff",
-      align: "center",
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+    const quitText = this.add.text(
+      width / 2,
+      top + 100 + SHOP_ITEM_IDS.length * rowHeight + 14,
+      "◀ FERMER LA BOUTIQUE",
+      {
+        fontFamily: "monospace",
+        fontSize: "15px",
+        color: "#ead9b8",
+        align: "center",
+      }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(12001)
+      .setInteractive({ useHandCursor: true });
     this.shopGroup.add(quitText);
 
-    const hint = this.add.text(width / 2, top + boxHeight - 22, "HAUT/BAS: choisir   E/ESPACE: acheter", {
+    const hint = this.add.text(width / 2, top + boxHeight - 20, "Clique sur un objet pour l'acheter", {
       fontFamily: "monospace",
       fontSize: "11px",
       color: "#aaaaaa",
@@ -1536,38 +1548,22 @@ if (
     }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
     this.shopGroup.add(hint);
 
-    const optionCount = SHOP_ITEM_IDS.length + 1;
-
     const render = () => {
       berrysText.setText(`💰 ${this.state.berrys} Berrys`);
 
       SHOP_ITEM_IDS.forEach((itemId, i) => {
         const item = ITEMS[itemId];
         const owned = this.state.items?.[itemId] || 0;
-        const selected = this.shopSelection === i;
+        const affordable = this.state.berrys >= item.price;
         rowTexts[i].setText(
-          `${selected ? "▶ " : "   "}${item.name.padEnd(14, " ")} ${String(item.price).padStart(4, " ")}💰  (x${owned})`
+          `${affordable ? "▶ " : "   "}${item.name.padEnd(14, " ")} ${String(item.price).padStart(4, " ")}💰  (x${owned})`
         );
-        rowTexts[i].setColor(selected ? "#f1c40f" : "#ffffff");
+        rowTexts[i].setColor(affordable ? "#9fd18f" : "#7f8c8d");
       });
-
-      quitText.setText(`${this.shopSelection === quitIndex ? "▶ " : "   "}QUITTER`);
-      quitText.setColor(this.shopSelection === quitIndex ? "#f1c40f" : "#ffffff");
     };
     render();
 
-    const move = (delta) => {
-      this.shopSelection = (this.shopSelection + delta + optionCount) % optionCount;
-      render();
-    };
-
-    const buy = () => {
-      if (this.shopSelection === quitIndex) {
-        closeShop();
-        return;
-      }
-
-      const itemId = SHOP_ITEM_IDS[this.shopSelection];
+    const buy = (itemId) => {
       const item = ITEMS[itemId];
 
       if (this.state.berrys < item.price) {
@@ -1583,30 +1579,28 @@ if (
       render();
     };
 
-    const upHandler = () => move(-1);
-    const downHandler = () => move(1);
+    SHOP_ITEM_IDS.forEach((itemId, i) => {
+      rowTexts[i]
+        .setInteractive({ useHandCursor: true })
+        .on("pointerdown", () => buy(itemId))
+        .on("pointerover", () => rowTexts[i].setColor("#ffffff"))
+        .on("pointerout", () => render());
+    });
 
     const closeShop = () => {
       this.shopGroup?.destroy(true);
       this.shopGroup = null;
-      this.input.keyboard?.off("keydown-UP", upHandler);
-      this.input.keyboard?.off("keydown-Z", upHandler);
-      this.input.keyboard?.off("keydown-DOWN", downHandler);
-      this.input.keyboard?.off("keydown-S", downHandler);
-      this.input.keyboard?.off("keydown-E", buy);
-      this.input.keyboard?.off("keydown-SPACE", buy);
-      this.input.keyboard?.off("keydown-Y", closeShop);
     };
 
-    this.time.delayedCall(150, () => {
-      this.input.keyboard?.on("keydown-UP", upHandler);
-      this.input.keyboard?.on("keydown-Z", upHandler);
-      this.input.keyboard?.on("keydown-DOWN", downHandler);
-      this.input.keyboard?.on("keydown-S", downHandler);
-      this.input.keyboard?.on("keydown-E", buy);
-      this.input.keyboard?.on("keydown-SPACE", buy);
-      this.input.keyboard?.on("keydown-Y", closeShop);
-    });
+    closeBtn
+      .on("pointerdown", closeShop)
+      .on("pointerover", () => closeBtn.setColor("#ffffff"))
+      .on("pointerout", () => closeBtn.setColor("#ead9b8"));
+
+    quitText
+      .on("pointerdown", closeShop)
+      .on("pointerover", () => quitText.setColor("#ffffff"))
+      .on("pointerout", () => quitText.setColor("#ead9b8"));
   }
 
   showNpcDialog(npc) {
