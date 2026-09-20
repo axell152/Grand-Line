@@ -14,15 +14,11 @@ const DIRECTIONS = {
 
 const CHARACTER_SPRITES = {
   captain: "luffy",
-  // Zoro, Nami, Usopp et Sanji apparaissent en PNJ génériques sur la carte,
-  // avant recrutement. Une fois recrutés, ils prennent leur vrai visuel
-  // (zoro.png, nami.png, usopp.PNG, sanji.PNG) en combat et dans l'équipage
-  // — voir CHARACTER_SPRITES dans BattleScene.js / CrewScene.js.
-  bretteur: "character_03",
-  navigatrice: "character_04",
-  tireur: "character_05",
+  bretteur: "zoro",
+  navigatrice: "nami",
+  tireur: "usopp",
+  cuisinier: "sanji",
   medecin: "character_06",
-  cuisinier: "character_08",
   charpentier: "character_07",
   musicien: "character_14",
   archeologue: "character_02",
@@ -38,10 +34,9 @@ function spriteKey(characterId) {
   return CHARACTER_SPRITES[characterId] || "character_01";
 }
 
-// Luffy est en feuille de sprites 64x64 (4x plus grande que les PNJ génériques
-// character_XX, en 16x16) : on compense son échelle. Tous les autres personnages
-// jouables utilisent désormais des sprites génériques character_XX (16x16).
-const BIG_SPRITE_KEYS = new Set(["luffy"]);
+// Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
+// grandes que les PNJ génériques character_XX, en 16x16) : on compense leur échelle.
+const BIG_SPRITE_KEYS = new Set(["luffy", "zoro", "nami", "usopp", "sanji"]);
 function scaleForSpriteKey(key) {
   return BIG_SPRITE_KEYS.has(key) ? 0.8 : 2.6;
 }
