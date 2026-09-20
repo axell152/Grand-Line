@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { ISLANDS, STARTING_ISLAND, TILE_SIZE } from "@/game/data/islands";
 import { CHARACTERS, ENEMY_CHARACTERS, PLAYER_CHARACTER } from "@/game/data/characters";
 import { MOVES } from "@/game/data/moves";
-import { STARTING_ITEMS } from "@/game/data/items";
+import { ITEMS, STARTING_ITEMS } from "@/game/data/items";
 import { saveGame, loadGame, downloadSaveFile } from "@/game/systems/SaveManager";
 
 const DIRECTIONS = {
@@ -112,6 +112,7 @@ export default class WorldScene extends Phaser.Scene {
     this.input.keyboard.on("keydown-SPACE", () => this.interact());
 
     this.input.keyboard.on("keydown-T", () => {
+  if (this.messageGroup || this.dialogGroup || this.shopGroup) return;
   // Toujours transmettre l'état actuellement sauvegardé dans le registry
   const currentState =
     this.game.registry.get("gameState") || this.state;
@@ -127,7 +128,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // Carte du monde : Y ouvre la carte sans quitter la partie.
     this.input.keyboard.on("keydown-Y", () => {
-      if (this.messageGroup || this.dialogGroup || this.learningQueue?.length) return;
+      if (this.messageGroup || this.dialogGroup || this.shopGroup || this.learningQueue?.length) return;
       if (this.scene.isActive("Map")) return;
       this.scene.launch("Map", { state: this.state });
       this.scene.pause();
@@ -1227,7 +1228,7 @@ showVictoryReward(winner, xp, berrys) {
 }
 
   update() {
-    if (this.isMoving || this.learningObjects.length) return;
+    if (this.isMoving || this.learningObjects.length || this.messageGroup || this.dialogGroup || this.shopGroup) return;
 
     let dir = null;
     if (this.cursors.left.isDown || this.wasd.left.isDown) dir = "left";
@@ -1471,6 +1472,143 @@ if (
     });
   }
 
+  openShop() {
+    if (this.shopGroup || this.messageGroup || this.dialogGroup) return;
+
+    const SHOP_ITEM_IDS = ["potion", "superPotion"];
+    this.state.items ||= { ...STARTING_ITEMS };
+
+    this.shopSelection = 0;
+    this.shopGroup = this.add.group();
+
+    const width = this.scale.width;
+    const height = this.scale.height;
+    const rowHeight = 34;
+    const boxHeight = 150 + SHOP_ITEM_IDS.length * rowHeight;
+    const top = height / 2 - boxHeight / 2;
+
+    const bg = this.add.rectangle(width / 2, height / 2, 440, boxHeight, 0x071a2d, 0.97)
+      .setStrokeStyle(3, 0xe8c96b).setScrollFactor(0).setDepth(12000);
+    this.shopGroup.add(bg);
+
+    const title = this.add.text(width / 2, top + 30, "TAVERNE — BOUTIQUE", {
+      fontFamily: "monospace",
+      fontSize: "20px",
+      fontStyle: "bold",
+      color: "#f1c40f",
+      align: "center",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+    this.shopGroup.add(title);
+
+    const berrysText = this.add.text(width / 2, top + 62, "", {
+      fontFamily: "monospace",
+      fontSize: "14px",
+      color: "#ffffff",
+      align: "center",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+    this.shopGroup.add(berrysText);
+
+    const rowTexts = SHOP_ITEM_IDS.map((itemId, i) => {
+      const text = this.add.text(width / 2, top + 100 + i * rowHeight, "", {
+        fontFamily: "monospace",
+        fontSize: "15px",
+        color: "#ffffff",
+        align: "center",
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+      this.shopGroup.add(text);
+      return text;
+    });
+
+    const quitIndex = SHOP_ITEM_IDS.length;
+    const quitText = this.add.text(width / 2, top + 100 + quitIndex * rowHeight, "", {
+      fontFamily: "monospace",
+      fontSize: "15px",
+      color: "#ffffff",
+      align: "center",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+    this.shopGroup.add(quitText);
+
+    const hint = this.add.text(width / 2, top + boxHeight - 22, "HAUT/BAS: choisir   E/ESPACE: acheter", {
+      fontFamily: "monospace",
+      fontSize: "11px",
+      color: "#aaaaaa",
+      align: "center",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+    this.shopGroup.add(hint);
+
+    const optionCount = SHOP_ITEM_IDS.length + 1;
+
+    const render = () => {
+      berrysText.setText(`💰 ${this.state.berrys} Berrys`);
+
+      SHOP_ITEM_IDS.forEach((itemId, i) => {
+        const item = ITEMS[itemId];
+        const owned = this.state.items?.[itemId] || 0;
+        const selected = this.shopSelection === i;
+        rowTexts[i].setText(
+          `${selected ? "▶ " : "   "}${item.name.padEnd(14, " ")} ${String(item.price).padStart(4, " ")}💰  (x${owned})`
+        );
+        rowTexts[i].setColor(selected ? "#f1c40f" : "#ffffff");
+      });
+
+      quitText.setText(`${this.shopSelection === quitIndex ? "▶ " : "   "}QUITTER`);
+      quitText.setColor(this.shopSelection === quitIndex ? "#f1c40f" : "#ffffff");
+    };
+    render();
+
+    const move = (delta) => {
+      this.shopSelection = (this.shopSelection + delta + optionCount) % optionCount;
+      render();
+    };
+
+    const buy = () => {
+      if (this.shopSelection === quitIndex) {
+        closeShop();
+        return;
+      }
+
+      const itemId = SHOP_ITEM_IDS[this.shopSelection];
+      const item = ITEMS[itemId];
+
+      if (this.state.berrys < item.price) {
+        berrysText.setColor("#e74c3c");
+        this.time.delayedCall(300, () => berrysText.setColor("#ffffff"));
+        return;
+      }
+
+      this.state.berrys -= item.price;
+      this.state.items[itemId] = (this.state.items[itemId] || 0) + 1;
+      this.persist();
+      this.updateHud();
+      render();
+    };
+
+    const upHandler = () => move(-1);
+    const downHandler = () => move(1);
+
+    const closeShop = () => {
+      this.shopGroup?.destroy(true);
+      this.shopGroup = null;
+      this.input.keyboard?.off("keydown-UP", upHandler);
+      this.input.keyboard?.off("keydown-Z", upHandler);
+      this.input.keyboard?.off("keydown-DOWN", downHandler);
+      this.input.keyboard?.off("keydown-S", downHandler);
+      this.input.keyboard?.off("keydown-E", buy);
+      this.input.keyboard?.off("keydown-SPACE", buy);
+      this.input.keyboard?.off("keydown-Y", closeShop);
+    };
+
+    this.time.delayedCall(150, () => {
+      this.input.keyboard?.on("keydown-UP", upHandler);
+      this.input.keyboard?.on("keydown-Z", upHandler);
+      this.input.keyboard?.on("keydown-DOWN", downHandler);
+      this.input.keyboard?.on("keydown-S", downHandler);
+      this.input.keyboard?.on("keydown-E", buy);
+      this.input.keyboard?.on("keydown-SPACE", buy);
+      this.input.keyboard?.on("keydown-Y", closeShop);
+    });
+  }
+
   showNpcDialog(npc) {
     if (this.dialogGroup) {
       this.dialogGroup.destroy(true);
@@ -1601,7 +1739,7 @@ if (
 }
 
   interact() {
-    if (this.isMoving || this.learningObjects.length || this.dialogGroup || this.messageGroup) return;
+    if (this.isMoving || this.learningObjects.length || this.dialogGroup || this.messageGroup || this.shopGroup) return;
 
     const { dx, dy } = DIRECTIONS[this.playerDirection] || DIRECTIONS.down;
     const x = this.state.x + dx;
@@ -1617,6 +1755,16 @@ if (
     const chest = this.chestSprites?.[key];
     if (chest) {
       this.openChest(key, chest);
+      return;
+    }
+
+    const tavern = this.island.tavern;
+    if (
+      tavern &&
+      ((tavern.x === this.state.x && tavern.y === this.state.y) ||
+        (tavern.x === x && tavern.y === y))
+    ) {
+      this.openShop();
       return;
     }
 

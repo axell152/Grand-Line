@@ -4,12 +4,14 @@ export const ITEMS = {
     name: "Potion",
     description: "Restaure 40 PV.",
     heal: 40,
+    price: 50,
   },
   superPotion: {
     id: "superPotion",
     name: "Super Potion",
     description: "Restaure 70 PV.",
     heal: 70,
+    price: 150,
   },
 };
 
