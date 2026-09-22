@@ -20,8 +20,8 @@ export const PLAYER_CHARACTER = {
 export const CHARACTERS = {
   bretteur: {
     id: "bretteur",
-    name: "Kaito le Bretteur",
-    title: "Épéiste errant",
+    name: "Roronoa Zoro",
+    title: "Chasseur de primes",
     color: 0x3f7f4f,
     type: "tranchant",
     maxHp: 110, atk: 22, def: 12, spd: 12,
@@ -35,8 +35,8 @@ export const CHARACTERS = {
   },
   navigatrice: {
     id: "navigatrice",
-    name: "Lina la Navigatrice",
-    title: "Voleuse repentie",
+    name: "Nami",
+    title: "Navigatrice et chapardeuse",
     color: 0xe07a3f,
     type: "choc",
     maxHp: 90, atk: 14, def: 10, spd: 18,
@@ -50,8 +50,8 @@ export const CHARACTERS = {
   },
   tireur: {
     id: "tireur",
-    name: "Nobu le Tireur d'Élite",
-    title: "Fils de village pêcheur",
+    name: "Usopp",
+    title: "Le plus froussard des tireurs d'élite",
     color: 0xc9b23c,
     type: "distance",
     maxHp: 95, atk: 16, def: 11, spd: 14,
@@ -65,7 +65,7 @@ export const CHARACTERS = {
   },
   medecin: {
     id: "medecin",
-    name: "Doc Suri",
+    name: "Chopper",
     title: "Médecin de l'île d'hiver",
     color: 0x4fa3c7,
     type: "mental",
@@ -80,8 +80,8 @@ export const CHARACTERS = {
   },
   cuisinier: {
     id: "cuisinier",
-    name: "Enzo Flambe-Jambe",
-    title: "Cuisinier des mers australes",
+    name: "Sanji",
+    title: "Cuisto à la jambe noire",
     color: 0xb23c54,
     type: "choc",
     maxHp: 115, atk: 20, def: 13, spd: 15,
@@ -95,8 +95,8 @@ export const CHARACTERS = {
   },
   charpentier: {
     id: "charpentier",
-    name: "Bruno le Charpentier",
-    title: "Bâtisseur increvable",
+    name: "Franky",
+    title: "Charpentier robotique",
     color: 0x8a5a2b,
     type: "choc",
     maxHp: 150, atk: 18, def: 22, spd: 8,
@@ -110,8 +110,8 @@ export const CHARACTERS = {
   },
   musicien: {
     id: "musicien",
-    name: "Iggy le Musicien",
-    title: "Ménestrel des tavernes portuaires",
+    name: "Brook",
+    title: "Stare squelettique",
     color: 0x9c4fc7,
     type: "mental",
     maxHp: 95, atk: 15, def: 10, spd: 20,
@@ -125,8 +125,8 @@ export const CHARACTERS = {
   },
   archeologue: {
     id: "archeologue",
-    name: "Mira l'Archéologue",
-    title: "Chercheuse de ruines oubliées",
+    name: "Robin",
+    title: "Chercheuse de ruines oubliée",
     color: 0xc7a23c,
     type: "distance",
     maxHp: 110, atk: 19, def: 13, spd: 17,
@@ -136,11 +136,16 @@ export const CHARACTERS = {
       { level: 5, move: "coupTonnerre" },
       { level: 8, move: "hakiArmement" },
     ],
-    recruitLine: "Vous avez la force qu'il faut pour percer les secrets de la Grand Line. J'embarque avec mes cartes.",
+    recruitLine: "Vous avez la force qu'il faut pour percer les secrets de Grand Line. J'embarque avec mes cartes.",
   },
 };
 
 export const ENEMY_CHARACTERS = {
+
+  // =========================
+  // MARINES - SHELL TOWN
+  // =========================
+  
   marineRecrue: {
     id: "marineRecrue",
     name: "Recrue de la Marine",
@@ -154,6 +159,31 @@ export const ENEMY_CHARACTERS = {
     moves: ["coupTonnerre", "griffureSauvage"],
   },
 
+  officierMarine: {
+    id: "officierMarine",
+    name: "Officier de la Marine",
+    title: "Ennemi",
+    color: 0x2c3e78,
+    type: "choc",
+    maxHp: 70,
+    atk: 13,
+    def: 11,
+    spd: 9,
+    moves: ["coupTonnerre", "coupDeMarteau"],
+  },
+
+marineFusilier: {
+  id: "marineFusilier",
+  name: "Fusilier de la Marine",
+  title: "Ennemi de Shells Town",
+  color: 0x58789c,
+  maxHp: 55,
+  atk: 12,
+  def: 8,
+  spd: 10,
+  moves: ["tirDePrecision", "coupTonnerre"],
+},  
+  
   pirateRival: {
     id: "pirateRival",
     name: "Pirate Rival",
@@ -180,18 +210,7 @@ export const ENEMY_CHARACTERS = {
     moves: ["hachoirDeSabre", "vagueDeChoc"],
   },
 
-  officierMarine: {
-    id: "officierMarine",
-    name: "Officier de la Marine",
-    title: "Ennemi",
-    color: 0x2c3e78,
-    type: "choc",
-    maxHp: 70,
-    atk: 13,
-    def: 11,
-    spd: 9,
-    moves: ["coupTonnerre", "coupDeMarteau"],
-  },
+
 
   // =========================
   // HOMMES-POISSONS - COCOYASI
