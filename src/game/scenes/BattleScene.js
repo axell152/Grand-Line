@@ -179,6 +179,14 @@ getEnemyScale(enemyId, sprite) {
     return targetSize / maxDimension;
   }
 
+  if (
+  enemyId === "marineRecrue" ||
+  enemyId === "marineFusilier" ||
+  enemyId === "officierMarine"
+) {
+  return 2.5;
+}
+  
   return 7;
 }
   
