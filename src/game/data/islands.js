@@ -121,7 +121,7 @@ export const ISLANDS = {
   "ssqtttttqtttqtqtqtttttqtttqtttttqtqtttqtttttttqtqtqtqtqtqtqtqqss",
   "ssqtqqqqqqqqqtqtqqqqqqqqqqqtqqqqqqqqqqqtqqqqqqqtqqqtqtqtqtqtqqss",
   "ssqtttttttttttqtttttttttttqtttttttttttttqtttttttttttqtqtttttqqss",
-  "ssqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqss",
+  "ssqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqrqqss",
   "ssqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqss",
   "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
   "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",

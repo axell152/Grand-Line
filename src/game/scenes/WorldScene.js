@@ -1296,7 +1296,11 @@ showVictoryReward(winner, xp, berrys) {
       targetY === bossPosition.y &&
       !this.isBossOnCooldown(this.island.boss);
 
-if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
+    const targetWarp = this.island.warps.find(
+      (w) => w.x === targetX && w.y === targetY
+    );
+
+    if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss && !targetWarp) return;
 
     this.isMoving = true;
     this.state.x = targetX;
@@ -1816,6 +1820,7 @@ getBossPosition(boss) {
       characterId,
       enemyLevel,
       recruitedLevel,
+      playerName: this.state.playerName,
       boss,
       bossId,
       bossTeam,
