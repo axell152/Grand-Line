@@ -141,6 +141,11 @@ export const CHARACTERS = {
 };
 
 export const ENEMY_CHARACTERS = {
+
+  // =========================
+  // MARINES - SHELL TOWN
+  // =========================
+  
   marineRecrue: {
     id: "marineRecrue",
     name: "Recrue de la Marine",
@@ -154,6 +159,31 @@ export const ENEMY_CHARACTERS = {
     moves: ["coupTonnerre", "griffureSauvage"],
   },
 
+  officierMarine: {
+    id: "officierMarine",
+    name: "Officier de la Marine",
+    title: "Ennemi",
+    color: 0x2c3e78,
+    type: "choc",
+    maxHp: 70,
+    atk: 13,
+    def: 11,
+    spd: 9,
+    moves: ["coupTonnerre", "coupDeMarteau"],
+  },
+
+marineFusilier: {
+  id: "marineFusilier",
+  name: "Fusilier de la Marine",
+  title: "Ennemi de Shells Town",
+  color: 0x58789c,
+  maxHp: 55,
+  atk: 12,
+  def: 8,
+  spd: 10,
+  moves: ["tirDePrecision", "coupTonnerre"],
+},  
+  
   pirateRival: {
     id: "pirateRival",
     name: "Pirate Rival",
@@ -180,18 +210,7 @@ export const ENEMY_CHARACTERS = {
     moves: ["hachoirDeSabre", "vagueDeChoc"],
   },
 
-  officierMarine: {
-    id: "officierMarine",
-    name: "Officier de la Marine",
-    title: "Ennemi",
-    color: 0x2c3e78,
-    type: "choc",
-    maxHp: 70,
-    atk: 13,
-    def: 11,
-    spd: 9,
-    moves: ["coupTonnerre", "coupDeMarteau"],
-  },
+
 
   // =========================
   // HOMMES-POISSONS - COCOYASI

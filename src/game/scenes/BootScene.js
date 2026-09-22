@@ -122,6 +122,14 @@ MAIN_CHARACTER_SPRITES.forEach(({ key, file }) => {
 });
 
 // ===============================
+// MARINES
+// ===============================
+
+this.load.image("marine_recrue", "/sprites/marine_recrue.png");
+this.load.image("marine_fusilier", "/sprites/marine_fusilier.png");
+this.load.image("marine_officier", "/sprites/marine_officier.png");
+    
+// ===============================
 // HOMMES-POISSONS
 // ===============================
 

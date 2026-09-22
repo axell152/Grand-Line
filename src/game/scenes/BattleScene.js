@@ -16,10 +16,11 @@ const CHARACTER_SPRITES = {
   musicien: "character_14",
   archeologue: "character_02",
 
-  marineRecrue: "character_10",
+  marineRecrue: "marine_recrue",
+  marineFusilier: "marine_fusilier",
   pirateRival: "character_09",
   chasseurDePrimes: "character_13",
-  officierMarine: "character_12",
+  officierMarine: "marine_officier",
 
   // Hommes-poissons de Cocoyasi
   fishmanPirate: "fishman_pirate",
@@ -178,6 +179,14 @@ getEnemyScale(enemyId, sprite) {
     return targetSize / maxDimension;
   }
 
+  if (
+  enemyId === "marineRecrue" ||
+  enemyId === "marineFusilier" ||
+  enemyId === "officierMarine"
+) {
+  return 2.5;
+}
+  
   return 7;
 }
   
