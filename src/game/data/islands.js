@@ -185,7 +185,7 @@ export const ISLANDS = {
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvttttttttttttttttttttss",
-      "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvtwwwwwwwwwwwwwwwwwwwss",
+      "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvwwwwwwwwwwwwwwwwwwwwss",
       "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvwpppppppppppppppppppss",
       "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvwpppppppppppppppppppss",
       "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvwpppppppppppppppppppss",
@@ -203,7 +203,7 @@ export const ISLANDS = {
       "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvwpppppppppppppppppppss",
       "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvwpppppppppppppppppppss",
       "ssttttttttttttttttttvvvvvvvvvvvvvvvvvvvvvvvvwpppppppppppppppppppss",
-      "sstttttttttttttttttttttttttttttttttttttttttttwwwwwwwwwwwwwwwwwwwss",
+      "ssttttttttttttttttttttttttttttttttttttttttttwwwwwwwwwwwwwwwwwwwwss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
       "ssttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttss",
@@ -215,7 +215,7 @@ export const ISLANDS = {
     tavern: { x: 10, y: 20 },
     buildings: [
       { x: 10, y: 20, key: "taverne" },
-      { x: 54, y: 9, key: "manoir", scale: 0.55 },
+      { x: 54, y: 12, key: "manoir", scale: 0.55 },
     ],
     recruitNpcs: [{ x: 16, y: 20, characterId: "tireur", level: 22 }],
     npcs: [
