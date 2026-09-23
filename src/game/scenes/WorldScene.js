@@ -28,6 +28,9 @@ const CHARACTER_SPRITES = {
   officierMarine: "character_12",
   arlong: "arlong",
   colonelMorgan: "colonel_morgan",
+  jango: "jango",
+  freresNyaban: "sham_buchi",
+  kuro: "kuro",
 };
 
 function spriteKey(characterId) {
@@ -89,6 +92,9 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image("arlong", "sprites/arlong.png");
     this.load.image("colonel_morgan", "sprites/colonel_morgan.png");
     this.load.image("forest_grass", "tiles/forest_grass.png");
+    this.load.image("jango", "sprites/jango.png");
+    this.load.image("sham_buchi", "sprites/sham_buchi.png");
+    this.load.image("kuro", "sprites/kuro.png");
   }
 
   init(data) {
@@ -282,6 +288,7 @@ export default class WorldScene extends Phaser.Scene {
             items: save.items || { ...STARTING_ITEMS },
             progressFlags: save.progressFlags || {},
             openedChests: save.openedChests || {},
+            bossRespawns: save.bossRespawns || {},
           });
 
           if (this.scene.isActive("World")) {
@@ -943,42 +950,48 @@ export default class WorldScene extends Phaser.Scene {
       this.chestGraphics[key] = g;
     });
 
-    // Boss d'île.
+// ============================================================
+// BOSS / COMBATS UNIQUES
+// ============================================================
+
 this.bossSprite = null;
+this.specialBossSprites = {};
 
-if (island.boss) {
-  const boss = island.boss;
+const bosses = this.getAllBosses();
+
+bosses.forEach((boss) => {
+  if (!this.shouldDisplayBoss(boss)) return;
+
   const bossPos = this.getBossPosition(boss);
+  if (!bossPos) return;
 
-  // Le boss initial reste présent tant qu'il n'a jamais été vaincu.
-  // Après sa victoire, il réapparaît uniquement après son cooldown,
-  // à sa nouvelle position.
-  const defeated = !!this.state.progressFlags?.[boss.unlockFlag];
-
-  if (
-    bossPos &&
-    (!defeated || !this.isBossOnCooldown(boss))
-  ) {
-    this.bossSprite = this.add.sprite(
-      bossPos.x * TILE_SIZE + TILE_SIZE / 2,
-      bossPos.y * TILE_SIZE + TILE_SIZE / 2,
-      spriteKey(boss.enemyId),
-      0
-    );
+  const sprite = this.add.sprite(
+    bossPos.x * TILE_SIZE + TILE_SIZE / 2,
+    bossPos.y * TILE_SIZE + TILE_SIZE / 2,
+    spriteKey(boss.enemyId),
+    0
+  );
 
   const bossScales = {
     arlong: 0.8,
     officierMarine: 2.5,
     pirateRival: 2.5,
     colonelMorgan: 0.08,
+    jango: 1.0,
+    freresNyaban: 1.0,
+    kuro: 1.0,
   };
 
-  this.bossSprite.setScale(bossScales[boss.enemyId] ?? 2.5);
+  sprite.setScale(bossScales[boss.enemyId] ?? 2.5);
+  sprite.setOrigin(0.5, 0.78);
+  sprite.setDepth(bossPos.y + 0.5);
 
-    this.bossSprite.setOrigin(0.5, 0.78);
-    this.bossSprite.setDepth(bossPos.y + 0.5);
+  if (boss.id === island.boss?.id) {
+    this.bossSprite = sprite;
+  } else {
+    this.specialBossSprites[boss.id] = sprite;
   }
-}
+});
 
     island.recruitNpcs
       .filter((npc) => !this.state.crew.includes(npc.characterId))
@@ -1318,14 +1331,18 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    const bossPosition = this.getBossPosition(this.island.boss);
+const targetBoss = this.getAllBosses().find((boss) => {
+  const position = this.getBossPosition(boss);
 
-    const targetIsBoss =
-      this.island.boss &&
-      bossPosition &&
-      targetX === bossPosition.x &&
-      targetY === bossPosition.y &&
-      !this.isBossOnCooldown(this.island.boss);
+  return (
+    this.shouldDisplayBoss(boss) &&
+    position &&
+    targetX === position.x &&
+    targetY === position.y
+  );
+});
+
+const targetIsBoss = !!targetBoss;
 
     const targetWarp = this.island.warps.find(
       (w) => w.x === targetX && w.y === targetY
@@ -1366,26 +1383,30 @@ showVictoryReward(winner, xp, berrys) {
       return;
     }
 
-    const bossPosition = this.getBossPosition(island.boss);
+const targetBoss = this.getAllBosses().find((boss) => {
+  const position = this.getBossPosition(boss);
 
-if (
-  island.boss &&
-  bossPosition &&
-  x === bossPosition.x &&
-  y === bossPosition.y &&
-  !this.isBossOnCooldown(island.boss)
-) {
+  return (
+    this.shouldDisplayBoss(boss) &&
+    position &&
+    x === position.x &&
+    y === position.y
+  );
+});
+
+if (targetBoss) {
   this.startBattle({
     mode: "wild",
-    characterId: island.boss.enemyId,
-    enemyLevel: island.boss.level,
+    characterId: targetBoss.enemyId,
+    enemyLevel: targetBoss.level,
     boss: true,
-    bossId: island.boss.id,
-    bossTeam: island.boss.team,
-    bossRespawnMinutes: island.boss.respawnMinutes || 15,
-    bossName: island.boss.name,
-    bossUnlockFlag: island.boss.unlockFlag,
+    bossId: targetBoss.id,
+    bossTeam: targetBoss.team,
+    bossRespawnMinutes: targetBoss.respawnMinutes || 15,
+    bossName: targetBoss.name,
+    bossUnlockFlag: targetBoss.unlockFlag,
   });
+
   return;
 }
 
@@ -1797,16 +1818,18 @@ if (
       return;
     }
 
-    const boss = this.island.boss;
-const bossPosition = this.getBossPosition(boss);
+const boss = this.getAllBosses().find((boss) => {
+  const position = this.getBossPosition(boss);
 
-if (
-  boss &&
-  bossPosition &&
-  bossPosition.x === x &&
-  bossPosition.y === y &&
-  !this.isBossOnCooldown(boss)
-) {
+  return (
+    this.shouldDisplayBoss(boss) &&
+    position &&
+    position.x === x &&
+    position.y === y
+  );
+});
+
+if (boss) {
   this.startBattle({
     mode: "wild",
     characterId: boss.enemyId,
@@ -1821,6 +1844,33 @@ if (
 }
   }
 
+getAllBosses() {
+  const island = this.island;
+
+  return [
+    ...(island?.boss ? [island.boss] : []),
+    ...(Array.isArray(island?.specialBosses)
+      ? island.specialBosses
+      : []),
+  ];
+}
+
+getBossAtPosition(x, y) {
+  const bosses = this.getAllBosses();
+
+  return (
+    bosses.find((boss) => {
+      const pos = this.getBossPosition(boss);
+
+      if (!pos) return false;
+      if (pos.x !== x || pos.y !== y) return false;
+      if (this.isBossOnCooldown(boss)) return false;
+
+      return true;
+    }) || null
+  );
+}
+  
 getBossPosition(boss) {
   if (!boss) return null;
 
@@ -1837,6 +1887,25 @@ getBossPosition(boss) {
     x: boss.x,
     y: boss.y,
   };
+}
+
+shouldDisplayBoss(boss) {
+  if (!boss) return false;
+
+  const defeated =
+    !!this.state.progressFlags?.[boss.unlockFlag];
+
+  // Boss unique : définitivement terminé après la victoire.
+  if (boss.oneTime && defeated) {
+    return false;
+  }
+
+  // Boss classiques : fonctionnement actuel avec cooldown.
+  if (defeated) {
+    return !this.isBossOnCooldown(boss);
+  }
+
+  return true;
 }
   
   isBossOnCooldown(boss) {
