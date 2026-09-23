@@ -203,7 +203,7 @@ export const ISLANDS = {
       "ssfffffffffcfffffffffffaffffffffffffffffffffwpppppppppppppppppppss",
       "ssfffffffffcffffffffffffffffffffffffffafffffwpppppppppppppppppppss",
       "ssfffffffffcfffffffffffffaffffffffffffffffffwpppppppppppppppppppss",
-      "ssfffffffffcffffffffffffffffffffffffffffffffwwwwwwwwwwwcwwwwwwwwss",
+      "ssfffffffffcffffffffffffffffffffffffffffffffwwwwwwwwwwwpwwwwwwwwss",
       "ssfffffffffcffffffffffaffffffffffffffffffffffffffffffffcffffffffss",
       "ssfffffffffcccccccccccccccccccccccccccccccccccccccccccccffffffffss",
       "ssfffffffffffffffffffffffffffffffffffffffffffffffffffffffaffffffss",
@@ -266,7 +266,7 @@ specialBosses: [
   {
     id: "freres-nyaban",
     x: 55,
-    y: 25,
+    y: 24,
     respawnX: 58,
     respawnY: 20,
     enemyId: "freresNyaban",
