@@ -7,7 +7,7 @@ export const PLAYER_CHARACTER = {
   maxHp: 90,
   atk: 9999,
   def: 10,
-  spd: 12,
+  spd: 9999,
   moves: ["taillade", "cravacheDeJambe", "hakiArmement"],
   // Nouvelles attaques disponibles au fil des niveaux.
   learnset: [

@@ -85,8 +85,10 @@ export default class WorldScene extends Phaser.Scene {
 
   preload() {
     this.load.image("taverne", "tiles/taverne.png");
+    this.load.image("manoir", "tiles/manoir.png");
     this.load.image("arlong", "sprites/arlong.png");
     this.load.image("colonel_morgan", "sprites/colonel_morgan.png");
+    this.load.image("forest_grass", "tiles/forest_grass.png");
   }
 
   init(data) {
@@ -794,6 +796,10 @@ export default class WorldScene extends Phaser.Scene {
     r: "tile-cocoyasi-rubble",
     v: "tile-cocoyasi-vegetation",
     q: "tile-cocoyasi-ruins",
+
+    // Syrup village
+    f: "forest_grass",
+    a: "forest_tree",
   };
 
   return terrainKeys[tile] || "tile-village-floor";
@@ -834,21 +840,41 @@ export default class WorldScene extends Phaser.Scene {
 
         let img;
         if (customKeys.has(key)) {
-          // Atlas 8x8 : sélection déterministe d'une case 32x32.
-          const frame = ((y % 8) * 8 + (x % 8));
-          img = this.add.sprite(
-            x * TILE_SIZE + TILE_SIZE / 2,
-            y * TILE_SIZE + TILE_SIZE / 2,
-            key,
-            frame
-          ).setDepth(0);
-        } else {
-          img = this.add.image(
-            x * TILE_SIZE + TILE_SIZE / 2,
-            y * TILE_SIZE + TILE_SIZE / 2,
-            key
-          ).setDepth(0);
-        }
+  // Atlas 8x8 : sélection déterministe d'une case 32x32.
+  const frame = ((y % 8) * 8 + (x % 8));
+
+  img = this.add.sprite(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key,
+    frame
+  ).setDepth(0);
+
+} else if (key === "forest_grass") {
+  // Le PNG fait 64x64 mais le jeu utilise des cases de 32x32.
+  img = this.add.image(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key
+  )
+    .setDisplaySize(TILE_SIZE, TILE_SIZE)
+    .setDepth(0);
+
+} else if (key === "forest_tree") {
+  // Arbre 64x64 affiché en 64x64.
+  img = this.add.image(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key
+  ).setDepth(0);
+
+} else {
+  img = this.add.image(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key
+  ).setDepth(0);
+}
       }
     }
 
@@ -860,7 +886,7 @@ export default class WorldScene extends Phaser.Scene {
       b.key
     ).setOrigin(0.5, 1).setDepth(b.y);
 
-    buildingSprite.setScale(0.3); // ← augmenté de 0.15 à 0.2 pour grossir
+    buildingSprite.setScale(b.scale ?? 0.3); // taille par défaut, personnalisable par bâtiment
   });
 }
 
@@ -1205,6 +1231,11 @@ showVictoryReward(winner, xp, berrys) {
     return "#";
   }
 
+  // Syrup village : arbre
+  if (terrain === "a") {
+    return "#";
+  }
+
   // ============================
   // PASSAGE BARRÉ
   // ============================
@@ -1296,7 +1327,11 @@ showVictoryReward(winner, xp, berrys) {
       targetY === bossPosition.y &&
       !this.isBossOnCooldown(this.island.boss);
 
-if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss) return;
+    const targetWarp = this.island.warps.find(
+      (w) => w.x === targetX && w.y === targetY
+    );
+
+    if (this.tileAt(targetX, targetY) === "#" && !targetIsBoss && !targetWarp) return;
 
     this.isMoving = true;
     this.state.x = targetX;
@@ -1816,6 +1851,7 @@ getBossPosition(boss) {
       characterId,
       enemyLevel,
       recruitedLevel,
+      playerName: this.state.playerName,
       boss,
       bossId,
       bossTeam,

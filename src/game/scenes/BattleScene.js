@@ -140,9 +140,13 @@ export default class BattleScene extends Phaser.Scene {
     this.drawCombatants();
     this.drawLog();
     this.showMainMenu();
-    this.setLog(this.battleMode === "recruit"
-      ? `${captain.name} fait face à ${this.enemy.name}.`
-      : `${captain.name} rencontre un ${this.enemy.name} sauvage !`);
+    this.setLog(
+      this.battleMode === "recruit"
+        ? `${captain.name} fait face à ${this.enemy.name}.`
+        : this.isBossBattle
+        ? `${captain.name} affronte ${this.enemy.name} !`
+        : `${captain.name} rencontre un ${this.enemy.name} sauvage !`
+    );
   }
 
   initPp(member) {
@@ -787,6 +791,9 @@ getEnemyScale(enemyId, sprite) {
       if (m.isCaptain) {
         state.hp = m.hp;
         state.maxHp = m.maxHp;
+        state.atk = m.atk;
+        state.def = m.def;
+        state.spd = m.spd;
         state.level = m.level || 1;
         state.exp = m.exp || 0;
         state.maxExp = m.maxExp || 100;
