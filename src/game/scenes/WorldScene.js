@@ -85,6 +85,7 @@ export default class WorldScene extends Phaser.Scene {
 
   preload() {
     this.load.image("taverne", "tiles/taverne.png");
+    this.load.image("manoir", "tiles/manoir.png");
     this.load.image("arlong", "sprites/arlong.png");
     this.load.image("colonel_morgan", "sprites/colonel_morgan.png");
   }
@@ -860,7 +861,7 @@ export default class WorldScene extends Phaser.Scene {
       b.key
     ).setOrigin(0.5, 1).setDepth(b.y);
 
-    buildingSprite.setScale(0.3); // ← augmenté de 0.15 à 0.2 pour grossir
+    buildingSprite.setScale(b.scale ?? 0.3); // taille par défaut, personnalisable par bâtiment
   });
 }
 
