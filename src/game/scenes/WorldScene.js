@@ -1008,7 +1008,7 @@ if (island.boss) {
 
     this.player.setScale(npcScaleFor("captain"));
     this.player.setOrigin(0.5, 0.78);
-    this.player.setDepth(999);
+    this.player.setDepth(this.state.y + 0.5);
     this.playerDirection = "down";
     this.player.play(`${spriteKey("captain")}-down`);
     this.cameras.main.setBounds(
@@ -1336,7 +1336,7 @@ showVictoryReward(winner, xp, berrys) {
     this.isMoving = true;
     this.state.x = targetX;
     this.state.y = targetY;
-    this.player.setDepth(999);
+    this.player.setDepth(this.state.y + 0.5);
 
     this.tweens.add({
       targets: this.player,
