@@ -1843,7 +1843,7 @@ if (boss) {
 }
   }
 
-getAllIslandBosses() {
+getAllBosses() {
   const island = this.island;
 
   return [
@@ -1855,7 +1855,7 @@ getAllIslandBosses() {
 }
 
 getBossAtPosition(x, y) {
-  const bosses = this.getAllIslandBosses();
+  const bosses = this.getAllBosses();
 
   return (
     bosses.find((boss) => {
