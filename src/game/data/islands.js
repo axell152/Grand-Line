@@ -228,7 +228,6 @@ export const ISLANDS = {
     chests: [
       { id: "syrup-chest-1", x: 30, y: 14, itemId: "potion", amount: 3 },
       { id: "syrup-chest-2", x: 52, y: 20, itemId: "superPotion", amount: 2 },
-      { characterId: "kuro", level: 30, isBoss: true },
     ],
 
 boss: {
