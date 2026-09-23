@@ -258,7 +258,7 @@ specialBosses: [
     level: 30,
     name: "Jango",
     unlockFlag: "jango_syrup_defeated",
-    oneTime: true,
+    respawnMinutes: 15,
     team: [
       { characterId: "jango", level: 30, isBoss: true },
     ],
@@ -274,7 +274,7 @@ specialBosses: [
     level: 28,
     name: "Frères Nyaban",
     unlockFlag: "nyaban_syrup_defeated",
-    oneTime: true,
+    respawnMinutes: 15,
     team: [
       { characterId: "freresNyaban", level: 28, isBoss: true },
     ],
