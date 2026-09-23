@@ -88,6 +88,7 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image("manoir", "tiles/manoir.png");
     this.load.image("arlong", "sprites/arlong.png");
     this.load.image("colonel_morgan", "sprites/colonel_morgan.png");
+    this.load.image("forest_grass", "tiles/forest_grass.png");
   }
 
   init(data) {
@@ -795,6 +796,9 @@ export default class WorldScene extends Phaser.Scene {
     r: "tile-cocoyasi-rubble",
     v: "tile-cocoyasi-vegetation",
     q: "tile-cocoyasi-ruins",
+
+    // Syrup village
+    f: "forest_grass",
   };
 
   return terrainKeys[tile] || "tile-village-floor";
@@ -835,21 +839,33 @@ export default class WorldScene extends Phaser.Scene {
 
         let img;
         if (customKeys.has(key)) {
-          // Atlas 8x8 : sélection déterministe d'une case 32x32.
-          const frame = ((y % 8) * 8 + (x % 8));
-          img = this.add.sprite(
-            x * TILE_SIZE + TILE_SIZE / 2,
-            y * TILE_SIZE + TILE_SIZE / 2,
-            key,
-            frame
-          ).setDepth(0);
-        } else {
-          img = this.add.image(
-            x * TILE_SIZE + TILE_SIZE / 2,
-            y * TILE_SIZE + TILE_SIZE / 2,
-            key
-          ).setDepth(0);
-        }
+  // Atlas 8x8 : sélection déterministe d'une case 32x32.
+  const frame = ((y % 8) * 8 + (x % 8));
+
+  img = this.add.sprite(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key,
+    frame
+  ).setDepth(0);
+
+} else if (key === "forest_grass") {
+  // Le PNG fait 64x64 mais le jeu utilise des cases de 32x32.
+  img = this.add.image(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key
+  )
+    .setDisplaySize(TILE_SIZE, TILE_SIZE)
+    .setDepth(0);
+
+} else {
+  img = this.add.image(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key
+  ).setDepth(0);
+}
       }
     }
 
