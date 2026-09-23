@@ -145,15 +145,8 @@ FISHMAN_SPRITES.forEach((key) => {
 // PIRATE CHAT NOIR - SYRUP VILLAGE
 // ===============================
 
-this.load.image(
-  "pirate_chat_noir_sabreur",
-  "assets/..."
-);
-
-this.load.image(
-  "pirate_chat_noir_pistolet",
-  "assets/..."
-);    
+this.load.image("pirate_chat_noir_sabreur","/sprites/pirate_chat_noir_sabreur.png");
+this.load.image("pirate_chat_noir_pistolet","/sprites/pirate_chat_noir_pistolet.png");
     
 // ===============================
 // BOSS
