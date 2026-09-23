@@ -30,9 +30,16 @@ const CHARACTER_SPRITES = {
   fishmanBountyHunter: "fishman_bounty_hunter",
   fishmanCaptain: "fishman_captain",
 
+  // Pirates du chat noir - Syrup Village
+  pirateChatNoirSabreur: "pirate_chat_noir_sabreur",
+  pirateChatNoirPistolet: "pirate_chat_noir_pistolet",  
+
   // Boss
   arlong: "arlong",
-  colonelMorgan: "colonel_morgan"
+  colonelMorgan: "colonel_morgan",
+  kuro: "kuro",
+  jango: "jango",
+  freresNyaban: "sham_buchi"  
 };
 
 const spriteKey = (id) => CHARACTER_SPRITES[id] || "character_01";
