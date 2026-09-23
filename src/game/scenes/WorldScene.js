@@ -164,7 +164,7 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.pause();
     });
 
-    this.input.keyboard.on("keydown-Q", () => {
+    this.input.keyboard.on("keydown-J", () => {
       if (this.messageGroup || this.dialogGroup || this.shopGroup || this.learningQueue?.length) return;
       this.showQuestLog();
     });
@@ -1231,7 +1231,7 @@ showVictoryReward(winner, xp, berrys) {
   updateHud() {
     const island = this.island;
     const questHint = this.state.islandId === "ile-baratie"
-      ? " | Q: QUÊTES"
+      ? " | J: QUÊTES"
       : "";
 
     this.hudText?.setText(
