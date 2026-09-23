@@ -977,9 +977,9 @@ bosses.forEach((boss) => {
     officierMarine: 2.5,
     pirateRival: 2.5,
     colonelMorgan: 0.08,
-    jango: 2.0,
-    freresNyaban: 2.0,
-    kuro: 2.0,
+    jango: 1.0,
+    freresNyaban: 1.0,
+    kuro: 1.0,
   };
 
   sprite.setScale(bossScales[boss.enemyId] ?? 2.5);
