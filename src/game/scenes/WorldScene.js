@@ -799,6 +799,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // Syrup village
     f: "forest_grass",
+    a: "forest_tree",
   };
 
   return terrainKeys[tile] || "tile-village-floor";
@@ -858,6 +859,14 @@ export default class WorldScene extends Phaser.Scene {
   )
     .setDisplaySize(TILE_SIZE, TILE_SIZE)
     .setDepth(0);
+
+} else if (key === "forest_tree") {
+  // Arbre 64x64 affiché en 64x64.
+  img = this.add.image(
+    x * TILE_SIZE + TILE_SIZE / 2,
+    y * TILE_SIZE + TILE_SIZE / 2,
+    key
+  ).setDepth(0);
 
 } else {
   img = this.add.image(
@@ -1219,6 +1228,11 @@ showVictoryReward(winner, xp, berrys) {
 
   // Cocoyasi : gravats
   if (terrain === "r") {
+    return "#";
+  }
+
+  // Syrup village : arbre
+  if (terrain === "a") {
     return "#";
   }
 
