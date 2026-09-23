@@ -181,7 +181,7 @@ export const ISLANDS = {
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssfffffffffffffffffffffffffffffffffffffafffffffffffffffffffaafffss",
-      "ssfffffffaffffffffffffffafffffffffffffffffffffffffffffffafffffaass",
+      "ssfffffffaffffffffffffffafffffffffffffffffffffffffffffffffffffaass",
       "ssfffffffffffffffffffffffffffffffffffffffaffffffffffffffffffffffss",
       "ssfffffffffffffffafffffffffffffffaffffffffffffffffffffffffffffffss",
       "ssffffffffffffffffffffffafffffffffffffffffffffffffffffffffffffffss",
@@ -217,9 +217,9 @@ export const ISLANDS = {
       { x: 10, y: 20, key: "taverne" },
       { x: 54, y: 12, key: "manoir", scale: 0.4 },
     ],
-    recruitNpcs: [{ x: 16, y: 20, characterId: "tireur", level: 22 }],
+    recruitNpcs: [{ x: 62, y: 2, characterId: "tireur", level: 22 }],
     npcs: [
-      { id: "syrup-maire", x: 62, y: 2, name: "Maire de Syrup Village", dialogue: ["Des pirates rivaux rôdent dans la vieille forêt, à l'est.", "Un tireur d'élite du coin rêve de prendre la mer.", "La grande propriété au bout de l'île appartient à une riche héritière."] },
+      { id: "syrup-maire", x: 15, y: 20, name: "Maire de Syrup Village", dialogue: ["Des pirates rôdent dans la vieille forêt, à l'est.", "Un tireur d'élite du coin rêve de prendre la mer.", "La grande propriété au bout de l'île appartient à une riche héritière."] },
       { id: "syrup-garde", x: 22, y: 13, name: "Garde du village", dialogue: ["Ne t'aventure pas seul dans les bois.", "Le chef des pirates a établi son camp devant le manoir."] },
     ],
     chests: [
