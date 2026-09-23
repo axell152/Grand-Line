@@ -215,7 +215,7 @@ export const ISLANDS = {
     tavern: { x: 10, y: 20 },
     buildings: [
       { x: 10, y: 20, key: "taverne" },
-      { x: 54, y: 12, key: "manoir", scale: 0.55 },
+      { x: 54, y: 12, key: "manoir", scale: 0.4 },
     ],
     recruitNpcs: [{ x: 16, y: 20, characterId: "tireur", level: 22 }],
     npcs: [
