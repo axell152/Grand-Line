@@ -164,7 +164,7 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.pause();
     });
 
-    this.input.keyboard.on("keydown-J", () => {
+    this.input.keyboard.on("keydown-Q", () => {
       if (this.messageGroup || this.dialogGroup || this.shopGroup || this.learningQueue?.length) return;
       this.showQuestLog();
     });
