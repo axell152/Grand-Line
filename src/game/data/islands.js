@@ -266,7 +266,7 @@ specialBosses: [
   {
     id: "freres-nyaban",
     x: 55,
-    y: 21,
+    y: 25,
     respawnX: 58,
     respawnY: 20,
     enemyId: "freresNyaban",
