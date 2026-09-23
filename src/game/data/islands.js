@@ -249,9 +249,9 @@ boss: {
 specialBosses: [
   {
     id: "jango",
-    x: 59,
-    y: 4,
-    respawnX: 50,
+    x: 61,
+    y: 3,
+    respawnX: 53,
     respawnY: 20,
     enemyId: "jango",
     level: 30,
@@ -265,9 +265,9 @@ specialBosses: [
 
   {
     id: "freres-nyaban",
-    x: 52,
-    y: 25,
-    respawnX: 55,
+    x: 55,
+    y: 21,
+    respawnX: 58,
     respawnY: 20,
     enemyId: "freresNyaban",
     level: 28,
