@@ -164,7 +164,8 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.pause();
     });
 
-    this.input.keyboard.on("keydown-Q", () => {
+    // Journal des quêtes : J. Q reste réservé au déplacement vers la gauche.
+    this.input.keyboard.on("keydown-J", () => {
       if (this.messageGroup || this.dialogGroup || this.shopGroup || this.learningQueue?.length) return;
       this.showQuestLog();
     });
@@ -1847,6 +1848,12 @@ if (targetBoss) {
         this.dialogGroup = null;
         this.input.keyboard?.off("keydown-E", next);
         this.input.keyboard?.off("keydown-SPACE", next);
+
+        if (npc.completeAfterDialog) {
+          this.state.progressFlags[npc.completeAfterDialog] = true;
+          this.persist();
+          this.updateHud();
+        }
       }
     };
 
@@ -1907,10 +1914,19 @@ if (targetBoss) {
 
   if (
     this.state.islandId === "ile-baratie" &&
+    this.state.progressFlags.baratie_cuisine_started &&
     this.state.progressFlags.baratie_cuisine_1 &&
     this.state.progressFlags.baratie_cuisine_2
   ) {
     this.state.progressFlags.baratie_cuisine_done = true;
+  }
+
+  if (
+    this.state.islandId === "ile-baratie" &&
+    this.state.progressFlags.baratie_chasseurs_started &&
+    this.state.progressFlags.baratie_chasseurs_target_found
+  ) {
+    this.state.progressFlags.baratie_chasseurs_done = true;
   }
 
   // Sauvegarde immédiate
