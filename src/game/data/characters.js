@@ -325,6 +325,140 @@ marineFusilier: {
   },
 
   // =========================
+  // BARATIE
+  // =========================
+
+  pirateBaratie: {
+    id: "pirateBaratie",
+    name: "Pirate du Baratie",
+    title: "Ennemi",
+    color: 0x6b4a3a,
+    type: "tranchant",
+    maxHp: 72,
+    atk: 16,
+    def: 9,
+    spd: 12,
+    moves: ["taillade", "vagueDeChoc"],
+  },
+
+  pirateBaratieSabreur: {
+    id: "pirateBaratieSabreur",
+    name: "Pirate du Baratie",
+    title: "Sabreur",
+    color: 0x523d35,
+    type: "tranchant",
+    maxHp: 80,
+    atk: 18,
+    def: 10,
+    spd: 14,
+    moves: ["taillade", "hachoirDeSabre"],
+  },
+
+  pirateBaratiePistolet: {
+    id: "pirateBaratiePistolet",
+    name: "Pirate du Baratie",
+    title: "Tireur",
+    color: 0x3f5260,
+    type: "distance",
+    maxHp: 68,
+    atk: 17,
+    def: 9,
+    spd: 15,
+    moves: ["tirDePrecision", "vagueDeChoc"],
+  },
+
+  kriegPirate: {
+    id: "kriegPirate",
+    name: "Pirate de Krieg",
+    title: "Ennemi",
+    color: 0x4d5560,
+    type: "tranchant",
+    maxHp: 88,
+    atk: 20,
+    def: 12,
+    spd: 11,
+    moves: ["taillade", "coupDeMarteau"],
+  },
+
+  kriegSabreur: {
+    id: "kriegSabreur",
+    name: "Sabreur de Krieg",
+    title: "Ennemi",
+    color: 0x5b4040,
+    type: "tranchant",
+    maxHp: 98,
+    atk: 22,
+    def: 13,
+    spd: 13,
+    moves: ["hachoirDeSabre", "taillade"],
+  },
+
+  kriegPistolet: {
+    id: "kriegPistolet",
+    name: "Tireur de Krieg",
+    title: "Ennemi",
+    color: 0x465867,
+    type: "distance",
+    maxHp: 82,
+    atk: 21,
+    def: 11,
+    spd: 15,
+    moves: ["tirDePrecision", "coupTonnerre"],
+  },
+
+  kriegLourd: {
+    id: "kriegLourd",
+    name: "Soldat lourd de Krieg",
+    title: "Ennemi",
+    color: 0x46464b,
+    type: "choc",
+    maxHp: 125,
+    atk: 25,
+    def: 18,
+    spd: 7,
+    moves: ["coupDeMarteau", "vagueDeChoc"],
+  },
+
+  pearl: {
+    id: "pearl",
+    name: "Pearl",
+    title: "Armure de feu",
+    color: 0x8c6f48,
+    type: "choc",
+    maxHp: 155,
+    atk: 29,
+    def: 21,
+    spd: 9,
+    moves: ["coupDeMarteau", "boulePeuFeu"],
+  },
+
+  gin: {
+    id: "gin",
+    name: "Gin",
+    title: "Le pied de fer",
+    color: 0x59606d,
+    type: "choc",
+    maxHp: 170,
+    atk: 31,
+    def: 19,
+    spd: 18,
+    moves: ["coupDeMarteau", "hachoirDeSabre"],
+  },
+
+  donKrieg: {
+    id: "donKrieg",
+    name: "Don Krieg",
+    title: "Amiral de la flotte de Krieg",
+    color: 0x8a6b42,
+    type: "choc",
+    maxHp: 230,
+    atk: 38,
+    def: 27,
+    spd: 12,
+    moves: ["coupDeMarteau", "tirDePrecision", "vagueDeChoc"],
+  },
+
+  // =========================
   // BOSS - SYRUP VILLAGE
   // =========================
 

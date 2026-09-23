@@ -31,6 +31,28 @@ const CHARACTER_SPRITES = {
   jango: "jango",
   freresNyaban: "sham_buchi",
   kuro: "kuro",
+
+  // Baratie
+  pirateBaratie: "character_09",
+  pirateBaratieSabreur: "character_13",
+  pirateBaratiePistolet: "character_11",
+  kriegPirate: "character_10",
+  kriegSabreur: "character_09",
+  kriegPistolet: "character_13",
+  kriegLourd: "character_12",
+  pearl: "character_12",
+  gin: "character_13",
+  donKrieg: "character_12",
+
+  // PNJ génériques explicitement choisis
+  character_01: "character_01",
+  character_03: "character_03",
+  character_04: "character_04",
+  character_05: "character_05",
+  character_06: "character_06",
+  character_08: "character_08",
+  character_10: "character_10",
+  character_11: "character_11",
 };
 
 function spriteKey(characterId) {
@@ -142,6 +164,11 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.pause();
     });
 
+    this.input.keyboard.on("keydown-Q", () => {
+      if (this.messageGroup || this.dialogGroup || this.shopGroup || this.learningQueue?.length) return;
+      this.showQuestLog();
+    });
+
     const expRewards = Array.isArray(this.incoming.expRewards)
       ? this.incoming.expRewards
       : (typeof this.incoming.expGained === "number"
@@ -190,6 +217,13 @@ export default class WorldScene extends Phaser.Scene {
           ppData: {},
         };
       }
+      if (
+        this.state.islandId === "ile-baratie" &&
+        recruitedId === "cuisinier"
+      ) {
+        this.state.progressFlags.baratie_sanji_recruited = true;
+      }
+
       this.persist();
     }
 
@@ -785,6 +819,11 @@ export default class WorldScene extends Phaser.Scene {
   getTerrainTileKey(tile) {
   const bossFlag = this.island?.boss?.unlockFlag;
 
+  if (this.state.islandId === "ile-baratie") {
+    if (tile === "f") return "tile-village-floor";
+    if (tile === "d") return "tile-dock";
+  }
+
   const terrainKeys = {
     // Shells Town
     t: "tile-village-floor",
@@ -807,6 +846,7 @@ export default class WorldScene extends Phaser.Scene {
     // Syrup village
     f: "forest_grass",
     a: "forest_tree",
+
   };
 
   return terrainKeys[tile] || "tile-village-floor";
@@ -980,6 +1020,9 @@ bosses.forEach((boss) => {
     jango: 1.0,
     freresNyaban: 1.0,
     kuro: 1.0,
+    pearl: 2.8,
+    gin: 2.8,
+    donKrieg: 2.8,
   };
 
   sprite.setScale(bossScales[boss.enemyId] ?? 2.5);
@@ -1187,8 +1230,12 @@ showVictoryReward(winner, xp, berrys) {
 
   updateHud() {
     const island = this.island;
+    const questHint = this.state.islandId === "ile-baratie"
+      ? " | Q: QUÊTES"
+      : "";
+
     this.hudText?.setText(
-      `${island.name}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
+      `${island.name}${questHint}\nÉquipage: ${this.state.crew.length} | Berrys: ${this.state.berrys} | Nv.${this.state.level} | XP: ${this.state.exp}/${this.state.maxExp} | PV: ${this.state.hp}/${this.state.maxHp}`
     );
   }
 
@@ -1659,6 +1706,81 @@ if (targetBoss) {
       .on("pointerout", () => quitText.setColor("#ead9b8"));
   }
 
+  showQuestLog() {
+    if (this.dialogGroup) {
+      this.dialogGroup.destroy(true);
+      this.dialogGroup = null;
+    }
+
+    const quests = this.island?.quests || [];
+    if (!quests.length) {
+      this.showMessage("QUÊTES", "Aucune quête disponible sur cette île.");
+      return;
+    }
+
+    const objects = [];
+    const bg = this.add.rectangle(512, 384, 900, 650, 0x071522, 0.98)
+      .setStrokeStyle(3, 0xe8c96b)
+      .setScrollFactor(0)
+      .setDepth(12000);
+
+    objects.push(bg);
+
+    const title = this.add.text(512, 70, "QUÊTES — " + this.island.name.toUpperCase(), {
+      fontFamily: "monospace",
+      fontSize: "25px",
+      fontStyle: "bold",
+      color: "#f1c40f",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+
+    objects.push(title);
+
+    const visible = quests.slice(0, 10);
+    visible.forEach((quest, i) => {
+      const completed = !!this.state.progressFlags?.[quest.completeFlag];
+      const started = !!this.state.progressFlags?.[quest.startFlag];
+      const status = completed ? "✓ TERMINÉE" : started ? "▶ EN COURS" : "○ À DÉCOUVRIR";
+      const color = completed ? "#7bd88f" : started ? "#f1c40f" : "#b9c6d3";
+
+      const y = 120 + i * 48;
+      const line = this.add.text(90, y, `${completed ? "✓" : "•"} ${quest.title}`, {
+        fontFamily: "monospace",
+        fontSize: "16px",
+        fontStyle: "bold",
+        color,
+      }).setScrollFactor(0).setDepth(12001);
+
+      const desc = this.add.text(110, y + 20, `${status} — ${quest.description}`, {
+        fontFamily: "monospace",
+        fontSize: "11px",
+        color: "#d6dbe1",
+        wordWrap: { width: 800 },
+      }).setScrollFactor(0).setDepth(12001);
+
+      objects.push(line, desc);
+    });
+
+    const close = this.add.text(512, 650, "ÉCHAP / CLIC — FERMER", {
+      fontFamily: "monospace",
+      fontSize: "14px",
+      color: "#aaaaaa",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(12001);
+
+    objects.push(close);
+
+    let closed = false;
+    const closePanel = () => {
+      if (closed) return;
+      closed = true;
+      objects.forEach((obj) => obj.destroy());
+      this.input.keyboard?.off("keydown-ESC", closePanel);
+      this.input.off("pointerdown", closePanel);
+    };
+
+    this.input.keyboard?.once("keydown-ESC", closePanel);
+    this.input.once("pointerdown", closePanel);
+  }
+
   showNpcDialog(npc) {
     if (this.dialogGroup) {
       this.dialogGroup.destroy(true);
@@ -1666,7 +1788,15 @@ if (targetBoss) {
       return;
     }
 
-    const lines = Array.isArray(npc.dialogue) ? npc.dialogue : [String(npc.dialogue || "")];
+    const selectedDialogue =
+      npc.dialogueAfterFlag &&
+      this.state.progressFlags?.[npc.dialogueAfterFlag.flag]
+        ? npc.dialogueAfterFlag.lines
+        : npc.dialogue;
+
+    const lines = Array.isArray(selectedDialogue)
+      ? selectedDialogue
+      : [String(selectedDialogue || "")];
     if (npc.setFlag) {
       this.state.progressFlags[npc.setFlag] = true;
       this.persist();
@@ -1754,6 +1884,34 @@ if (targetBoss) {
 
   // Marque le coffre comme ouvert
   this.state.openedChests[chest.id || key] = true;
+
+  if (chest.setFlag) {
+    this.state.progressFlags[chest.setFlag] = true;
+  }
+
+  if (Array.isArray(chest.setFlags)) {
+    chest.setFlags.forEach((flag) => {
+      if (flag) this.state.progressFlags[flag] = true;
+    });
+  }
+
+  // Quêtes Baratie : validation automatique des objectifs de collecte.
+  if (
+    this.state.islandId === "ile-baratie" &&
+    this.state.progressFlags.baratie_provision_1 &&
+    this.state.progressFlags.baratie_provision_2 &&
+    this.state.progressFlags.baratie_provision_3
+  ) {
+    this.state.progressFlags.baratie_provisions = true;
+  }
+
+  if (
+    this.state.islandId === "ile-baratie" &&
+    this.state.progressFlags.baratie_cuisine_1 &&
+    this.state.progressFlags.baratie_cuisine_2
+  ) {
+    this.state.progressFlags.baratie_cuisine_done = true;
+  }
 
   // Sauvegarde immédiate
   this.persist();
@@ -1891,6 +2049,13 @@ getBossPosition(boss) {
 
 shouldDisplayBoss(boss) {
   if (!boss) return false;
+
+  if (
+    boss.requiredFlag &&
+    !this.state.progressFlags?.[boss.requiredFlag]
+  ) {
+    return false;
+  }
 
   const defeated =
     !!this.state.progressFlags?.[boss.unlockFlag];

@@ -39,7 +39,19 @@ const CHARACTER_SPRITES = {
   colonelMorgan: "colonel_morgan",
   kuro: "kuro",
   jango: "jango",
-  freresNyaban: "sham_buchi"  
+  freresNyaban: "sham_buchi",
+
+  // Baratie
+  pirateBaratie: "character_09",
+  pirateBaratieSabreur: "character_13",
+  pirateBaratiePistolet: "character_11",
+  kriegPirate: "character_10",
+  kriegSabreur: "character_09",
+  kriegPistolet: "character_13",
+  kriegLourd: "character_12",
+  pearl: "character_12",
+  gin: "character_13",
+  donKrieg: "character_12",
 };
 
 const spriteKey = (id) => CHARACTER_SPRITES[id] || "character_01";
