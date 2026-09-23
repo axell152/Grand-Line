@@ -145,6 +145,10 @@ FISHMAN_SPRITES.forEach((key) => {
 // BOSS
 // ===============================
 
+this.load.image("jango", "/sprites/jango.png");
+this.load.image("sham_buchi", "/sprites/sham_buchi.png");
+this.load.image("kuro", "/sprites/kuro.png");    
+    
 this.load.image(
   "arlong",
   "/sprites/arlong.png"
