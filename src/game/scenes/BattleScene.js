@@ -190,6 +190,21 @@ getEnemyScale(enemyId, sprite) {
     return targetSize / maxDimension;
   }
 
+if (
+  enemyId === "kuro" ||
+  enemyId === "jango" ||
+  enemyId === "freresNyaban"
+) {
+  return 1.4;
+}
+
+if (
+  enemyId === "pirateChatNoirSabreur" ||
+  enemyId === "pirateChatNoirPistolet"
+) {
+  return 5.5;
+}
+  
   if (
   enemyId === "marineRecrue" ||
   enemyId === "marineFusilier" ||
