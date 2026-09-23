@@ -195,14 +195,14 @@ if (
   enemyId === "jango" ||
   enemyId === "freresNyaban"
 ) {
-  return 1.4;
+  return 2.5;
 }
 
 if (
   enemyId === "pirateChatNoirSabreur" ||
   enemyId === "pirateChatNoirPistolet"
 ) {
-  return 5.5;
+  return 3.5;
 }
   
   if (
