@@ -28,6 +28,7 @@ export default class BootScene extends Phaser.Scene {
     this.load.image("tile-wall", "/tiles/wall.png");
     this.load.image("tile-path", "/tiles/path.png");
     this.load.image("tile-wild", "/tiles/wild.png");
+    this.load.image("forest_tree", "/tiles/forest_tree.png");
 
     // Tiles personnalisés.
     // Chaque image est un atlas 8x8 de cases 32x32.
