@@ -217,29 +217,98 @@ export const ISLANDS = {
       { x: 10, y: 20, key: "taverne" },
       { x: 54, y: 12, key: "manoir", scale: 0.4 },
     ],
+    
     recruitNpcs: [{ x: 62, y: 2, characterId: "tireur", level: 22 }],
+    
     npcs: [
       { id: "syrup-maire", x: 15, y: 20, name: "Maire de Syrup Village", dialogue: ["Des pirates rôdent dans la vieille forêt, à l'est.", "Un tireur d'élite du coin rêve de prendre la mer.", "La grande propriété au bout de l'île appartient à une riche héritière."] },
       { id: "syrup-garde", x: 22, y: 13, name: "Garde du village", dialogue: ["Ne t'aventure pas seul dans les bois.", "Le chef des pirates a établi son camp devant le manoir."] },
     ],
+    
     chests: [
       { id: "syrup-chest-1", x: 30, y: 14, itemId: "potion", amount: 3 },
       { id: "syrup-chest-2", x: 52, y: 20, itemId: "superPotion", amount: 2 },
+      { characterId: "kuro", level: 30, isBoss: true },
     ],
-    boss: {
-      id: "kuro", x: 54, y: 14, enemyId: "pirateRival", level: 27,
-      name: "Capitaine Pirate Rival", unlockFlag: "boss_ile-syrup", respawnMinutes: 15,
-      team: [
-        { characterId: "pirateRival", level: 20 },
-        { characterId: "chasseurDePrimes", level: 23 },
-        { characterId: "pirateRival", level: 27, isBoss: true },
-      ],
-    },
-    wildZones: [
-      { x1: 20, y1: 5, x2: 28, y2: 25, level: 7, encounterRate: 0.045, enemyPool: ["pirateRival"] },
-      { x1: 29, y1: 5, x2: 36, y2: 25, level: 8, encounterRate: 0.05, enemyPool: ["pirateRival", "chasseurDePrimes"] },
-      { x1: 37, y1: 5, x2: 44, y2: 25, level: 9, encounterRate: 0.055, enemyPool: ["chasseurDePrimes", "pirateRival"] },
+
+boss: {
+  id: "kuro",
+  x: 56,
+  y: 15,
+  enemyId: "kuro",
+  level: 30,
+  name: "Kuro",
+  unlockFlag: "boss_ile-syrup",
+  respawnMinutes: 15,
+  team: [
+    { characterId: "pirateChatNoirSabreur", level: 25 },
+    { characterId: "pirateChatNoirPistolet", level: 27 },
+    { characterId: "kuro", level: 30, isBoss: true },
+  ],
+},
+
+specialBosses: [
+  {
+    id: "jango",
+    x: 32,
+    y: 8,
+    respawnX: 30,
+    respawnY: 8,
+    enemyId: "jango",
+    level: 30,
+    name: "Jango",
+    unlockFlag: "jango_syrup_defeated",
+    oneTime: true,
+    team: [
+      { characterId: "jango", level: 30, isBoss: true },
     ],
+  },
+
+  {
+    id: "freres-nyaban",
+    x: 55,
+    y: 14,
+    respawnX: 53,
+    respawnY: 14,
+    enemyId: "freresNyaban",
+    level: 28,
+    name: "Frères Nyaban",
+    unlockFlag: "nyaban_syrup_defeated",
+    oneTime: true,
+    team: [
+      { characterId: "freresNyaban", level: 28, isBoss: true },
+    ],
+  },
+],
+    
+wildZones: [
+  {
+    x1: 4,
+    y1: 4,
+    x2: 28,
+    y2: 29,
+    level: 19,
+    encounterRate: 0.045,
+    enemyPool: [
+      "pirateChatNoirSabreur",
+      "pirateChatNoirPistolet",
+    ],
+  },
+
+  {
+    x1: 29,
+    y1: 4,
+    x2: 51,
+    y2: 29,
+    level: 21,
+    encounterRate: 0.05,
+    enemyPool: [
+      "pirateChatNoirSabreur",
+      "pirateChatNoirPistolet",
+    ],
+  },
+],
+    
     warps: [
       { x: 1, y: 29, toIsland: "ile-cocoyasi", toX: 61, toY: 16 },
       { x: 63, y: 29, toIsland: "ile-baratie", toX: 32, toY: 31, lockedBy: "boss_ile-syrup" },
