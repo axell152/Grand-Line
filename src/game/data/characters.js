@@ -295,6 +295,79 @@ marineFusilier: {
   },
 
   // =========================
+  // CHAT NOIR - SYRUP VILLAGE
+  // =========================
+
+  pirateChatNoirSabreur: {
+    id: "pirateChatNoirSabreur",
+    name: "Pirate du Chat Noir",
+    title: "Sabreur",
+    color: 0x5c4b6b,
+    type: "tranchant",
+    maxHp: 65,
+    atk: 15,
+    def: 9,
+    spd: 13,
+    moves: ["taillade", "hachoirDeSabre"],
+  },
+
+  pirateChatNoirPistolet: {
+    id: "pirateChatNoirPistolet",
+    name: "Pirate du Chat Noir",
+    title: "Tireur",
+    color: 0x4b5c6b,
+    type: "distance",
+    maxHp: 58,
+    atk: 14,
+    def: 8,
+    spd: 14,
+    moves: ["tirDePrecision", "vagueDeChoc"],
+  },
+
+  // =========================
+  // BOSS - SYRUP VILLAGE
+  // =========================
+
+  kuro: {
+    id: "kuro",
+    name: "Kuro",
+    title: "Capitaine du Chat Noir",
+    color: 0x29252f,
+    type: "tranchant",
+    maxHp: 190,
+    atk: 34,
+    def: 22,
+    spd: 24,
+    moves: ["hachoirDeSabre", "taillade"],
+  },
+
+  jango: {
+    id: "jango",
+    name: "Jango",
+    title: "Hypnotiseur",
+    color: 0x6d4c8c,
+    type: "mental",
+    maxHp: 120,
+    atk: 20,
+    def: 13,
+    spd: 18,
+    moves: ["chantEnivrant", "vagueDeChoc"],
+  },
+
+  freresNyaban: {
+    id: "freresNyaban",
+    name: "Frères Nyaban",
+    title: "Combat en duo",
+    color: 0x7a5038,
+    type: "tranchant",
+    maxHp: 150,
+    atk: 27,
+    def: 17,
+    spd: 20,
+    moves: ["taillade", "hachoirDeSabre"],
+  },
+  
+  // =========================
   // BOSS
   // =========================
 
