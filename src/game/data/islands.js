@@ -445,7 +445,7 @@ wildZones: [
         x: 18,
         y: 12,
         name: "Zeff",
-        characterId: "character_05",
+        characterId: "zeff",
         setFlag: "baratie_intro_started",
         completeAfterDialog: "baratie_intro_done",
         dialogue: [
@@ -459,7 +459,7 @@ wildZones: [
         x: 22,
         y: 17,
         name: "Patty",
-        characterId: "character_03",
+        characterId: "patty",
         dialogue: [
           "Bienvenue au Baratie ! Ici, même les pirates paient leur addition.",
           "Si Krieg attaque, protège surtout la salle du restaurant.",
@@ -470,7 +470,7 @@ wildZones: [
         x: 30,
         y: 20,
         name: "Carne",
-        characterId: "character_04",
+        characterId: "carne",
         setFlag: "baratie_provisions_started",
         dialogue: [
           "On nous a volé trois caisses de provisions.",
@@ -494,7 +494,7 @@ wildZones: [
         x: 38,
         y: 8,
         name: "Johnny",
-        characterId: "character_11",
+        characterId: "johnny",
         setFlag: "baratie_chasseurs_started",
         dialogue: [
           "Yosaku et moi poursuivons un pirate qui se cache près de la cale.",
@@ -506,7 +506,7 @@ wildZones: [
         x: 42,
         y: 9,
         name: "Yosaku",
-        characterId: "character_01",
+        characterId: "yosaku",
         dialogue: [
           "Notre cible porte une veste rouge et se cache parmi les caisses.",
           "Si tu la trouves, montre-nous que tu sais te battre.",
@@ -517,7 +517,7 @@ wildZones: [
         x: 20,
         y: 24,
         name: "Cuisinier du Baratie",
-        characterId: "character_06",
+        characterId: "baratieCook",
         setFlag: "baratie_cuisine_started",
         dialogue: [
           "Il me manque plusieurs ingrédients pour le service.",

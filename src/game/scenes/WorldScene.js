@@ -32,17 +32,23 @@ const CHARACTER_SPRITES = {
   freresNyaban: "sham_buchi",
   kuro: "kuro",
 
-  // Baratie
-  pirateBaratie: "character_09",
+  // Baratie — sprites PNG haute résolution (1024x1024)
+  zeff: "baratie_zeff",
+  patty: "baratie_patty",
+  carne: "baratie_carne",
+  baratieCook: "baratie_cook",
+  johnny: "baratie_johnny",
+  yosaku: "baratie_yosaku",
+  pirateBaratie: "baratie_pirate",
+  kriegPistolet: "baratie_krieg_pistolet",
+  pearl: "baratie_pearl",
+  gin: "baratie_gin",
+  donKrieg: "baratie_don_krieg",
   pirateBaratieSabreur: "character_13",
   pirateBaratiePistolet: "character_11",
   kriegPirate: "character_10",
   kriegSabreur: "character_09",
-  kriegPistolet: "character_13",
   kriegLourd: "character_12",
-  pearl: "character_12",
-  gin: "character_13",
-  donKrieg: "character_12",
 
   // PNJ génériques explicitement choisis
   character_01: "character_01",
@@ -57,6 +63,26 @@ const CHARACTER_SPRITES = {
 
 function spriteKey(characterId) {
   return CHARACTER_SPRITES[characterId] || "character_01";
+}
+
+// Ces sprites sont des illustrations PNG haute résolution (1024x1024).
+// Ils restent en 1024x1024 sur disque et sont uniquement réduits à l'affichage.
+const LARGE_STATIC_SPRITE_KEYS = new Set([
+  "baratie_zeff",
+  "baratie_patty",
+  "baratie_carne",
+  "baratie_cook",
+  "baratie_johnny",
+  "baratie_yosaku",
+  "baratie_pirate",
+  "baratie_krieg_pistolet",
+  "baratie_pearl",
+  "baratie_gin",
+  "baratie_don_krieg",
+]);
+
+function isLargeStaticSpriteKey(key) {
+  return LARGE_STATIC_SPRITE_KEYS.has(key);
 }
 
 // Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
@@ -117,6 +143,25 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image("jango", "sprites/jango.png");
     this.load.image("sham_buchi", "sprites/sham_buchi.png");
     this.load.image("kuro", "sprites/kuro.png");
+
+    // Baratie : illustrations haute résolution.
+    const baratieSprites = {
+      baratie_zeff: "sprites/baratie/zeff.png",
+      baratie_patty: "sprites/baratie/patty.png",
+      baratie_carne: "sprites/baratie/carne.png",
+      baratie_cook: "sprites/baratie/baratie_cook.png",
+      baratie_johnny: "sprites/baratie/johnny.png",
+      baratie_yosaku: "sprites/baratie/yosaku.png",
+      baratie_pirate: "sprites/baratie/pirate_don_krieg.png",
+      baratie_krieg_pistolet: "sprites/baratie/pistolet_don_krieg.png",
+      baratie_pearl: "sprites/baratie/pearl.png",
+      baratie_gin: "sprites/baratie/gin.png",
+      baratie_don_krieg: "sprites/baratie/don_krieg.png",
+    };
+
+    Object.entries(baratieSprites).forEach(([key, path]) => {
+      if (!this.textures.exists(key)) this.load.image(key, path);
+    });
   }
 
   init(data) {
@@ -965,7 +1010,11 @@ export default class WorldScene extends Phaser.Scene {
         0
       );
 
-      sprite.setScale(scaleForSpriteKey(key));
+      if (isLargeStaticSpriteKey(key)) {
+        sprite.setDisplaySize(64, 64);
+      } else {
+        sprite.setScale(scaleForSpriteKey(key));
+      }
       sprite.setOrigin(0.5, 0.78);
       sprite.setDepth(npc.y + 0.5);
       this.talkNpcSprites[`${npc.x},${npc.y}`] = npc;
@@ -1026,7 +1075,12 @@ bosses.forEach((boss) => {
     donKrieg: 2.8,
   };
 
-  sprite.setScale(bossScales[boss.enemyId] ?? 2.5);
+  const bossKey = spriteKey(boss.enemyId);
+  if (isLargeStaticSpriteKey(bossKey)) {
+    sprite.setDisplaySize(64, 64);
+  } else {
+    sprite.setScale(bossScales[boss.enemyId] ?? 2.5);
+  }
   sprite.setOrigin(0.5, 0.78);
   sprite.setDepth(bossPos.y + 0.5);
 
@@ -1048,7 +1102,12 @@ bosses.forEach((boss) => {
           0
         );
 
-        sprite.setScale(npcScaleFor(npc.characterId));
+        const recruitKey = spriteKey(npc.characterId);
+        if (isLargeStaticSpriteKey(recruitKey)) {
+          sprite.setDisplaySize(64, 64);
+        } else {
+          sprite.setScale(npcScaleFor(npc.characterId));
+        }
         sprite.setOrigin(0.5, 0.78);
         sprite.setDepth(npc.y + 0.5);
         this.npcSprites[`${npc.x},${npc.y}`] = npc.characterId;

@@ -41,20 +41,40 @@ const CHARACTER_SPRITES = {
   jango: "jango",
   freresNyaban: "sham_buchi",
 
-  // Baratie
-  pirateBaratie: "character_09",
+  // Baratie — sprites PNG haute résolution (1024x1024)
+  pirateBaratie: "baratie_pirate",
+  kriegPistolet: "baratie_krieg_pistolet",
+  pearl: "baratie_pearl",
+  gin: "baratie_gin",
+  donKrieg: "baratie_don_krieg",
   pirateBaratieSabreur: "character_13",
   pirateBaratiePistolet: "character_11",
   kriegPirate: "character_10",
   kriegSabreur: "character_09",
-  kriegPistolet: "character_13",
   kriegLourd: "character_12",
-  pearl: "character_12",
-  gin: "character_13",
-  donKrieg: "character_12",
+};
+
+const LARGE_STATIC_SPRITE_KEYS = new Set([
+  "baratie_pirate",
+  "baratie_krieg_pistolet",
+  "baratie_pearl",
+  "baratie_gin",
+  "baratie_don_krieg",
+]);
+
+const BARATIE_HIGH_RES_ASSETS = {
+  baratie_pirate: "sprites/baratie/pirate_don_krieg.png",
+  baratie_krieg_pistolet: "sprites/baratie/pistolet_don_krieg.png",
+  baratie_pearl: "sprites/baratie/pearl.png",
+  baratie_gin: "sprites/baratie/gin.png",
+  baratie_don_krieg: "sprites/baratie/don_krieg.png",
 };
 
 const spriteKey = (id) => CHARACTER_SPRITES[id] || "character_01";
+
+function isLargeStaticSprite(id) {
+  return LARGE_STATIC_SPRITE_KEYS.has(spriteKey(id));
+}
 
 // Luffy / Zoro / Nami / Usopp / Sanji sont des feuilles de sprites 64x64 (4x plus
 // grandes que les PNJ génériques character_XX, en 16x16) : on compense leur échelle.
@@ -63,6 +83,13 @@ const isBigSprite = (id) => BIG_SPRITE_KEYS.has(spriteKey(id));
 
 export default class BattleScene extends Phaser.Scene {
   constructor() { super("Battle"); }
+
+  preload() {
+    Object.entries(BARATIE_HIGH_RES_ASSETS).forEach(([key, path]) => {
+      if (!this.textures.exists(key)) this.load.image(key, path);
+    });
+  }
+
   init(data) { this.battleData = data || {}; }
 
   create() {
@@ -185,6 +212,10 @@ export default class BattleScene extends Phaser.Scene {
   }
 
 getEnemyScale(enemyId, sprite) {
+  if (isLargeStaticSprite(enemyId)) {
+    return 1;
+  }
+
   if (isBigSprite(enemyId) || enemyId === "arlong") {
     return 1.75;
   }
@@ -244,9 +275,13 @@ if (
   .setOrigin(0.5, 0.82)
   .setDepth(10);
 
-  this.enemySprite.setScale(
-    this.getEnemyScale(enemyId, this.enemySprite)
-  );
+  if (isLargeStaticSprite(enemyId)) {
+    this.enemySprite.setDisplaySize(220, 220);
+  } else {
+    this.enemySprite.setScale(
+      this.getEnemyScale(enemyId, this.enemySprite)
+    );
+  }
 
   this.enemyNameText = this.add.text(300, 72, "", {
     fontFamily: "monospace",
@@ -750,7 +785,11 @@ if (
         this.targetCharacterId = this.battleData.bossTeam[this.bossEnemyIndex].characterId;
         this.enemySprite.setTexture(spriteKey(this.targetCharacterId), 0);
         this.enemySprite.setAlpha(0);
-        this.enemySprite.setScale( this.getEnemyScale( this.targetCharacterId, this.enemySprite ) );
+        if (isLargeStaticSprite(this.targetCharacterId)) {
+          this.enemySprite.setDisplaySize(220, 220);
+        } else {
+          this.enemySprite.setScale(this.getEnemyScale(this.targetCharacterId, this.enemySprite));
+        }
         this.tweens.add({ targets: this.enemySprite, alpha: 1, duration: 350 });
         this.refreshBars();
         this.setLog(`${this.enemy.name} entre dans le combat !`);
