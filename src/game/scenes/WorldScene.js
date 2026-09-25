@@ -144,24 +144,6 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image("sham_buchi", "sprites/sham_buchi.png");
     this.load.image("kuro", "sprites/kuro.png");
 
-    // Baratie : illustrations haute résolution.
-    const baratieSprites = {
-      baratie_zeff: "sprites/baratie/zeff.png",
-      baratie_patty: "sprites/baratie/patty.png",
-      baratie_carne: "sprites/baratie/carne.png",
-      baratie_cook: "sprites/baratie/baratie_cook.png",
-      baratie_johnny: "sprites/baratie/johnny.png",
-      baratie_yosaku: "sprites/baratie/yosaku.png",
-      baratie_pirate: "sprites/baratie/pirate_don_krieg.png",
-      baratie_krieg_pistolet: "sprites/baratie/pistolet_don_krieg.png",
-      baratie_pearl: "sprites/baratie/pearl.png",
-      baratie_gin: "sprites/baratie/gin.png",
-      baratie_don_krieg: "sprites/baratie/don_krieg.png",
-    };
-
-    Object.entries(baratieSprites).forEach(([key, path]) => {
-      if (!this.textures.exists(key)) this.load.image(key, path);
-    });
   }
 
   init(data) {
