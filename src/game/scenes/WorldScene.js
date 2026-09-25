@@ -1393,15 +1393,11 @@ showVictoryReward(winner, xp, berrys) {
   // PASSAGE BARRÉ
   // ============================
 
+  // Baratie : le pont (b) est franchissable.
+  // Le verrouillage de la sortie vers Drum est géré par le warp,
+  // pas par le sol du navire.
   if (terrain === "b") {
-    const unlockFlag = island.boss?.unlockFlag;
-
-    if (
-      unlockFlag &&
-      !this.state.progressFlags?.[unlockFlag]
-    ) {
-      return "#";
-    }
+    return ".";
   }
 
   // ============================
