@@ -140,10 +140,31 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image("arlong", "sprites/arlong.png");
     this.load.image("colonel_morgan", "sprites/colonel_morgan.png");
     this.load.image("forest_grass", "tiles/forest_grass.png");
+    // Baratie : vrai atlas terrain 32x32 + façade du restaurant.
+    this.load.image("baratie_terrain", "tiles/custom/baratie_tileset_32.png");
+    this.load.image("baratie_building", "tiles/baratie_building.png");
     this.load.image("jango", "sprites/jango.png");
     this.load.image("sham_buchi", "sprites/sham_buchi.png");
     this.load.image("kuro", "sprites/kuro.png");
 
+    // Baratie : illustrations haute résolution.
+    const baratieSprites = {
+      baratie_zeff: "sprites/baratie/zeff.png",
+      baratie_patty: "sprites/baratie/patty.png",
+      baratie_carne: "sprites/baratie/carne.png",
+      baratie_cook: "sprites/baratie/baratie_cook.png",
+      baratie_johnny: "sprites/baratie/johnny.png",
+      baratie_yosaku: "sprites/baratie/yosaku.png",
+      baratie_pirate: "sprites/baratie/pirate_don_krieg.png",
+      baratie_krieg_pistolet: "sprites/baratie/pistolet_don_krieg.png",
+      baratie_pearl: "sprites/baratie/pearl.png",
+      baratie_gin: "sprites/baratie/gin.png",
+      baratie_don_krieg: "sprites/baratie/don_krieg.png",
+    };
+
+    Object.entries(baratieSprites).forEach(([key, path]) => {
+      if (!this.textures.exists(key)) this.load.image(key, path);
+    });
   }
 
   init(data) {
@@ -848,8 +869,8 @@ export default class WorldScene extends Phaser.Scene {
   const bossFlag = this.island?.boss?.unlockFlag;
 
   if (this.state.islandId === "ile-baratie") {
-    if (tile === "f") return "tile-village-floor";
-    if (tile === "d") return "tile-dock";
+    if (tile === "s") return "tile-sea";
+    return "baratie_terrain";
   }
 
   const terrainKeys = {
@@ -905,6 +926,9 @@ export default class WorldScene extends Phaser.Scene {
   "tile-cocoyasi-rubble",
   "tile-cocoyasi-vegetation",
   "tile-cocoyasi-ruins",
+
+  // Baratie
+  "baratie_terrain",
 ]);
 
     for (let y = 0; y < mapRows.length; y++) {
@@ -914,7 +938,36 @@ export default class WorldScene extends Phaser.Scene {
         const key = this.getTerrainTileKey(tile);
 
         let img;
-        if (customKeys.has(key)) {
+        if (this.state.islandId === "ile-baratie") {
+          const styles = {
+            b: { frame: 0 },
+            p: { frame: 1 },
+            N: { frame: 31, flipY: true },
+            S: { frame: 31 },
+            W: { frame: 31, angle: 90 },
+            E: { frame: 31, angle: -90 },
+            A: { frame: 36 },
+            C: { frame: 37, flipX: true },
+            F: { frame: 48, flipY: true },
+            D: { frame: 49, flipX: true, flipY: true },
+          };
+          const style = styles[tile] || styles.b;
+          const deckFrames = [0, 1, 2, 3];
+          const frame = tile === "b"
+            ? deckFrames[(x * 7 + y * 13) % deckFrames.length]
+            : style.frame;
+
+          img = this.add.sprite(
+            x * TILE_SIZE + TILE_SIZE / 2,
+            y * TILE_SIZE + TILE_SIZE / 2,
+            "baratie_terrain",
+            frame
+          ).setDepth(0);
+
+          if (style.flipX) img.setFlipX(true);
+          if (style.flipY) img.setFlipY(true);
+          if (style.angle) img.setAngle(style.angle);
+        } else if (customKeys.has(key)) {
   // Atlas 8x8 : sélection déterministe d'une case 32x32.
   const frame = ((y % 8) * 8 + (x % 8));
 
@@ -964,6 +1017,21 @@ export default class WorldScene extends Phaser.Scene {
     buildingSprite.setScale(b.scale ?? 0.3); // taille par défaut, personnalisable par bâtiment
   });
 }
+
+    // Décorations Baratie tirées du même atlas 32x32.
+    (island.decorations || []).forEach((decor) => {
+      const sprite = this.add.sprite(
+        decor.x * TILE_SIZE + TILE_SIZE / 2,
+        decor.y * TILE_SIZE + TILE_SIZE / 2,
+        "baratie_terrain",
+        decor.frame
+      ).setDepth((decor.y || 0) + 0.25);
+
+      if (decor.scale) sprite.setScale(decor.scale);
+      if (decor.flipX) sprite.setFlipX(true);
+      if (decor.flipY) sprite.setFlipY(true);
+      if (decor.angle) sprite.setAngle(decor.angle);
+    });
 
     island.warps.forEach((warp) => {
       const locked = warp.lockedBy && !this.state.progressFlags?.[warp.lockedBy];

@@ -128,29 +128,6 @@ MAIN_CHARACTER_SPRITES.forEach(({ key, file }) => {
 
 this.load.image("marine_recrue", "/sprites/marine_recrue.png");
 this.load.image("marine_fusilier", "/sprites/marine_fusilier.png");
-
-// ===============================
-// BARATIE — ILLUSTRATIONS 1024x1024
-// Chargées dans Boot pour être disponibles avant WorldScene/BattleScene.
-// Elles restent en haute résolution et sont seulement réduites à l’affichage.
-// ===============================
-const BARATIE_SPRITES = {
-  baratie_zeff: "zeff.png",
-  baratie_patty: "patty.png",
-  baratie_carne: "carne.png",
-  baratie_cook: "baratie_cook.png",
-  baratie_johnny: "johnny.png",
-  baratie_yosaku: "yosaku.png",
-  baratie_pirate: "pirate_don_krieg.png",
-  baratie_krieg_pistolet: "pistolet_don_krieg.png",
-  baratie_pearl: "pearl.png",
-  baratie_gin: "gin.png",
-  baratie_don_krieg: "don_krieg.png",
-};
-
-Object.entries(BARATIE_SPRITES).forEach(([key, file]) => {
-  this.load.image(key, `/sprites/baratie/${file}`);
-});
 this.load.image("marine_officier", "/sprites/marine_officier.png");
     
 // ===============================
