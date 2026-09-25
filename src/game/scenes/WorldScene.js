@@ -140,9 +140,16 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image("arlong", "sprites/arlong.png");
     this.load.image("colonel_morgan", "sprites/colonel_morgan.png");
     this.load.image("forest_grass", "tiles/forest_grass.png");
-    // Baratie : vrai atlas terrain 32x32 + façade du restaurant.
-    this.load.image("baratie_terrain", "tiles/custom/baratie_tileset_32.png");
-    this.load.image("baratie_building", "tiles/baratie_building.png");
+    this.load.image("baratie_restaurant", "tiles/baratie_restaurant.png");
+    const baratieTiles = [
+      "deck", "deck2", "deck3", "deck4", "deck5", "deck6",
+      "crate", "crate2", "stairs", "stairs2", "lamp", "lamp2",
+      "stone", "stone2", "hull_top", "hull_bow", "hull_side",
+      "hull_side2", "hull_bottom", "hull_bottom2",
+    ];
+    baratieTiles.forEach((name) => {
+      this.load.image(`baratie_${name}`, `tiles/baratie/${name}.png`);
+    });
     this.load.image("jango", "sprites/jango.png");
     this.load.image("sham_buchi", "sprites/sham_buchi.png");
     this.load.image("kuro", "sprites/kuro.png");
@@ -869,8 +876,10 @@ export default class WorldScene extends Phaser.Scene {
   const bossFlag = this.island?.boss?.unlockFlag;
 
   if (this.state.islandId === "ile-baratie") {
-    if (tile === "s") return "tile-sea";
-    return "baratie_terrain";
+    if (tile === "b") return "baratie_deck";
+    if (tile === "c") return "baratie_deck2";
+    if (tile === "v") return "baratie_deck3";
+    if (tile === "d") return "baratie_deck4";
   }
 
   const terrainKeys = {
@@ -910,6 +919,11 @@ export default class WorldScene extends Phaser.Scene {
     // Terrain est l'unique source de vérité : il contrôle à la fois
     // l'apparence et la structure de la carte. Les wildZones restent invisibles.
     const mapRows = island.terrain || [];
+    const baratieKeys = new Set([
+      "baratie_deck", "baratie_deck2", "baratie_deck3", "baratie_deck4",
+      "baratie_deck5", "baratie_deck6",
+    ]);
+
     const customKeys = new Set([
   // Shells Town
   "tile-village-floor",
@@ -926,9 +940,6 @@ export default class WorldScene extends Phaser.Scene {
   "tile-cocoyasi-rubble",
   "tile-cocoyasi-vegetation",
   "tile-cocoyasi-ruins",
-
-  // Baratie
-  "baratie_terrain",
 ]);
 
     for (let y = 0; y < mapRows.length; y++) {
@@ -938,35 +949,12 @@ export default class WorldScene extends Phaser.Scene {
         const key = this.getTerrainTileKey(tile);
 
         let img;
-        if (this.state.islandId === "ile-baratie") {
-          const styles = {
-            b: { frame: 0 },
-            p: { frame: 1 },
-            N: { frame: 31, flipY: true },
-            S: { frame: 31 },
-            W: { frame: 31, angle: 90 },
-            E: { frame: 31, angle: -90 },
-            A: { frame: 36 },
-            C: { frame: 37, flipX: true },
-            F: { frame: 48, flipY: true },
-            D: { frame: 49, flipX: true, flipY: true },
-          };
-          const style = styles[tile] || styles.b;
-          const deckFrames = [0, 1, 2, 3];
-          const frame = tile === "b"
-            ? deckFrames[(x * 7 + y * 13) % deckFrames.length]
-            : style.frame;
-
-          img = this.add.sprite(
+        if (baratieKeys.has(key)) {
+          img = this.add.image(
             x * TILE_SIZE + TILE_SIZE / 2,
             y * TILE_SIZE + TILE_SIZE / 2,
-            "baratie_terrain",
-            frame
+            key
           ).setDepth(0);
-
-          if (style.flipX) img.setFlipX(true);
-          if (style.flipY) img.setFlipY(true);
-          if (style.angle) img.setAngle(style.angle);
         } else if (customKeys.has(key)) {
   // Atlas 8x8 : sélection déterministe d'une case 32x32.
   const frame = ((y % 8) * 8 + (x % 8));
@@ -1018,19 +1006,14 @@ export default class WorldScene extends Phaser.Scene {
   });
 }
 
-    // Décorations Baratie tirées du même atlas 32x32.
-    (island.decorations || []).forEach((decor) => {
-      const sprite = this.add.sprite(
-        decor.x * TILE_SIZE + TILE_SIZE / 2,
-        decor.y * TILE_SIZE + TILE_SIZE / 2,
-        "baratie_terrain",
-        decor.frame
-      ).setDepth((decor.y || 0) + 0.25);
-
-      if (decor.scale) sprite.setScale(decor.scale);
-      if (decor.flipX) sprite.setFlipX(true);
-      if (decor.flipY) sprite.setFlipY(true);
-      if (decor.angle) sprite.setAngle(decor.angle);
+    (island.decorations || []).forEach((d) => {
+      const sprite = this.add.image(
+        d.x * TILE_SIZE + TILE_SIZE / 2,
+        d.y * TILE_SIZE + TILE_SIZE / 2,
+        d.key
+      ).setDepth(d.depth ?? 2);
+      if (d.scale) sprite.setScale(d.scale);
+      if (d.displaySize) sprite.setDisplaySize(d.displaySize, d.displaySize);
     });
 
     island.warps.forEach((warp) => {
