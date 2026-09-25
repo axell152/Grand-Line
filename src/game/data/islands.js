@@ -354,7 +354,7 @@ wildZones: [
       "ssssssssssssbbbbbcbbbbbbbbbbbbbvbbbbbbbbcbbbbbbbbbbbssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
       "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-    ]
+    ] ,
 
     playerStart: { x: 5, y: 16 },
     tavern: { x: 14, y: 22 },
